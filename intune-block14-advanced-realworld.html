@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 14: Advanced &amp; Real World</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#07060f;--bg2:#0c0a1a;--bg3:#100e22;
+    --sb:#060510;--border:#1a1630;
+    --acc:#6366f1;--acc2:#818cf8;--acc3:#a5b4fc;
+    --green:#22c55e;--orange:#f97316;--sky:#38bdf8;
+    --red:#f87171;--yellow:#fbbf24;--teal:#2dd4bf;--pink:#f472b6;
+    --text:#e0e7ff;--text2:#6b6a9a;--text3:#38375a;
+    --h:#f0f0ff;--card:#08071a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;font-weight:300;display:flex;min-height:100vh;line-height:1.75;}
+  #sb{width:285px;min-width:285px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+  #sb::-webkit-scrollbar{width:3px;}
+  #sb::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .shd{padding:23px 20px 15px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#060510,#0a091c);}
+  .slo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--h);letter-spacing:-.5px;display:flex;align-items:center;gap:10px;}
+  .lic{width:34px;height:34px;background:linear-gradient(135deg,var(--teal),var(--acc));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(45,212,191,.35);}
+  .ssu{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .bbg{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(45,212,191,.15),rgba(99,102,241,.1));border:1px solid rgba(45,212,191,.28);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--teal);font-family:'IBM Plex Mono',monospace;margin-top:10px;letter-spacing:.5px;}
+  .snv{padding:12px 0;flex:1;}
+  .nlb{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 20px 4px;font-family:'IBM Plex Mono',monospace;}
+  .ni{display:flex;align-items:flex-start;gap:9px;padding:8px 20px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none;color:var(--text2);font-size:12.5px;line-height:1.4;}
+  .ni:hover{background:rgba(45,212,191,.06);color:var(--text);border-left-color:var(--teal);}
+  .ni.active{background:rgba(45,212,191,.09);color:var(--teal);border-left-color:var(--teal);}
+  .nn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;margin-top:1px;}
+  .ni.active .nn{color:var(--teal);}
+  .plk{display:flex;align-items:center;gap:7px;padding:7px 11px;font-size:11px;color:var(--text3);text-decoration:none;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;margin:0 12px 4px;transition:all .2s;}
+  .plk:hover{color:var(--text2);border-color:rgba(45,212,191,.22);}
+  .sft{padding:13px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .pbar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .pfill{height:100%;width:99%;background:linear-gradient(90deg,var(--teal),var(--acc));border-radius:2px;animation:pg 2s ease-in-out infinite alternate;}
+  @keyframes pg{from{box-shadow:0 0 4px var(--teal);}to{box-shadow:0 0 14px var(--acc);}}
+  #main{margin-left:285px;flex:1;min-height:100vh;}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(7,6,15,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 46px;display:flex;align-items:center;justify-content:space-between;}
+  .bcrumb{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:7px;}
+  .bcrumb span{color:var(--teal);}
+  .tcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 13px;}
+  .cont{padding:50px 46px 80px;max-width:980px;}
+  .hero{margin-bottom:56px;position:relative;padding:44px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(45,212,191,.12) 0%,transparent 70%);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(99,102,241,.08) 0%,transparent 70%);border-radius:50%;}
+  .htag{display:inline-flex;align-items:center;gap:6px;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.25);border-radius:20px;padding:5px 14px;font-size:10.5px;color:var(--teal);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;letter-spacing:1px;}
+  .htitle{font-family:'Syne',sans-serif;font-size:39px;font-weight:800;color:var(--h);line-height:1.1;letter-spacing:-1px;margin-bottom:13px;}
+  .htitle span{background:linear-gradient(135deg,var(--teal),var(--acc));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hdesc{font-size:14.5px;color:var(--text2);max-width:620px;line-height:1.8;}
+  .hmeta{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .hmi{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);}
+  .dot.g{background:var(--green);box-shadow:0 0 8px var(--green);}
+  .dot.p{background:var(--pink);box-shadow:0 0 8px var(--pink);}
+  .ts{margin-bottom:68px;scroll-margin-top:66px;opacity:0;animation:fu .5s ease forwards;}
+  .ts:nth-child(1){animation-delay:.05s;}.ts:nth-child(2){animation-delay:.1s;}.ts:nth-child(3){animation-delay:.15s;}.ts:nth-child(4){animation-delay:.2s;}.ts:nth-child(5){animation-delay:.25s;}.ts:nth-child(6){animation-delay:.3s;}.ts:nth-child(7){animation-delay:.35s;}.ts:nth-child(8){animation-delay:.4s;}.ts:nth-child(9){animation-delay:.45s;}.ts:nth-child(10){animation-delay:.5s;}
+  @keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .th{display:flex;align-items:flex-start;gap:15px;margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--border);}
+  .tnum{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--teal);background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.2);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+  .ttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--h);letter-spacing:-.5px;line-height:1.2;margin-bottom:4px;}
+  .tsub{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .sh{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--h);margin:28px 0 10px;display:flex;align-items:center;gap:10px;}
+  .sh::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,var(--teal),var(--acc));border-radius:2px;flex-shrink:0;}
+  p{color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:12px;}
+  p strong{color:var(--text);font-weight:500;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(45,212,191,.08);color:var(--teal);padding:2px 6px;border-radius:4px;border:1px solid rgba(45,212,191,.18);}
+  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:17px;transition:border-color .2s,transform .2s;}
+  .card:hover{border-color:rgba(45,212,191,.3);transform:translateY(-2px);}
+  .cico{font-size:21px;margin-bottom:8px;}
+  .ctit{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:var(--h);margin-bottom:6px;}
+  .cbod{font-size:12.5px;color:var(--text2);line-height:1.6;}
+  .tw{overflow-x:auto;margin:16px 0;border-radius:11px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+  th{padding:12px 15px;text-align:left;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--h);letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 15px;color:var(--text2);border-bottom:1px solid rgba(26,22,48,.5);vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(45,212,191,.02);}
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+  .ti{background:rgba(99,102,241,.15);color:var(--acc2);border:1px solid rgba(99,102,241,.2);}
+  .tg{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.2);}
+  .tt{background:rgba(45,212,191,.15);color:var(--teal);border:1px solid rgba(45,212,191,.2);}
+  .to{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.2);}
+  .tr2{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.2);}
+  .ty{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+  .ib{border-radius:10px;padding:16px 18px;margin:16px 0;border-left:3px solid;}
+  .ib .bt{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:6px;}
+  .ib p{margin:0;font-size:13.5px;color:var(--text2);}
+  .ibi{background:rgba(99,102,241,.06);border-color:var(--acc);}
+  .ibi .bt{color:var(--acc2);}
+  .ibg{background:rgba(34,197,94,.06);border-color:var(--green);}
+  .ibg .bt{color:var(--green);}
+  .ibt{background:rgba(45,212,191,.06);border-color:var(--teal);}
+  .ibt .bt{color:var(--teal);}
+  .ibo{background:rgba(249,115,22,.06);border-color:var(--orange);}
+  .ibo .bt{color:var(--orange);}
+  .ibr{background:rgba(248,113,113,.06);border-color:var(--red);}
+  .ibr .bt{color:var(--red);}
+  .iby{background:rgba(251,191,36,.06);border-color:var(--yellow);}
+  .iby .bt{color:var(--yellow);}
+  .steps{list-style:none;margin:13px 0;display:flex;flex-direction:column;gap:10px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .sn{min-width:25px;height:25px;background:linear-gradient(135deg,var(--teal),var(--acc));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .steps li strong{color:var(--text);}
+  .bl{list-style:none;margin:10px 0 13px;display:flex;flex-direction:column;gap:7px;}
+  .bl li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .bl li::before{content:'▹';color:var(--teal);font-size:13px;flex-shrink:0;margin-top:2px;}
+  .bl li strong{color:var(--text);}
+  .rw{background:linear-gradient(135deg,rgba(45,212,191,.04),rgba(99,102,241,.04));border:1px solid rgba(45,212,191,.18);border-radius:12px;padding:19px;margin:20px 0;}
+  .rwh{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .rwi{font-size:18px;}
+  .rwl{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--teal);}
+  .rw p{color:var(--text2);font-size:13px;margin:0;line-height:1.7;}
+  .rw p+p{margin-top:8px;}
+  .iq{background:linear-gradient(135deg,rgba(167,139,250,.04),rgba(99,102,241,.04));border:1px solid rgba(167,139,250,.18);border-radius:13px;padding:21px;margin:24px 0;}
+  .iqh{font-family:'Syne',sans-serif;font-weight:700;font-size:14.5px;color:#c4b5fd;margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+  .qa{margin-bottom:14px;}
+  .qa:last-child{margin-bottom:0;}
+  .qq{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;gap:8px;}
+  .qq::before{content:'Q.';color:#c4b5fd;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .qans{font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.65;display:flex;gap:8px;}
+  .qans::before{content:'A.';color:var(--teal);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .tip{display:flex;gap:12px;align-items:flex-start;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:9px;padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.65;}
+  .tpic{font-size:16px;flex-shrink:0;}
+  .code{background:#030410;border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#a5b4fc;overflow-x:auto;line-height:1.75;}
+  .clb{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:block;}
+  .cm{color:var(--text3);}
+  .kw{color:#f472b6;}
+  .st{color:#86efac;}
+  .hl{color:var(--sky);}
+  .vl{color:#fcd34d;}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0;}
+  .stup{position:fixed;bottom:26px;right:26px;width:40px;height:40px;background:linear-gradient(135deg,var(--teal),var(--acc));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;box-shadow:0 4px 18px rgba(45,212,191,.3);border:none;color:white;z-index:200;text-decoration:none;transition:transform .2s;}
+  .stup:hover{transform:translateY(-3px);}
+  @media(max-width:768px){#sb{transform:translateX(-100%);}#main{margin-left:0;}.cont{padding:26px 16px;}.topbar{padding:11px 16px;}.htitle{font-size:26px;}}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="shd">
+    <div class="slo"><div class="lic">🚀</div>Intune Mastery</div>
+    <div class="ssu">Complete Learning Series</div>
+    <div class="bbg">⬡ Block 14 of 14 — Advanced &amp; Real World</div>
+  </div>
+  <div class="snv">
+    <div class="nlb">Block 14 Topics</div>
+    <a href="#t116" class="ni active"><span class="nn">116</span>Zero Trust &amp; Intune's Role</a>
+    <a href="#t117" class="ni"><span class="nn">117</span>Intune + Azure AD PIM</a>
+    <a href="#t118" class="ni"><span class="nn">118</span>Intune in Hybrid Environments</a>
+    <a href="#t119" class="ni"><span class="nn">119</span>Update Rings — Feature &amp; Quality Updates</a>
+    <a href="#t120" class="ni"><span class="nn">120</span>Windows Hello for Business</a>
+    <a href="#t121" class="ni"><span class="nn">121</span>Certificate Authority Integration</a>
+    <a href="#t122" class="ni"><span class="nn">122</span>Network Access Control (NAC)</a>
+    <a href="#t123" class="ni"><span class="nn">123</span>Third-Party Integrations</a>
+    <a href="#t124" class="ni"><span class="nn">124</span>Intune Migration from Other MDMs</a>
+    <a href="#t125" class="ni"><span class="nn">125</span>Enterprise Deployment — End to End</a>
+    <div class="nlb" style="margin-top:12px;">Previous Blocks</div>
+    <a href="intune-block12-monitoring-automation.html" class="plk">← Block 12: Monitoring &amp; Automation</a>
+    <a href="intune-block13-troubleshooting.html" class="plk">← Block 13: Troubleshooting Mastery</a>
+  </div>
+  <div class="sft">
+    <div>Overall Progress</div>
+    <div style="color:var(--teal);margin:2px 0;">Block 14 / 14 — Final Block 🎓</div>
+    <div class="pbar"><div class="pfill"></div></div>
+  </div>
+</nav>
+
+<div id="main">
+<div class="topbar">
+  <div class="bcrumb">Intune Mastery <span>›</span> Block 14 <span>›</span> Advanced &amp; Real World</div>
+  <div class="tcount">10 Topics · Expert Level</div>
+</div>
+<div class="cont">
+
+  <div class="hero">
+    <div class="htag">🚀 BLOCK 14 · FINAL BLOCK</div>
+    <h1 class="htitle">Advanced &amp; <br/><span>Real World</span></h1>
+    <p class="hdesc">The final block. Zero Trust architecture, PIM integration, hybrid edge cases, Windows Hello for Business, certificate authority deep dives, NAC, third-party integrations, MDM migration strategy, and a complete end-to-end enterprise deployment project. This is where everything comes together.</p>
+    <div class="hmeta">
+      <div class="hmi"><div class="dot"></div>10 Topics</div>
+      <div class="hmi"><div class="dot g"></div>Expert Level</div>
+      <div class="hmi"><div class="dot p"></div>Topics 116–125</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ T116 ═══════════════ -->
+  <section class="ts" id="t116">
+    <div class="th">
+      <div class="tnum">TOPIC 116</div>
+      <div><div class="ttl">Zero Trust Model and Intune's Role</div>
+      <div class="tsub">How Intune is the enforcement engine of a Zero Trust architecture</div></div>
+    </div>
+
+    <div class="sh">What Is Zero Trust?</div>
+    <p>Zero Trust is a security model based on one principle: <strong>never trust, always verify</strong>. Traditional security assumed everything inside the corporate network was safe. Zero Trust assumes breach — every access request must be verified regardless of where it originates, even from inside the network perimeter.</p>
+    <p>Microsoft's Zero Trust framework has three pillars: <strong>Verify explicitly</strong> (always authenticate and authorize based on all available data points), <strong>Use least privilege access</strong> (limit user access with just-in-time and just-enough-access), and <strong>Assume breach</strong> (minimize blast radius and segment access).</p>
+
+    <div class="sh">Intune's Role in Zero Trust</div>
+    <p>Intune is the <strong>device compliance enforcement engine</strong> of Zero Trust. It answers the critical question that Conditional Access asks on every sign-in: <em>"Is this device healthy and compliant?"</em> Without Intune, Conditional Access can verify user identity (MFA, risk) but cannot verify device health.</p>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🔐</div>
+        <div class="ctit">Identity Verification</div>
+        <div class="cbod">Azure AD handles user identity via MFA, risk signals, and Conditional Access policies. Intune provides the device identity component.</div>
+      </div>
+      <div class="card">
+        <div class="cico">💻</div>
+        <div class="ctit">Device Health Signal</div>
+        <div class="cbod">Intune compliance policies define "healthy device" — BitLocker on, OS patched, no malware, password set. This signal flows to Conditional Access in real time.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📦</div>
+        <div class="ctit">App Protection</div>
+        <div class="cbod">MAM policies enforce Zero Trust on unmanaged (BYOD) devices — corporate data stays within managed apps even without full device enrollment.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🛡️</div>
+        <div class="ctit">Endpoint Security</div>
+        <div class="cbod">Intune deploys Defender for Endpoint, BitLocker, ASR rules, and security baselines — hardening devices against the threats Zero Trust assumes are present.</div>
+      </div>
+    </div>
+
+    <div class="sh">The Zero Trust Access Decision Flow</div>
+    <p>Every resource access attempt flows through this chain: User authenticates (Azure AD + MFA) → Azure AD checks all Conditional Access policies → CA asks Intune: "Is device compliant?" → Intune responds with compliance state → CA grants or blocks access → Access token issued with appropriate scope. Intune's compliance answer is the device gate in this chain.</p>
+
+    <div class="sh">Zero Trust Maturity with Intune</div>
+    <div class="tw"><table>
+      <thead><tr><th>Maturity Level</th><th>What's in Place</th><th>Intune Contribution</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tr2">Initial</span></td><td>Basic MDM enrollment, no Conditional Access</td><td>Device inventory and basic policy push</td></tr>
+        <tr><td><span class="tag to">Advanced</span></td><td>Compliance policies + CA requiring compliant device for cloud apps</td><td>Real-time compliance signal to Azure AD for access decisions</td></tr>
+        <tr><td><span class="tag ty">Optimal</span></td><td>MDE integration, risk-based CA, MAM for BYOD, LAPS, WHFB, continuous access evaluation</td><td>Full endpoint health enforcement — device risk score feeds CA, automatic remediation on breach detection</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🌐</div><div class="rwl">Real-World Zero Trust Implementation</div></div>
+      <p><strong>Company:</strong> 2,000-employee financial services firm. After a ransomware incident, CISO mandated Zero Trust within 6 months.</p>
+      <p><strong>Intune's role:</strong> (1) Enrolled all Windows/Mac/mobile devices. (2) Compliance policies requiring BitLocker, Defender AV active, OS patched within 30 days, screen lock PIN. (3) MDE integration — devices with active threats automatically marked non-compliant. (4) CA policy: all Microsoft 365 access requires compliant device. BYOD users get MAM-only access to Outlook/Teams with app protection policies. (5) Security baselines deployed to harden all endpoints.</p>
+      <p><strong>Result:</strong> Any device compromised by malware is automatically flagged as non-compliant by MDE → Intune marks it non-compliant → CA blocks the device from all M365 services within minutes — without any manual intervention.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 116</div>
+      <div class="qa"><div class="qq">What is Intune's role in a Zero Trust architecture?</div>
+      <div class="qans">Intune is the device compliance enforcement layer of Zero Trust. It defines what a "healthy device" looks like through compliance policies, continuously monitors device health, and feeds that compliance signal to Azure AD Conditional Access. When a user tries to access a resource, CA queries Intune's compliance state for that device — if the device is non-compliant, access is blocked regardless of user identity. Intune also enforces the security configurations (BitLocker, Defender, baselines) that define Zero Trust's "assume breach" posture on endpoints.</div></div>
+      <div class="qa"><div class="qq">How does Intune + MDE integration contribute to Zero Trust?</div>
+      <div class="qans">Microsoft Defender for Endpoint sends a device risk score (Low/Medium/High/Clear) to Intune. Intune compliance policies can require a maximum MDE risk level — for example, any device with a High risk score is automatically marked non-compliant. Conditional Access then blocks that device from corporate resources until the threat is remediated. This creates an automated Zero Trust response loop: detection → compliance change → access revocation — no manual intervention needed.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════ T117 ═══════════════ -->
+  <section class="ts" id="t117">
+    <div class="th">
+      <div class="tnum">TOPIC 117</div>
+      <div><div class="ttl">Intune + Azure AD Privileged Identity Management</div>
+      <div class="tsub">Just-in-time admin access for Intune roles — removing standing privileges</div></div>
+    </div>
+
+    <div class="sh">What Is PIM?</div>
+    <p>Azure AD Privileged Identity Management (PIM) provides <strong>just-in-time (JIT) privileged access</strong> — instead of permanently assigning admin roles, users are <em>eligible</em> for a role and must activate it when needed. Activation requires MFA, approval, and is time-limited (e.g., 4 hours). After the window expires, admin rights are automatically revoked.</p>
+
+    <div class="sh">Why PIM Matters for Intune Administration</div>
+    <p>Permanent admin standing is one of the highest-risk configurations in any tenant. An Intune Administrator account with standing access, if compromised, lets an attacker immediately wipe all devices, push malicious scripts, or exfiltrate data. PIM eliminates standing Intune admin access — forcing elevation only when needed, with audit trail and approval.</p>
+
+    <div class="sh">Configuring PIM for Intune Roles</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Open Azure AD PIM:</strong> Azure AD → Identity Governance → Privileged Identity Management → Azure AD Roles</div></li>
+      <li><div class="sn">2</div><div><strong>Find the Intune Administrator role.</strong> Click it → Settings. Configure: maximum activation duration (recommend 4–8 hours), require MFA on activation, require justification, require approval if needed for high-risk roles.</div></li>
+      <li><div class="sn">3</div><div><strong>Add eligible assignments.</strong> Under Assignments → Add assignments → select Intune admins as "Eligible" (not "Active"). They now have zero standing permissions.</div></li>
+      <li><div class="sn">4</div><div><strong>Admin activation flow:</strong> Admin goes to PIM portal → My Roles → activates Intune Administrator → provides MFA + justification → gets 4-hour Intune admin access → role expires automatically.</div></li>
+      <li><div class="sn">5</div><div><strong>Configure alerts and notifications.</strong> PIM sends email when a role is activated. Set up alerts for unusual activation patterns (outside business hours, unexpected users).</div></li>
+    </ol>
+
+    <div class="sh">PIM for Intune RBAC Custom Roles</div>
+    <p>PIM works for Azure AD roles (like Intune Administrator) but <strong>not natively</strong> for Intune's internal RBAC custom roles. For Intune-specific roles (Application Manager, Help Desk Operator), use Azure AD Groups with PIM: put the group as the role assignment in Intune, then make users eligible for the group via PIM Group Management. When they activate PIM group membership, they get the Intune custom role access.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Without PIM</th><th>With PIM</th></tr></thead>
+      <tbody>
+        <tr><td>Intune admin has standing 24/7 access — always at risk if account compromised</td><td>Zero standing access — role activated only when needed, expires automatically</td></tr>
+        <tr><td>No record of why admin access was used</td><td>Every activation requires a written justification logged in audit trail</td></tr>
+        <tr><td>Admin forgets to remove role when no longer needed</td><td>Time-limited activation — auto-expires after configured window</td></tr>
+        <tr><td>No visibility into admin activity patterns</td><td>Alerts for after-hours activations, unusual patterns, multiple activations</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 117</div>
+      <div class="qa"><div class="qq">What is PIM and why would you use it with Intune?</div>
+      <div class="qans">PIM is Azure AD's just-in-time privileged access management. Instead of permanently assigning admin roles, you make users "eligible" — they activate the role only when needed, with MFA, justification, and a time limit. For Intune, it means no one has standing Intune Administrator access. If an Intune admin account is compromised, the attacker gets zero privileges until they can also complete PIM activation — which requires MFA and triggers immediate alerts. It dramatically reduces the blast radius of a compromised admin account.</div></div>
+      <div class="qa"><div class="qq">How would you apply PIM to Intune's internal RBAC custom roles?</div>
+      <div class="qans">PIM natively covers Azure AD roles but not Intune's internal custom roles directly. The workaround is to use PIM-managed groups: assign the Intune custom role to an Azure AD group rather than directly to users. Then use PIM for Groups to make users eligible for that group. When they activate via PIM, they join the group temporarily and get the Intune role access. When activation expires, they're removed from the group and lose the role automatically.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════ T118 ═══════════════ -->
+  <section class="ts" id="t118">
+    <div class="th">
+      <div class="tnum">TOPIC 118</div>
+      <div><div class="ttl">Intune in Hybrid Environments — Edge Cases</div>
+      <div class="tsub">The real-world complexity of running Intune alongside on-premises AD, SCCM, and GPO</div></div>
+    </div>
+
+    <div class="sh">Hybrid Environment Reality</div>
+    <p>Most enterprise Intune deployments aren't greenfield cloud-only — they coexist with on-premises Active Directory, Group Policy, SCCM/ConfigMgr, and legacy on-prem apps. This creates edge cases that don't appear in clean lab environments. Understanding these is what distinguishes real enterprise engineers.</p>
+
+    <div class="sh">Edge Case 1: GPO and MDM Policy Conflict</div>
+    <p>When a device is Hybrid AADJ, both Group Policy and Intune MDM write to the device. For the same registry key, the last writer wins — and GPO often wins because it applies at logon/background refresh, which may happen after Intune sync. The Intune portal shows "Succeeded" (MDM sent the setting successfully) but the device enforces the GPO value.</p>
+    <div class="ib iby"><div class="bt">⚠️ Critical Nuance</div><p>Use <strong>MDMWinsOverGP</strong> CSP policy to make MDM settings take precedence over GPO for supported settings. Deploy via OMA-URI: <code>./Device/Vendor/MSFT/Policy/Config/ControlPolicyConflict/MDMWinsOverGP</code> with value Integer 1. This resolves the conflict in Intune's favor for Settings Catalog policies.</p></div>
+
+    <div class="sh">Edge Case 2: Hybrid AADJ Requires Line-of-Sight for Initial Join</div>
+    <p>Hybrid Azure AD Join requires the device to reach an on-premises Domain Controller during the join process to complete the computer object sync. Devices that have never been on the corporate network (or VPN) since being prepared cannot complete Hybrid AADJ. This is a common failure mode for remote workers receiving new laptops by mail.</p>
+    <div class="ib ibo"><div class="bt">⚠️ Edge Case</div><p>Remote workers with new laptops cannot complete Hybrid AADJ without VPN or direct DC line-of-sight. Solution: either deploy Always On VPN before the join completes (complex), or switch to Azure AD Join only — which has no on-premises dependency. Many organizations use this edge case as justification to move from Hybrid AADJ to pure AADJ.</p></div>
+
+    <div class="sh">Edge Case 3: Stale Objects in Both AD and Azure AD</div>
+    <p>In hybrid environments, device objects exist in both on-premises AD and Azure AD. When a device is wiped and re-enrolled, a new Azure AD object is created but the old one may persist. Similarly, the on-premises AD computer object from the original Hybrid AADJ may conflict with the new one. This causes duplicate device records, policy assignment confusion, and BitLocker key mismatches.</p>
+    <p><strong>Fix:</strong> Implement a device offboarding process that deletes objects from both AD and Azure AD when devices are retired. Use Intune's retire/wipe action AND delete the Azure AD object AND delete the on-premises AD computer object.</p>
+
+    <div class="sh">Edge Case 4: Intune Policies Don't Apply Until User Logs In (Hybrid AADJ)</div>
+    <p>On Hybrid AADJ devices, some Intune user-targeted policies only apply after the user logs in with their Azure AD credentials for the first time. Before that first login, the device only has the computer object token — not the user token that Intune uses for user-targeted policies. Device-targeted policies apply fine; user-targeted policies are delayed.</p>
+
+    <div class="sh">Edge Case 5: Certificate Autoenrollment Conflict</div>
+    <p>In hybrid environments, Group Policy Certificate Autoenrollment (from on-premises CA) and Intune SCEP/PKCS certificate profiles may both try to enroll certificates for the same template. This can result in duplicate certificates, unexpected certificate replacements, or enrollment failures. Audit which certificate enrollment mechanism owns which template before deploying Intune cert profiles.</p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Scenario</th><th>Root Cause</th><th>Resolution</th></tr></thead>
+      <tbody>
+        <tr><td>MDMWinsOverGP not set — GPO overrides Intune settings</td><td>Both write to same registry; GPO wins at refresh</td><td>Deploy MDMWinsOverGP CSP, or block GPO inheritance for cloud-managed OUs</td></tr>
+        <tr><td>Remote worker can't complete Hybrid AADJ</td><td>No line-of-sight to Domain Controller</td><td>Move to pure AADJ, or require VPN during setup</td></tr>
+        <tr><td>Duplicate device records after re-enrollment</td><td>Old objects not cleaned up from AD and Azure AD</td><td>Implement formal device offboarding — delete from both AD and Azure AD</td></tr>
+        <tr><td>User policies not applying to new Hybrid AADJ device</td><td>User hasn't logged in with Azure AD token yet</td><td>Ensure first login is Azure AD-authenticated. Switch user-targeted policies to device-targeted where possible.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 118</div>
+      <div class="qa"><div class="qq">A configuration profile shows "Succeeded" in Intune but the setting isn't applied on Hybrid AADJ devices. What's happening?</div>
+      <div class="qans">Most likely a GPO is overriding the Intune MDM setting. On Hybrid AADJ devices, both Group Policy and MDM can write the same registry value. GPO often applies after Intune sync and overwrites it — Intune shows "Succeeded" because MDM successfully delivered the setting, but GPO reverted it. The fix is to deploy the MDMWinsOverGP CSP policy, which instructs the OS to prefer MDM settings over GPO for supported policies. Alternatively, block GPO inheritance for the OU containing cloud-managed devices.</div></div>
+      <div class="qa"><div class="qq">Why might a remote worker's brand new laptop fail to complete Hybrid Azure AD Join?</div>
+      <div class="qans">Hybrid AADJ requires the device to communicate with an on-premises Domain Controller to sync the computer object from AD to Azure AD. A remote worker with no corporate network access and no VPN connection cannot complete this sync — the join process hangs or fails. Solutions: require the device to be on VPN before setup, ship devices to office first, or reconsider the join type and switch to pure Azure AD Join which has no on-premises dependency and works natively for remote workers.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════ T119 ═══════════════ -->
+  <section class="ts" id="t119">
+    <div class="th">
+      <div class="tnum">TOPIC 119</div>
+      <div><div class="ttl">Intune Update Rings — Feature &amp; Quality Updates</div>
+      <div class="tsub">Controlling Windows Update deployment at enterprise scale with rings and policies</div></div>
+    </div>
+
+    <div class="sh">Why Update Rings?</div>
+    <p>Deploying updates to 10,000 devices simultaneously is dangerous — a bad update could break every device at once. Update Rings solve this by deploying updates in waves: a small pilot group gets updates first, IT validates, then broader groups receive the update progressively. Problems are caught early and blasted radius is limited.</p>
+
+    <div class="sh">Types of Windows Updates in Intune</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🔄</div>
+        <div class="ctit">Update Rings (WUfB)</div>
+        <div class="cbod">Control Quality Updates (Patch Tuesday) and Feature Updates (annual Windows versions) via Windows Update for Business policies. Set deferral periods, maintenance windows, and restart behavior.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🪟</div>
+        <div class="ctit">Feature Update Policies</div>
+        <div class="cbod">Pin devices to a specific Windows version (e.g., 22H2). Prevents automatic feature updates from installing until IT is ready. Requires Windows Update for Business reports for monitoring.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🛡️</div>
+        <div class="ctit">Quality Update Policies</div>
+        <div class="cbod">Deploy specific cumulative update KB numbers to targeted device groups — useful for emergency patches or testing a specific update on pilot devices before broad rollout.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔁</div>
+        <div class="ctit">Driver Update Policies</div>
+        <div class="cbod">Control driver updates separately from OS updates. Approve or pause specific driver updates. Prevents problematic driver updates from auto-installing.</div>
+      </div>
+    </div>
+
+    <div class="sh">Designing a 4-Ring Update Strategy</div>
+    <div class="tw"><table>
+      <thead><tr><th>Ring</th><th>Group</th><th>Quality Update Deferral</th><th>Feature Update Deferral</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tt">Ring 0 — Pilot</span></td><td>IT admins, volunteers (1–2% of devices)</td><td>0 days</td><td>0 days</td><td>First to receive everything. IT validates before broader rollout.</td></tr>
+        <tr><td><span class="tag tg">Ring 1 — Early</span></td><td>Tech-savvy users, dev teams (10–15%)</td><td>7 days</td><td>30 days</td><td>Early adopters. Broader real-world validation.</td></tr>
+        <tr><td><span class="tag to">Ring 2 — Standard</span></td><td>General staff (70–80%)</td><td>14 days</td><td>60 days</td><td>Main fleet. Updates after validation complete.</td></tr>
+        <tr><td><span class="tag tr2">Ring 3 — Critical</span></td><td>Executives, VIPs, OT-adjacent (5–10%)</td><td>21 days</td><td>90 days</td><td>Latest updates. Maximum validation time. Never disrupted during business hours.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="sh">Key Update Ring Settings to Know</div>
+    <ul class="bl">
+      <li><strong>Deferral period:</strong> Days to wait after Microsoft releases the update before it installs on devices in this ring. Gives time for Microsoft to fix issues post-release.</li>
+      <li><strong>Maintenance window:</strong> Restricts update installation and reboots to specific hours (e.g., 2 AM – 6 AM). Prevents mid-workday disruption.</li>
+      <li><strong>Active hours:</strong> Windows won't reboot for updates during defined active hours. Separate from maintenance window — active hours prevent reboot, maintenance window defines when installs can happen.</li>
+      <li><strong>Deadline:</strong> Forces installation even if device has been avoiding updates. After deadline days, update installs regardless of active hours. Ensures security patches don't stay pending indefinitely.</li>
+      <li><strong>Grace period:</strong> Days after deadline before a forced restart. Gives users warning time to save work before forced reboot.</li>
+      <li><strong>Pause updates:</strong> Emergency pause button. If a bad update ships, you can pause it for up to 35 days across all rings without modifying deferral settings.</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔄</div><div class="rwl">Real-World — Handling a Bad Patch Tuesday</div></div>
+      <p><strong>Scenario:</strong> Microsoft releases KB5034441 in January. Two days later, reports emerge that it causes blue screens on devices with BitLocker enabled.</p>
+      <p><strong>Response:</strong> IT immediately pauses updates on Ring 1, 2, and 3 via Intune (Update ring → Pause quality updates). Ring 0 (IT pilot) has 12 devices already updated — 3 have BSOD issues, confirming the problem. Pause holds for 7 days while Microsoft releases a fix. When Microsoft releases the revised KB, IT resumes Ring 1 deferral. The ring structure meant only 12 devices were affected instead of all 8,000.</p>
+      <p><strong>Key insight:</strong> Ring 0 being IT staff means the people discovering the BSOD are also the people who can immediately pause rollout. This is why IT should always be in Ring 0 — they're the canary and the response team in one.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 119</div>
+      <div class="qa"><div class="qq">Explain the difference between deferral, deadline, and grace period in Intune Update Rings.</div>
+      <div class="qans">Deferral is how many days after Microsoft releases an update before Intune even offers it to devices — this is your ring staging mechanism. Deadline is how many days after the update becomes available that Intune forces installation regardless of user activity — this ensures security patches don't stay pending forever. Grace period is how many days after the deadline before Intune forces a restart — it gives users warning time to save work. Together: deferral controls when the update arrives, deadline ensures it installs, and grace period manages the reboot.</div></div>
+      <div class="qa"><div class="qq">A critical security patch has just been released. How do you get it deployed urgently while bypassing normal ring deferral?</div>
+      <div class="qans">Two options: first, use a Quality Update Policy to target a specific KB number directly to all device groups, bypassing Update Ring deferral — this is the fastest way to push an emergency patch to all rings simultaneously. Second, temporarily set deferral to 0 days on all rings and set a short deadline (e.g., 1 day). After the emergency patch is deployed, restore the normal deferral settings. Always communicate to users before forcing rapid restarts — especially for the Critical/VIP ring.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════ T120 ═══════════════ -->
+  <section class="ts" id="t120">
+    <div class="th">
+      <div class="tnum">TOPIC 120</div>
+      <div><div class="ttl">Windows Hello for Business via Intune</div>
+      <div class="tsub">Passwordless authentication — deploying and managing WHFB at enterprise scale</div></div>
+    </div>
+
+    <div class="sh">What Is Windows Hello for Business?</div>
+    <p>Windows Hello for Business (WHFB) replaces passwords with <strong>strong two-factor authentication</strong> using a combination of device possession (the enrolled device with its TPM-bound key) and a user gesture (PIN, fingerprint, or face recognition). Unlike a password, the credential never leaves the device — it's asymmetric key-based and phishing-resistant by design.</p>
+
+    <div class="sh">Why WHFB Matters for Security</div>
+    <ul class="bl">
+      <li><strong>Phishing resistant:</strong> The private key never leaves the TPM. Even if a user is phished into entering a PIN on a fake site, the attacker gets nothing — the PIN is only meaningful on that specific device.</li>
+      <li><strong>No password spray or credential stuffing:</strong> No shared password secret means these attack vectors are eliminated entirely for WHFB-enrolled devices.</li>
+      <li><strong>MFA in a single gesture:</strong> Device possession (hardware key) + user gesture (PIN/biometric) = MFA built into the login flow without a second-step prompt.</li>
+      <li><strong>Zero Trust aligned:</strong> WHFB credentials are device-specific — they fulfill the "verified identity + verified device" requirement of Zero Trust simultaneously.</li>
+    </ul>
+
+    <div class="sh">Deploying WHFB via Intune</div>
+    <p><strong>Method 1 — Intune WHFB Enrollment Policy (Tenant-wide):</strong></p>
+    <p>Intune → Devices → Windows → Windows enrollment → Windows Hello for Business. This tenant-wide policy configures WHFB for all enrolled Windows devices. Settings: Enable WHFB (Required/Disabled/Not Configured), minimum PIN length (recommend 6+), biometrics (Enabled/Disabled), anti-spoofing (Enhanced), TPM requirement.</p>
+    <p><strong>Method 2 — Settings Catalog / Identity Protection Profile:</strong></p>
+    <p>For granular per-group control: Intune → Devices → Configuration profiles → Settings Catalog → Windows Hello for Business. This lets you target WHFB settings to specific device groups rather than tenant-wide.</p>
+
+    <div class="sh">WHFB Deployment Modes</div>
+    <div class="tw"><table>
+      <thead><tr><th>Mode</th><th>When to Use</th><th>Requirements</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tt">Cloud-Only (AADJ)</span></td><td>Pure cloud environments — devices Azure AD Joined only</td><td>Azure AD P1, Intune, TPM 2.0. Simplest deployment.</td></tr>
+        <tr><td><span class="tag ti">Hybrid Key Trust</span></td><td>Hybrid AADJ, access to on-prem resources needed</td><td>On-prem AD, AAD Connect, schema update, DRS. More complex but uses WHFB for both cloud and on-prem auth.</td></tr>
+        <tr><td><span class="tag to">Hybrid Certificate Trust</span></td><td>Hybrid AADJ, older on-prem infrastructure (pre-Windows Server 2016 DCs)</td><td>On-prem PKI, ADFS (or Azure AD Kerberos), certificate enrollment infrastructure. Most complex but most compatible.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="sh">Common WHFB Issues</div>
+    <ul class="bl">
+      <li><strong>TPM not ready:</strong> WHFB requires TPM 2.0. Devices with TPM 1.2 or no TPM cannot enroll. Check: Settings → Windows Security → Device Security → Security processor details.</li>
+      <li><strong>Provisioning fails after Autopilot:</strong> If the ESP completes before the WHFB provisioning policy is delivered, WHFB setup might be skipped. Ensure the WHFB policy is assigned and synced before ESP completes, or trigger provisioning manually via: <code>dsregcmd /forcerecovery</code></li>
+      <li><strong>PIN reset not working:</strong> If a user forgets their PIN and the WHFB PIN reset service isn't configured, they may be locked out. Enable Microsoft PIN Reset Service in Intune WHFB policy settings.</li>
+    </ul>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 120</div>
+      <div class="qa"><div class="qq">Why is Windows Hello for Business considered phishing resistant?</div>
+      <div class="qans">WHFB uses asymmetric key cryptography where the private key is stored in the device's TPM and never leaves it. The user's PIN or biometric only unlocks the key locally on that device — it's never transmitted to any server. A phishing site that tricks a user into entering their PIN gets nothing useful because the PIN is bound to a specific device's TPM. Without both the physical device AND the correct PIN/biometric gesture, authentication fails. This is fundamentally different from passwords, which are shared secrets that can be captured and replayed from anywhere.</div></div>
+      <div class="qa"><div class="qq">What's the difference between WHFB cloud-only and hybrid key trust deployments?</div>
+      <div class="qans">Cloud-only WHFB is for pure Azure AD Joined devices — it's the simplest deployment, just needs Azure AD P1, Intune, and TPM 2.0. It provides passwordless authentication to cloud resources only. Hybrid key trust extends WHFB to Hybrid AADJ devices and enables passwordless authentication to both cloud AND on-premises resources using Kerberos. It requires on-premises AD, AAD Connect syncing, schema updates, and Azure AD Kerberos or ADFS. The complexity is significantly higher but is necessary when devices need to authenticate to on-prem file servers, printers, or legacy apps.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════ T121 ═══════════════ -->
+  <section class="ts" id="t121">
+    <div class="th">
+      <div class="tnum">TOPIC 121</div>
+      <div><div class="ttl">Certificate Authority Integration — NDES and SCEP Deep Dive</div>
+      <div class="tsub">How Intune delivers certificates to devices using NDES, SCEP, and PKCS</div></div>
+    </div>
+
+    <div class="sh">Why Certificates via Intune?</div>
+    <p>Certificates enable: Wi-Fi authentication (802.1X EAP-TLS), VPN client authentication, S/MIME email signing/encryption, code signing, and device identity in Zero Trust architectures. Manually deploying certificates to thousands of devices is impossible — Intune automates certificate lifecycle (enrollment, renewal, revocation) at scale.</p>
+
+    <div class="sh">The Two Certificate Delivery Methods</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🔑</div>
+        <div class="ctit">SCEP (via NDES)</div>
+        <div class="cbod">Simple Certificate Enrollment Protocol. Each device generates its own key pair and requests a certificate from the CA. Private key never leaves the device. Best for device identity certificates. Requires NDES server on-premises.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📜</div>
+        <div class="ctit">PKCS (via PFX)</div>
+        <div class="cbod">The CA generates the key pair and certificate, encrypts it, and Intune delivers the PFX to the device. Private key is generated centrally. Required for S/MIME (email certificates must be backed up). Requires PFX connector.</div>
+      </div>
+    </div>
+
+    <div class="sh">SCEP Certificate Delivery Architecture</div>
+    <p>The SCEP flow involves several components that must all be configured correctly:</p>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>On-premises CA (Microsoft AD CS):</strong> Issues certificates based on templates. Must have a certificate template configured for device/user enrollment that Intune can use.</div></li>
+      <li><div class="sn">2</div><div><strong>NDES Server (Network Device Enrollment Service):</strong> An IIS-based service that acts as the SCEP endpoint. Intune connector is installed here. Must be internet-reachable (or accessible via proxy) for Intune-managed devices to reach it. <strong>Critical:</strong> NDES must use an SSL certificate from a public or device-trusted CA — not a self-signed cert.</div></li>
+      <li><div class="sn">3</div><div><strong>Intune Certificate Connector:</strong> Installed on the NDES server. Authenticates to Intune, receives SCEP challenge passwords, and brokers the certificate request between the device and the CA.</div></li>
+      <li><div class="sn">4</div><div><strong>Trusted Root Certificate Profile:</strong> Must be deployed to devices BEFORE the SCEP profile. Devices need to trust the CA root before they can validate and accept certificates issued by it.</div></li>
+      <li><div class="sn">5</div><div><strong>SCEP Certificate Profile:</strong> Configured in Intune with the NDES URL, certificate template name, key usage, SAN, and validity period. Assigned to device/user groups. Intune orchestrates the SCEP enrollment on the device.</div></li>
+    </ol>
+
+    <div class="sh">Common Certificate Deployment Failures</div>
+    <div class="tw"><table>
+      <thead><tr><th>Symptom</th><th>Likely Cause</th><th>Fix</th></tr></thead>
+      <tbody>
+        <tr><td>Certificate profile shows Error in Intune portal</td><td>NDES URL unreachable from device or Intune service</td><td>Test NDES URL from device browser — should get a 403 (not 404/timeout). Check firewall rules and NDES IIS bindings.</td></tr>
+        <tr><td>Certificate issued but Wi-Fi/VPN still prompts for password</td><td>Certificate SAN doesn't match what the RADIUS/VPN server expects, or wrong EKU (Extended Key Usage)</td><td>Check certificate SAN configuration in the SCEP profile. Verify EKU includes "Client Authentication" for 802.1X.</td></tr>
+        <tr><td>Certificates not renewing automatically</td><td>Renewal threshold not configured or NDES connector not processing renewals</td><td>Set "Renewal threshold" in SCEP profile (recommend 20%). Check Intune Certificate Connector logs on NDES server.</td></tr>
+        <tr><td>Trusted Root profile not applying before SCEP profile</td><td>Both profiles assigned but Trusted Root hasn't been processed yet</td><td>Always assign Trusted Root profile separately and verify it shows "Succeeded" before deploying SCEP profile. Use separate assignment groups with sequential timing if needed.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 121</div>
+      <div class="qa"><div class="qq">What's the difference between SCEP and PKCS certificate delivery in Intune?</div>
+      <div class="qans">With SCEP, the device generates its own key pair locally and sends a certificate signing request to the CA via the NDES server — the private key never leaves the device, which is more secure. With PKCS, the CA generates both the private key and the certificate, encrypts the PFX package, and Intune delivers it to the device. PKCS is required for S/MIME email certificates because the private key needs to be backed up (for email decryption if the device is lost). For device identity certificates — Wi-Fi, VPN, device auth — SCEP is preferred because the private key never leaves the TPM.</div></div>
+      <div class="qa"><div class="qq">Walk through the components needed for SCEP certificate deployment via Intune.</div>
+      <div class="qans">Five components: first, an on-premises Microsoft AD CS Certificate Authority with a configured device/user certificate template. Second, an NDES server with IIS that acts as the SCEP endpoint — must have a valid SSL cert and be reachable by devices and Intune. Third, the Intune Certificate Connector installed on the NDES server. Fourth, a Trusted Root Certificate Profile deployed to devices — devices must trust the CA root before accepting its certificates. Fifth, the SCEP Certificate Profile in Intune with the NDES URL and template settings, assigned to device groups. The Trusted Root profile must be deployed and applied before the SCEP profile is processed.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════ T122 ═══════════════ -->
+  <section class="ts" id="t122">
+    <div class="th">
+      <div class="tnum">TOPIC 122</div>
+      <div><div class="ttl">Network Access Control (NAC) Integration</div>
+      <div class="tsub">Using Intune compliance as a gate for network access via NAC solutions</div></div>
+    </div>
+
+    <div class="sh">What Is NAC and Why Does It Matter?</div>
+    <p>Network Access Control (NAC) ensures that only compliant, trusted devices can connect to the corporate network — wired or wireless. When integrated with Intune, NAC solutions can query Intune's real-time compliance state for a device before granting network access. Non-compliant devices are quarantined to a remediation VLAN instead of the corporate network.</p>
+
+    <div class="sh">How Intune NAC Integration Works</div>
+    <p>Intune exposes a NAC API endpoint that NAC solutions can query with a device ID. The query returns: device enrollment status, compliance state, and last compliance check time. The NAC solution (Cisco ISE, Forescout, Aruba ClearPass) receives this response and enforces network access policy based on the compliance state.</p>
+
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Enable NAC in Intune:</strong> Intune → Tenant administration → Connectors → Network Access Control. Note: The NAC vendor registers an app in your Azure AD tenant which gets permission to query Intune's NAC API.</div></li>
+      <li><div class="sn">2</div><div><strong>Configure NAC vendor (e.g., Cisco ISE):</strong> Add Microsoft Intune as an MDM server in ISE. Configure the Azure AD application credentials for API queries.</div></li>
+      <li><div class="sn">3</div><div><strong>802.1X RADIUS policy on switches/APs:</strong> Configure your network infrastructure to require 802.1X authentication. The RADIUS server (ISE) handles authentication and queries Intune for compliance.</div></li>
+      <li><div class="sn">4</div><div><strong>Test enforcement:</strong> A non-compliant device connects to corporate Wi-Fi → RADIUS authenticates the device → queries Intune API → receives "Non-Compliant" → device placed in quarantine VLAN with internet-only access and remediation instructions.</div></li>
+    </ol>
+
+    <div class="sh">Supported NAC Partners</div>
+    <ul class="bl">
+      <li><strong>Cisco Identity Services Engine (ISE):</strong> Most common in enterprise. Deep integration with Intune via RADIUS and API.</li>
+      <li><strong>Forescout:</strong> Agentless network visibility combined with Intune compliance queries for full device posture.</li>
+      <li><strong>Aruba ClearPass:</strong> Popular in education and healthcare. Intune compliance integration for 802.1X wired and wireless.</li>
+      <li><strong>Portnox:</strong> Cloud-native NAC with native Intune integration — no on-premises RADIUS infrastructure required.</li>
+    </ul>
+
+    <div class="ib ibt"><div class="bt">💡 NAC vs Conditional Access</div><p>Conditional Access blocks cloud app access based on compliance. NAC blocks network access based on compliance. They're complementary — CA protects cloud resources, NAC protects network resources. In a Zero Trust architecture, both are deployed: CA for cloud, NAC for network, creating layered enforcement that non-compliant devices cannot bypass through any path.</p></div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 122</div>
+      <div class="qa"><div class="qq">How does Intune integrate with NAC solutions like Cisco ISE?</div>
+      <div class="qans">Intune exposes a NAC API that third-party NAC solutions can query with a device identifier to get the device's real-time compliance state. When a device connects to the network via 802.1X, the RADIUS server (ISE) authenticates the device certificate and then queries Intune's NAC API with the device ID to check compliance. If Intune returns "Non-Compliant", ISE places the device in a quarantine VLAN. The integration requires enabling NAC in Intune's connector settings, registering the NAC vendor's app in Azure AD, and configuring ISE with the API credentials.</div></div>
+      <div class="qa"><div class="qq">What's the difference between Conditional Access and NAC for enforcement?</div>
+      <div class="qans">Conditional Access operates at the identity/application layer — it controls access to cloud applications and resources by evaluating compliance at the time of Azure AD authentication. NAC operates at the network layer — it controls whether a device can even connect to the network. They protect different layers: CA stops a non-compliant device from accessing SharePoint or Teams; NAC stops that same device from getting an IP address on the corporate VLAN. In a Zero Trust architecture, both are used together because a non-compliant device shouldn't reach the network or the cloud.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════ T123 ═══════════════ -->
+  <section class="ts" id="t123">
+    <div class="th">
+      <div class="tnum">TOPIC 123</div>
+      <div><div class="ttl">Intune and Third-Party Integrations</div>
+      <div class="tsub">Jamf, ServiceNow, Lookout, and partner ecosystem integrations</div></div>
+    </div>
+
+    <div class="sh">Why Third-Party Integrations?</div>
+    <p>Intune doesn't operate in isolation. Enterprise environments include macOS fleets (where Jamf is often preferred), ITSM platforms for ticket automation, mobile threat defense solutions for advanced mobile security, and identity governance tools. Intune's open API and connector ecosystem lets it feed into and receive data from these platforms.</p>
+
+    <div class="sh">Jamf + Intune Integration (macOS)</div>
+    <p>Many organizations use <strong>Jamf Pro</strong> for macOS management (better native macOS support, richer Mac-specific features) while using Intune for Windows/mobile. The Jamf + Intune integration bridges the two: Jamf-managed Macs can participate in Azure AD Conditional Access using Intune's compliance framework.</p>
+    <p><strong>How it works:</strong> Jamf registers managed Macs in Azure AD. Jamf sends device compliance data to Intune via the Jamf Cloud Connector. Intune uses this compliance signal in Conditional Access decisions — so a Mac managed by Jamf can be required to be "compliant" (per Jamf's definition) before accessing M365 resources.</p>
+    <div class="ib ibt"><div class="bt">🍎 Jamf Integration Requirements</div><p>Azure AD P1 license · Jamf Pro 10.36 or later · Jamf Cloud Connector configured in both Jamf and Intune (Intune → Tenant administration → Connectors → Partner compliance management → Jamf Pro) · macOS devices enrolled in Jamf must also be Azure AD registered</p></div>
+
+    <div class="sh">ServiceNow + Intune</div>
+    <p>ServiceNow integration enables: automatic ITSM ticket creation from Intune alerts, device inventory sync to ServiceNow CMDB, and Intune remediation actions triggered from ServiceNow workflows. Configuration is via the <strong>Microsoft Intune ServiceNow connector</strong> or through ServiceNow's Microsoft 365 spoke using Graph API calls.</p>
+    <ul class="bl">
+      <li><strong>Auto-ticket creation:</strong> When Intune detects a non-compliant device, ServiceNow auto-creates an incident assigned to the device owner's manager's queue.</li>
+      <li><strong>CMDB sync:</strong> Intune device inventory exported to ServiceNow CMDB via Graph API, keeping asset records current automatically.</li>
+      <li><strong>Remote wipe from ITSM:</strong> IT agents can trigger Intune device wipe/retire directly from the ServiceNow incident, without needing Intune portal access.</li>
+    </ul>
+
+    <div class="sh">Mobile Threat Defense (MTD) Partners</div>
+    <p>MTD partners add advanced mobile threat detection beyond what Intune/Defender provides natively — especially for iOS and Android. They detect network attacks, malicious apps, OS exploits, and phishing links on mobile devices and report risk scores to Intune.</p>
+    <div class="tw"><table>
+      <thead><tr><th>MTD Partner</th><th>Speciality</th><th>How Intune Uses It</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag ti">Lookout for Work</span></td><td>iOS/Android threat detection — malicious apps, network attacks, OS vulnerabilities</td><td>Device risk score sent to Intune. Compliance policy can require "No High risk from Lookout." Non-compliant devices blocked by CA.</td></tr>
+        <tr><td><span class="tag tg">Better Mobile</span></td><td>App vetting, phishing protection, jailbreak detection</td><td>Same integration model — risk score → Intune compliance → CA enforcement.</td></tr>
+        <tr><td><span class="tag to">Zimperium (zIPS)</span></td><td>On-device ML detection for zero-day mobile threats without cloud dependency</td><td>Detects threats locally on device, reports to Intune. Good for highly regulated industries with data residency requirements.</td></tr>
+        <tr><td><span class="tag tt">Microsoft Defender for Endpoint</span></td><td>Native Microsoft MTD for iOS/Android — phishing, malicious content, network protection</td><td>Native integration — no additional connector needed. Risk signal directly in Intune compliance.</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 123</div>
+      <div class="qa"><div class="qq">An organization uses Jamf for Mac management. How can they include Macs in Conditional Access compliance requirements?</div>
+      <div class="qans">Through the Jamf + Intune integration via the Jamf Cloud Connector. Jamf registers managed Macs in Azure AD and sends compliance status to Intune. Intune then uses this as a compliance signal in Conditional Access — the CA policy sees the Mac as "Intune-managed" (via Jamf) and checks its compliance state. This way, Macs managed by Jamf can be required to be compliant before accessing M365 resources, even though Intune isn't managing them directly. It requires Azure AD P1, Jamf Pro 10.36+, and configuring the Jamf connector in both platforms.</div></div>
+      <div class="qa"><div class="qq">What is Mobile Threat Defense and how does it work with Intune?</div>
+      <div class="qans">MTD solutions add threat detection capabilities for iOS and Android beyond what's built into Intune. They analyze the device for malicious apps, network-based attacks, jailbreak/root, and OS exploits, then send a risk score (Clear/Low/Medium/High) to Intune. Intune compliance policies can include an MTD condition — for example, "device threat level must be Low or Clear." If the MTD partner reports a High threat (e.g., device is connecting to a malicious Wi-Fi network), Intune marks the device non-compliant, and Conditional Access blocks corporate access automatically. Microsoft Defender for Endpoint on iOS/Android is the native Microsoft MTD option.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════ T124 ═══════════════ -->
+  <section class="ts" id="t124">
+    <div class="th">
+      <div class="tnum">TOPIC 124</div>
+      <div><div class="ttl">Intune Migration — From Other MDMs to Intune</div>
+      <div class="tsub">Planning and executing a migration from MobileIron, VMware Workspace ONE, or Jamf to Intune</div></div>
+    </div>
+
+    <div class="sh">Why Migrate to Intune?</div>
+    <p>Organizations migrate to Intune from legacy MDMs for several reasons: Microsoft licensing consolidation (Intune included in M365 E3/E5 — no separate MDM cost), deep integration with Azure AD and Microsoft 365, unified endpoint management across Windows, iOS, Android, and macOS, and Copilot/AI features in the Microsoft security stack that don't extend to third-party MDMs.</p>
+
+    <div class="sh">Migration Phases</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Discovery and inventory:</strong> Export the full device inventory, policy list, app list, and certificate profiles from the existing MDM. Document: how many devices per platform, which apps are deployed, what compliance requirements exist, which certificates are in use, and what configurations are critical to operations.</div></li>
+      <li><div class="sn">2</div><div><strong>Intune environment setup:</strong> Configure the Intune tenant before migrating any devices — MDM enrollment scope, Apple MDM push cert, Android Enterprise binding, enrollment restrictions, naming conventions, and Azure AD groups.</div></li>
+      <li><div class="sn">3</div><div><strong>Policy translation:</strong> Recreate every policy from the old MDM in Intune. Don't assume 1:1 feature mapping exists — some old MDM policies may need to be achieved differently in Intune (e.g., custom OMA-URI instead of a GUI setting). Test every policy on pilot devices.</div></li>
+      <li><div class="sn">4</div><div><strong>App migration:</strong> Re-package and re-upload all Win32 apps. For managed iOS/Android apps, approve them in Managed Google Play / Apple VPP. Test all app deployments independently before migrating users.</div></li>
+      <li><div class="sn">5</div><div><strong>Pilot migration (5–10% of devices):</strong> Select a diverse pilot group (different platforms, departments, locations). Unenroll from old MDM → enroll in Intune → validate all policies and apps apply correctly → document issues and fix them before proceeding.</div></li>
+      <li><div class="sn">6</div><div><strong>Wave-based production migration:</strong> Migrate in waves by department or location. Maintain parallel operation during migration — old MDM manages unenrolled devices, Intune manages enrolled ones. Do not decommission old MDM until 100% migration is validated.</div></li>
+      <li><div class="sn">7</div><div><strong>Certificate migration:</strong> Most complex part. Certificates issued by the old MDM will expire — plan for SCEP/PKCS infrastructure in Intune before migrating devices that depend on certificates for Wi-Fi or VPN. Stagger migration so certificate-dependent devices migrate after the Intune PKI is validated.</div></li>
+    </ol>
+
+    <div class="sh">The Double-Enrollment Problem</div>
+    <p>You cannot have two MDMs simultaneously managing a device. During migration, the device must be unenrolled from the old MDM before enrolling in Intune. For corporate-owned devices, this means a brief period of no MDM management. Plan the unenroll-to-enroll window carefully — preferably automate it so the gap is under 5 minutes.</p>
+
+    <div class="sh">Platform-Specific Migration Notes</div>
+    <div class="tw"><table>
+      <thead><tr><th>Platform</th><th>Migration Approach</th><th>Key Challenge</th></tr></thead>
+      <tbody>
+        <tr><td>Windows</td><td>Unenroll from old MDM → run Intune enrollment via Settings → Access work or school, or use Autopilot reset for a clean start</td><td>GPO conflicts in hybrid environments; application re-delivery downtime</td></tr>
+        <tr><td>iOS/iPadOS ADE</td><td>Reassign devices from old MDM server to Intune in Apple Business Manager → wipe device → re-run Setup Assistant</td><td>Requires device wipe — user data must be backed up first. ABM token must be transferred to Intune.</td></tr>
+        <tr><td>Android Enterprise</td><td>Factory reset required for fully managed → re-enroll via Intune Android Enterprise. Work profile BYOD can unenroll/re-enroll without wipe.</td><td>Work profile data loss on full wipe; user coordination for BYOD re-enrollment.</td></tr>
+        <tr><td>macOS</td><td>Remove old MDM profile → enroll via Intune Company Portal or ADE (ABM)</td><td>Certificate and Wi-Fi profile gap during transition; consider Jamf co-management period</td></tr>
+      </tbody>
+    </table></div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 124</div>
+      <div class="qa"><div class="qq">How would you plan a migration from VMware Workspace ONE to Intune for 5,000 devices?</div>
+      <div class="qans">I'd structure it in phases: first a full discovery — inventory all devices, policies, apps, and certificates from Workspace ONE. Then set up the Intune environment — configure enrollment, build all policies and apps in Intune, test on lab devices. Run a pilot with 200–300 diverse devices, validate everything, fix issues. Then wave-based migration by department — 500–1,000 devices per wave over 4–6 weeks. The trickiest part is certificates: any device using SCEP certs for Wi-Fi or VPN must have the Intune PKI validated and working before that device migrates, or they lose network access. I'd keep Workspace ONE running in parallel until the last device is confirmed enrolled in Intune and validated.</div></div>
+      <div class="qa"><div class="qq">What's the double-enrollment problem in MDM migrations and how do you handle it?</div>
+      <div class="qans">A device can only be actively managed by one MDM at a time. During migration you must unenroll from the old MDM before enrolling in Intune — creating a brief unmanaged gap. For corporate devices, I minimize this gap by scripting or automating the unenroll and immediate re-enroll sequence, targeting sub-5-minute windows. For ADE iOS devices, I reassign them in Apple Business Manager to Intune and wipe them so Setup Assistant auto-enrolls them into Intune — that's the cleanest approach with no unmanaged period. The key is planning and communicating the timing so it happens during low-usage periods.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════ T125 ═══════════════ -->
+  <section class="ts" id="t125">
+    <div class="th">
+      <div class="tnum">TOPIC 125</div>
+      <div><div class="ttl">Real-World Enterprise Deployment — End to End</div>
+      <div class="tsub">Bringing it all together: deploying Intune in a 3,000-device enterprise from zero to production</div></div>
+    </div>
+
+    <p>This final topic is a capstone — a complete walkthrough of deploying Intune in a real enterprise environment, integrating every block of this course into a coherent implementation. Follow this as a reference architecture.</p>
+
+    <div class="sh">The Scenario</div>
+    <p><strong>Organization:</strong> 3,000-employee manufacturing company with offices in 5 countries. Currently using on-premises SCCM for Windows, no MDM for mobile, no cloud identity. Moving to Microsoft 365 E3. Goal: full Intune deployment in 6 months, Zero Trust aligned, with compliance reporting for cyber insurance.</p>
+
+    <div class="sh">Phase 1: Foundation (Weeks 1–4)</div>
+    <ul class="bl">
+      <li><strong>Azure AD setup:</strong> Configure Azure AD Connect to sync on-premises AD. Enable password hash sync. Configure MFA (Authenticator app) for all users.</li>
+      <li><strong>Intune tenant setup:</strong> Set MDM authority, configure MDM user scope (All), set enrollment restrictions (block personal Windows devices, allow personal mobile), create naming conventions for groups and policies.</li>
+      <li><strong>Azure AD groups:</strong> Create device groups by platform (All-Windows, All-iOS, All-Android), by ring (Pilot-Ring0, Standard-Ring2), by criticality (VIP-Devices). Dynamic group rules where possible.</li>
+      <li><strong>Licensing:</strong> Assign Microsoft 365 E3 licenses (includes Intune P1) to all users. Assign Azure AD P2 to IT admins (for PIM).</li>
+      <li><strong>PIM:</strong> Configure PIM for Intune Administrator, Global Administrator roles. All IT admins become eligible — no standing admin roles.</li>
+    </ul>
+
+    <div class="sh">Phase 2: Windows Enrollment &amp; Configuration (Weeks 5–10)</div>
+    <ul class="bl">
+      <li><strong>Hybrid AADJ:</strong> Configure Hybrid Azure AD Join via AAD Connect for existing domain-joined devices. Enable automatic MDM enrollment via Azure AD Mobility settings.</li>
+      <li><strong>Autopilot:</strong> Register hardware hashes for all new devices from OEM. Build Autopilot profile (AADJ, user-driven, hide OOBE steps). Configure ESP with 60-minute timeout, required apps blocking.</li>
+      <li><strong>Configuration profiles:</strong> Deploy security baseline (Microsoft Security Baseline for Windows 11). Configure BitLocker silent encryption with Azure AD key escrow. Deploy Wi-Fi and VPN profiles. Restrict removable media (USB blocking). Configure LAPS for local admin passwords.</li>
+      <li><strong>Update rings:</strong> Create 4-ring strategy. Ring 0 (IT) — 0-day deferral. Ring 1 (Early) — 7 days. Ring 2 (Standard) — 14 days. Ring 3 (VIP) — 21 days. Feature updates pinned to current production Windows build.</li>
+      <li><strong>Apps:</strong> Package and deploy: Microsoft 365 Apps (via built-in Intune installer), Chrome Enterprise (Win32), VPN client (Win32), LOB ERP application (Win32). Configure supersedence chains for legacy app versions.</li>
+    </ul>
+
+    <div class="sh">Phase 3: Mobile Enrollment (Weeks 8–12)</div>
+    <ul class="bl">
+      <li><strong>iOS/iPadOS:</strong> Set up Apple Business Manager, connect to Intune, obtain Volume Purchase Program token. Configure ADE enrollment profile for corporate iPhones. Deploy: Outlook, Teams, Company Portal, VPN client via VPP. App protection policies for corporate email/data on BYOD.</li>
+      <li><strong>Android:</strong> Configure Android Enterprise with Managed Google Play. AE Fully Managed for corporate Androids. AE Work Profile for BYOD. Deploy core apps from Managed Google Play. App protection policies for MAM.</li>
+    </ul>
+
+    <div class="sh">Phase 4: Security &amp; Compliance (Weeks 10–16)</div>
+    <ul class="bl">
+      <li><strong>Compliance policies:</strong> Windows: BitLocker enabled, Defender AV active, OS within 30 days of latest patch, minimum OS version, complex password. iOS: passcode required, not jailbroken. Android: not rooted, Play Protect enabled.</li>
+      <li><strong>MDE integration:</strong> Connect Defender for Endpoint to Intune. Compliance policy includes MDE risk requirement (Low or Clear). Deploy MDE onboarding profile to all Windows devices.</li>
+      <li><strong>Conditional Access:</strong> Require compliant device for all M365 apps. Require MFA for all cloud apps. Block legacy authentication. Named Locations configured for offices. Risk-based CA using Azure AD Identity Protection.</li>
+      <li><strong>SCEP certificates:</strong> Deploy NDES infrastructure. Configure Intune Certificate Connector. Deploy Trusted Root → SCEP certificate profiles for Wi-Fi authentication. Test 802.1X connectivity on pilot devices before broad rollout.</li>
+      <li><strong>Windows Hello for Business:</strong> Enable WHFB policy for all AADJ and Hybrid AADJ devices. Configure PIN complexity. Enable PIN reset service. Target all users to move to passwordless over 60 days.</li>
+    </ul>
+
+    <div class="sh">Phase 5: Monitoring, Automation &amp; Reporting (Weeks 14–20)</div>
+    <ul class="bl">
+      <li><strong>Proactive Remediations:</strong> Auto-fix stale DNS cache, repair Windows Update issues, detect and re-enable Defender Real-Time Protection, alert on low disk space before it becomes critical.</li>
+      <li><strong>Endpoint Analytics:</strong> Monitor startup performance. Create baseline. Identify the 200 slowest-booting devices for hardware refresh prioritization.</li>
+      <li><strong>Log Analytics:</strong> Stream Intune audit logs and device compliance logs to Azure Monitor Log Analytics. Build KQL queries for non-compliance trends, enrollment failures, app install failure rates.</li>
+      <li><strong>Power BI dashboard:</strong> Connect to Intune Data Warehouse. Build CISO dashboard: compliance rate (target: 95%), BitLocker coverage, MDE onboarding rate, OS currency, enrollment growth. Auto-refresh daily. Share with CISO and Head of IT.</li>
+      <li><strong>Graph API automation:</strong> PowerShell script run weekly via Azure Automation: export non-compliant device list, stale devices (no check-in 14+ days), devices approaching OS end-of-support. Email report to IT team leads.</li>
+    </ul>
+
+    <div class="sh">Phase 6: Validation and Handover (Weeks 20–24)</div>
+    <ul class="bl">
+      <li><strong>Compliance audit:</strong> Run full compliance report across all 3,000 devices. Target ≥95% compliant before sign-off. Document remaining non-compliant devices with remediation plans and owners.</li>
+      <li><strong>Documentation:</strong> Architecture diagram, runbook for common operations (enrollment, offboarding, app packaging, certificate renewal), escalation procedures, and incident response plan for Intune-related outages.</li>
+      <li><strong>Handover training:</strong> Train L1 helpdesk on Troubleshooting blade usage. Train L2 on log analysis and policy troubleshooting. Train IT management on Power BI dashboard interpretation.</li>
+      <li><strong>Co-management decision:</strong> Review remaining SCCM workloads. Migrate: Compliance policies, Device configuration, Endpoint Protection, Windows Update to Intune. Keep SCCM for: legacy application deployment (if needed), OSD for specific scenarios.</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🏆</div><div class="rwl">Key Lessons from Real Enterprise Deployments</div></div>
+      <p><strong>Certificate complexity is always underestimated.</strong> Budget 2x the time you think certificate infrastructure will take. NDES, SCEP, and 802.1X issues are the most common cause of deployment delays.</p>
+      <p><strong>Communication is half the job.</strong> Users who understand WHY Intune is being deployed (security, enabling remote work, BYOD access) comply far better than users who receive a mandated IT change with no explanation. Send clear communication: what Intune can and cannot see on their device.</p>
+      <p><strong>Never decommission the old MDM until 100% migration is validated.</strong> Parallel operation feels wasteful but saves you when a wave migration fails and devices need to re-enroll in the old system while you fix Intune issues.</p>
+      <p><strong>PIM from day one.</strong> Standing Intune admin accounts are the biggest security risk in your deployment. Configure PIM before the first device enrolls — not as an afterthought 6 months later.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 125</div>
+      <div class="qa"><div class="qq">You're hired to deploy Intune for a 3,000-device organization. Where do you start?</div>
+      <div class="qans">I start with discovery — understand the current state: what devices exist, what platforms, what the security requirements are, what licensing is in place, and what the timeline is. Then I set up the foundation before touching any devices: Azure AD groups, MDM scope, enrollment restrictions, naming conventions, and PIM for admin roles. I build a pilot group (50–100 devices covering all platforms and use cases) and validate every policy, app, and compliance requirement end-to-end before any production migration. Only after the pilot validates cleanly do I begin wave-based production deployment — by department or location, with communication and rollback plans at each wave.</div></div>
+      <div class="qa"><div class="qq">What's the most challenging part of an enterprise Intune deployment in your experience?</div>
+      <div class="qans">Certificate infrastructure — specifically getting SCEP via NDES working reliably for Wi-Fi and VPN authentication. It involves the most components (CA, NDES, connector, firewall rules, certificate templates, Intune profiles) and the most potential failure points. The second challenge is hybrid environment complexity — GPO conflicts, Hybrid AADJ line-of-sight requirements, and co-management workload decisions require deep knowledge of both SCCM and Intune. The organizational challenge is user communication — Intune deployments that fail technically can usually be fixed, but deployments that fail because users resist enrollment or compliance are much harder to recover.</div></div>
+      <div class="qa"><div class="qq">How would you measure success of an Intune deployment?</div>
+      <div class="qans">I'd define success metrics upfront: enrollment rate (target: 100% of corporate devices enrolled within timeline), compliance rate (target: ≥95% compliant), app deployment success rate (target: ≥98% of required apps installed successfully), MDE onboarding rate (target: 100% of Windows devices), BitLocker encryption coverage (target: 100% of laptops), and WHFB adoption rate (target: 80% within 3 months of deployment). I'd track these in a Power BI dashboard refreshed daily and report weekly to IT leadership during the deployment. Post-deployment, I'd measure helpdesk ticket volume for Intune-related issues as a proxy for operational stability.</div></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ COURSE COMPLETE BANNER ═══════════════ -->
+  <div style="background:linear-gradient(135deg,rgba(45,212,191,.1),rgba(99,102,241,.08));border:1px solid rgba(45,212,191,.3);border-radius:20px;padding:44px;margin-top:56px;text-align:center;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(45,212,191,.12) 0%,transparent 70%);border-radius:50%;pointer-events:none;"></div>
+    <div style="position:absolute;bottom:-40px;left:-40px;width:140px;height:140px;background:radial-gradient(circle,rgba(99,102,241,.1) 0%,transparent 70%);border-radius:50%;pointer-events:none;"></div>
+    <div style="font-size:48px;margin-bottom:14px;">🎓</div>
+    <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--h);margin-bottom:10px;letter-spacing:-0.5px;">Intune Mastery — Course Complete!</div>
+    <div style="color:var(--text2);font-size:14px;max-width:620px;margin:0 auto 24px;line-height:1.8;">You've completed all 14 blocks and 125 topics — from the very basics of MDM concepts, through every aspect of Intune configuration, security, automation, troubleshooting, and now the advanced real-world architectures that enterprise engineers build every day. You are now equipped to design, deploy, manage, and defend a world-class Intune implementation.</div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;">
+      <div style="background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.25);border-radius:8px;padding:9px 18px;font-size:12px;color:var(--teal);font-family:'IBM Plex Mono',monospace;">✅ 125 Topics Complete</div>
+      <div style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:9px 18px;font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;">🏆 14 Blocks Mastered</div>
+      <div style="background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:8px;padding:9px 18px;font-size:12px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;">🎯 MD-102 Ready</div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">What's Next</div>
+    <div style="color:var(--text2);font-size:13px;max-width:540px;margin:0 auto;line-height:1.7;">→ Bonus Block: Interview Prep &amp; MD-102 Certification Guide (126–129) &nbsp;|&nbsp; Build your Lab environment using the Lab Manual &nbsp;|&nbsp; Take the MD-102 exam</div>
+  </div>
+
+</div>
+</div>
+
+<a href="#" class="stup">↑</a>
+<script>
+  const secs=document.querySelectorAll('.ts');
+  const navs=document.querySelectorAll('.ni[href^="#"]');
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;navs.forEach(n=>{n.classList.remove('active');if(n.getAttribute('href')==='#'+id)n.classList.add('active');});}});},{rootMargin:'-20% 0px -60% 0px'});
+  secs.forEach(s=>obs.observe(s));
+  navs.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(n.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});}));
+</script>
+</body>
+</html>
