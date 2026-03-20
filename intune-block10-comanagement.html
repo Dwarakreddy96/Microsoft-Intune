@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 10: Co-Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#08060f;--bg2:#0d0b18;--bg3:#120f22;
+    --sb:#060410;--border:#1c1630;
+    --acc:#7c3aed;--acc2:#a78bfa;--acc3:#c4b5fd;
+    --blue:#38bdf8;--green:#34d399;--orange:#fb923c;
+    --red:#f87171;--yellow:#fbbf24;--teal:#2dd4bf;--pink:#f472b6;
+    --text:#ede8ff;--text2:#6b6a8a;--text3:#38365a;
+    --h:#f5f0ff;--card:#090718;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Manrope',sans-serif;font-weight:300;display:flex;min-height:100vh;line-height:1.75;}
+  #sb{width:285px;min-width:285px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+  #sb::-webkit-scrollbar{width:3px;}
+  #sb::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .shd{padding:23px 20px 15px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#060410,#0b0918);}
+  .slo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--h);letter-spacing:-.5px;display:flex;align-items:center;gap:10px;}
+  .lic{width:34px;height:34px;background:linear-gradient(135deg,var(--acc),var(--blue));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(124,58,237,.35);}
+  .ssu{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .bbg{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(56,189,248,.1));border:1px solid rgba(124,58,237,.28);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-top:10px;letter-spacing:.5px;}
+  .snv{padding:12px 0;flex:1;}
+  .nlb{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 20px 4px;font-family:'IBM Plex Mono',monospace;}
+  .ni{display:flex;align-items:flex-start;gap:9px;padding:8px 20px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none;color:var(--text2);font-size:12.5px;line-height:1.4;}
+  .ni:hover{background:rgba(124,58,237,.07);color:var(--text);border-left-color:var(--acc);}
+  .ni.active{background:rgba(124,58,237,.11);color:var(--acc2);border-left-color:var(--acc);}
+  .nn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;margin-top:1px;}
+  .ni.active .nn{color:var(--acc);}
+  .plk{display:flex;align-items:center;gap:7px;padding:7px 11px;font-size:11px;color:var(--text3);text-decoration:none;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;margin:0 12px 4px;transition:all .2s;}
+  .plk:hover{color:var(--text2);border-color:rgba(124,58,237,.22);}
+  .sft{padding:13px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .pbar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .pfill{height:100%;width:71%;background:linear-gradient(90deg,var(--acc),var(--blue));border-radius:2px;animation:pg 2s ease-in-out infinite alternate;}
+  @keyframes pg{from{box-shadow:0 0 4px var(--acc);}to{box-shadow:0 0 14px var(--blue);}}
+  #main{margin-left:285px;flex:1;min-height:100vh;}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(8,6,15,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 46px;display:flex;align-items:center;justify-content:space-between;}
+  .bcrumb{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:7px;}
+  .bcrumb span{color:var(--acc2);}
+  .tcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 13px;}
+  .cont{padding:50px 46px 80px;max-width:980px;}
+  .hero{margin-bottom:56px;position:relative;padding:44px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(124,58,237,.13) 0%,transparent 70%);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(56,189,248,.08) 0%,transparent 70%);border-radius:50%;}
+  .htag{display:inline-flex;align-items:center;gap:6px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:20px;padding:5px 14px;font-size:10.5px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;letter-spacing:1px;}
+  .htitle{font-family:'Syne',sans-serif;font-size:39px;font-weight:800;color:var(--h);line-height:1.1;letter-spacing:-1px;margin-bottom:13px;}
+  .htitle span{background:linear-gradient(135deg,var(--acc),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hdesc{font-size:14.5px;color:var(--text2);max-width:620px;line-height:1.8;}
+  .hmeta{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .hmi{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);}
+  .dot.g{background:var(--green);box-shadow:0 0 8px var(--green);}
+  .dot.b{background:var(--blue);box-shadow:0 0 8px var(--blue);}
+  .ts{margin-bottom:68px;scroll-margin-top:66px;opacity:0;animation:fu .5s ease forwards;}
+  .ts:nth-child(1){animation-delay:.05s;}.ts:nth-child(2){animation-delay:.12s;}.ts:nth-child(3){animation-delay:.19s;}.ts:nth-child(4){animation-delay:.26s;}.ts:nth-child(5){animation-delay:.33s;}.ts:nth-child(6){animation-delay:.4s;}
+  @keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .th{display:flex;align-items:flex-start;gap:15px;margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--border);}
+  .tnum{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--acc);background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+  .ttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--h);letter-spacing:-.5px;line-height:1.2;margin-bottom:4px;}
+  .tsub{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .sh{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--h);margin:28px 0 10px;display:flex;align-items:center;gap:10px;}
+  .sh::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,var(--acc),var(--blue));border-radius:2px;flex-shrink:0;}
+  p{color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:12px;}
+  p strong{color:var(--text);font-weight:500;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(124,58,237,.1);color:var(--acc2);padding:2px 6px;border-radius:4px;border:1px solid rgba(124,58,237,.18);}
+  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:17px;transition:border-color .2s,transform .2s;}
+  .card:hover{border-color:rgba(124,58,237,.3);transform:translateY(-2px);}
+  .cico{font-size:21px;margin-bottom:8px;}
+  .ctit{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:var(--h);margin-bottom:6px;}
+  .cbod{font-size:12.5px;color:var(--text2);line-height:1.6;}
+  .tw{overflow-x:auto;margin:16px 0;border-radius:11px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+  th{padding:12px 15px;text-align:left;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--h);letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 15px;color:var(--text2);border-bottom:1px solid rgba(28,22,48,.5);vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(124,58,237,.02);}
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+  .tp{background:rgba(124,58,237,.15);color:var(--acc2);border:1px solid rgba(124,58,237,.2);}
+  .tb{background:rgba(56,189,248,.15);color:var(--blue);border:1px solid rgba(56,189,248,.2);}
+  .tg{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.2);}
+  .to{background:rgba(251,146,60,.15);color:var(--orange);border:1px solid rgba(251,146,60,.2);}
+  .tr{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.2);}
+  .ty{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+  .ib{border-radius:10px;padding:16px 18px;margin:16px 0;border-left:3px solid;}
+  .ib .bt{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:6px;}
+  .ib p{margin:0;font-size:13.5px;color:var(--text2);}
+  .ibp{background:rgba(124,58,237,.06);border-color:var(--acc);}
+  .ibp .bt{color:var(--acc2);}
+  .ibb{background:rgba(56,189,248,.06);border-color:var(--blue);}
+  .ibb .bt{color:var(--blue);}
+  .ibg{background:rgba(52,211,153,.06);border-color:var(--green);}
+  .ibg .bt{color:var(--green);}
+  .ibo{background:rgba(251,146,60,.06);border-color:var(--orange);}
+  .ibo .bt{color:var(--orange);}
+  .ibr{background:rgba(248,113,113,.06);border-color:var(--red);}
+  .ibr .bt{color:var(--red);}
+  .iby{background:rgba(251,191,36,.06);border-color:var(--yellow);}
+  .iby .bt{color:var(--yellow);}
+  .steps{list-style:none;margin:13px 0;display:flex;flex-direction:column;gap:10px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .sn{min-width:25px;height:25px;background:linear-gradient(135deg,var(--acc),var(--blue));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .steps li strong{color:var(--text);}
+  .bl{list-style:none;margin:10px 0 13px;display:flex;flex-direction:column;gap:7px;}
+  .bl li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .bl li::before{content:'▹';color:var(--acc);font-size:13px;flex-shrink:0;margin-top:2px;}
+  .bl li strong{color:var(--text);}
+  .rw{background:linear-gradient(135deg,rgba(52,211,153,.04),rgba(56,189,248,.04));border:1px solid rgba(52,211,153,.18);border-radius:12px;padding:19px;margin:20px 0;}
+  .rwh{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .rwi{font-size:18px;}
+  .rwl{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--green);}
+  .rw p{color:var(--text2);font-size:13px;margin:0;line-height:1.7;}
+  .rw p+p{margin-top:8px;}
+  .iq{background:linear-gradient(135deg,rgba(124,58,237,.04),rgba(56,189,248,.04));border:1px solid rgba(124,58,237,.18);border-radius:13px;padding:21px;margin:24px 0;}
+  .iqh{font-family:'Syne',sans-serif;font-weight:700;font-size:14.5px;color:var(--acc2);margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+  .qa{margin-bottom:14px;}
+  .qa:last-child{margin-bottom:0;}
+  .qq{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:4px;display:flex;gap:8px;}
+  .qq::before{content:'Q.';color:var(--acc2);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .qans{font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.65;display:flex;gap:8px;}
+  .qans::before{content:'A.';color:var(--blue);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .tip{display:flex;gap:12px;align-items:flex-start;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:9px;padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.65;}
+  .tpic{font-size:16px;flex-shrink:0;}
+  .code{background:#040310;border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#c4b5fd;overflow-x:auto;line-height:1.75;}
+  .cm{color:var(--text3);}
+  .kw{color:#f472b6;}
+  .st{color:#86efac;}
+  .hl{color:var(--blue);}
+  .vl{color:#fcd34d;}
+  /* Co-management architecture visual */
+  .arch-visual{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin:18px 0;}
+  .arch-row{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .arch-box{border-radius:10px;padding:14px 18px;font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--h);text-align:center;min-width:130px;border:1px solid;}
+  .ab-sccm{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(124,58,237,.08));border-color:rgba(56,189,248,.28);}
+  .ab-intune{background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(52,211,153,.08));border-color:rgba(124,58,237,.28);}
+  .ab-device{background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(251,146,60,.08));border-color:rgba(251,191,36,.28);}
+  .ab-azure{background:linear-gradient(135deg,rgba(52,211,153,.12),rgba(56,189,248,.08));border-color:rgba(52,211,153,.28);}
+  .arch-arrow{color:var(--text3);font-size:20px;}
+  .arch-label{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);text-align:center;margin-top:-8px;margin-bottom:12px;}
+  /* Workload table color */
+  .wl-sccm{background:rgba(56,189,248,.08);color:var(--blue);}
+  .wl-intune{background:rgba(52,211,153,.08);color:var(--green);}
+  .wl-pilot{background:rgba(251,191,36,.08);color:var(--yellow);}
+  /* Migration phase timeline */
+  .phase-timeline{display:flex;flex-direction:column;gap:0;margin:18px 0;}
+  .phase-row{display:flex;align-items:stretch;gap:0;}
+  .phase-num{min-width:80px;padding:16px 12px;background:var(--bg3);border:1px solid var(--border);border-right:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .phase-row:first-child .phase-num{border-radius:10px 0 0 0;}
+  .phase-row:last-child .phase-num{border-radius:0 0 0 10px;}
+  .ph-label{font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+  .ph-value{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--h);margin-top:2px;}
+  .phase-content{flex:1;padding:16px 18px;border:1px solid var(--border);}
+  .phase-row:first-child .phase-content{border-radius:0 10px 0 0;}
+  .phase-row:last-child .phase-content{border-radius:0 0 10px 0;}
+  .pc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13.5px;color:var(--h);margin-bottom:6px;}
+  .pc-body{font-size:12.5px;color:var(--text2);line-height:1.6;}
+  /* Troubleshoot card */
+  .ts-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;border-left:3px solid var(--acc);}
+  .ts-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--h);margin-bottom:6px;}
+  .ts-cause{font-size:12.5px;color:var(--text2);margin-bottom:6px;line-height:1.6;}
+  .ts-fix{font-size:12.5px;background:rgba(52,211,153,.06);border-radius:7px;padding:8px 11px;color:var(--green);border:1px solid rgba(52,211,153,.15);line-height:1.6;}
+  .ts-fix strong{color:var(--h);}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0;}
+  .stup{position:fixed;bottom:26px;right:26px;width:40px;height:40px;background:linear-gradient(135deg,var(--acc),var(--blue));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;box-shadow:0 4px 18px rgba(124,58,237,.3);border:none;color:white;z-index:200;text-decoration:none;transition:transform .2s;}
+  .stup:hover{transform:translateY(-3px);}
+  @media(max-width:768px){#sb{transform:translateX(-100%);}#main{margin-left:0;}.cont{padding:26px 16px;}.topbar{padding:11px 16px;}.htitle{font-size:26px;}}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="shd">
+    <div class="slo"><div class="lic">🛡️</div>Intune Mastery</div>
+    <div class="ssu">Complete Learning Series</div>
+    <div class="bbg">⬡ Block 10 of 14 — Co-Management</div>
+  </div>
+  <div class="snv">
+    <div class="nlb">Block 10 Topics</div>
+    <a href="#t86" class="ni active"><span class="nn">86</span>What Is Co-Management?</a>
+    <a href="#t87" class="ni"><span class="nn">87</span>Co-Management Prerequisites</a>
+    <a href="#t88" class="ni"><span class="nn">88</span>Enabling Co-Management — Step by Step</a>
+    <a href="#t89" class="ni"><span class="nn">89</span>Workload Switching</a>
+    <a href="#t90" class="ni"><span class="nn">90</span>Pilot Collections &amp; Gradual Migration</a>
+    <a href="#t91" class="ni"><span class="nn">91</span>Troubleshooting Co-Management</a>
+    <div class="nlb" style="margin-top:12px;">Previous Blocks</div>
+    <a href="intune-block1-foundations.html" class="plk">← Block 1: Foundations</a>
+    <a href="intune-block2-azuread.html" class="plk">← Block 2: Azure AD</a>
+    <a href="intune-block3-enrollment.html" class="plk">← Block 3: Enrollment</a>
+    <a href="intune-block4-configprofiles.html" class="plk">← Block 4: Config Profiles</a>
+    <a href="intune-block5-compliance.html" class="plk">← Block 5: Compliance</a>
+    <a href="intune-block6-appmanagement.html" class="plk">← Block 6: App Management</a>
+    <a href="intune-block7-endpointsecurity.html" class="plk">← Block 7: Endpoint Security</a>
+    <a href="intune-block8-rbac.html" class="plk">← Block 8: RBAC &amp; Audit</a>
+    <a href="intune-block9-autopatch.html" class="plk">← Block 9: Autopatch</a>
+    <div class="ni" style="opacity:.4;cursor:default;font-size:11.5px;"><span class="nn">→</span>Block 11: Intune for Education (Next)</div>
+  </div>
+  <div class="sft">
+    <div>Overall Progress</div>
+    <div style="color:var(--acc2);margin:2px 0;">Block 10 / 14 — 91 Topics Done</div>
+    <div class="pbar"><div class="pfill"></div></div>
+  </div>
+</nav>
+
+<div id="main">
+<div class="topbar">
+  <div class="bcrumb">Intune Mastery <span>›</span> Block 10 <span>›</span> Co-Management</div>
+  <div class="tcount">6 Topics · ~2.5 Hours</div>
+</div>
+<div class="cont">
+
+  <div class="hero">
+    <div class="htag">🔗 BLOCK 10 · CO-MANAGEMENT</div>
+    <h1 class="htitle">SCCM + Intune<br/><span>Better Together</span></h1>
+    <p class="hdesc">Most large enterprises can't abandon SCCM overnight — they've invested years in it, it manages complex OS deployments, software distribution, and hardware inventory at scale. Co-Management is the bridge: run SCCM and Intune simultaneously on the same Windows device, then gradually shift workloads to the cloud at your own pace. This block covers the full co-management journey from concept to troubleshooting.</p>
+    <div class="hmeta">
+      <div class="hmi"><div class="dot"></div>6 Topics</div>
+      <div class="hmi"><div class="dot g"></div>Workload Migration Framework</div>
+      <div class="hmi"><div class="dot b"></div>Step-by-Step Enablement</div>
+    </div>
+  </div>
+
+  <!-- T86 -->
+  <section class="ts" id="t86">
+    <div class="th"><div class="tnum">TOPIC 86</div>
+      <div><div class="ttl">What Is Co-Management?</div>
+      <div class="tsub">The concept, value, and why it's the most common enterprise Intune scenario</div></div>
+    </div>
+
+    <div class="sh">The Enterprise Reality</div>
+    <p>Walk into most large enterprise IT departments and you'll find SCCM (now called <strong>Microsoft Endpoint Configuration Manager — MECM</strong>) running the show. It's been deployed for years, or even decades. It manages software deployment, OS imaging, hardware inventory, patch management, and application lifecycle. The IT team knows it deeply. Ripping it out overnight to replace with Intune isn't realistic.</p>
+    <p><strong>Co-Management</strong> solves this by letting a Windows device be simultaneously managed by <strong>both SCCM and Intune</strong>. The same device checks in with SCCM for traditional management tasks AND with Intune for cloud management. Over time, you can move ("switch") individual workloads from SCCM to Intune — one at a time, at your own pace, with easy rollback if needed.</p>
+
+    <div class="sh">The Architecture — How It Works</div>
+    <div class="arch-visual">
+      <div class="arch-row">
+        <div class="arch-box ab-device">💻 Windows Device<br/><span style="font-size:10px;font-weight:400;color:var(--text3);">Hybrid Azure AD Joined</span></div>
+      </div>
+      <div class="arch-label">Device reports to both management authorities simultaneously</div>
+      <div class="arch-row">
+        <div class="arch-box ab-sccm">🏗️ SCCM / MECM<br/><span style="font-size:10px;font-weight:400;color:var(--text3);">On-premises server</span></div>
+        <div class="arch-arrow">⟵ AND ⟶</div>
+        <div class="arch-box ab-intune">☁️ Microsoft Intune<br/><span style="font-size:10px;font-weight:400;color:var(--text3);">Azure cloud</span></div>
+      </div>
+      <div class="arch-label">Both management planes active — workloads split between them</div>
+      <div class="arch-row">
+        <div class="arch-box ab-azure">🔵 Azure AD<br/><span style="font-size:10px;font-weight:400;color:var(--text3);">Identity + Conditional Access</span></div>
+      </div>
+    </div>
+
+    <div class="sh">Why Co-Management Matters</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🌐</div>
+        <div class="ctit">Remote Work Enablement</div>
+        <div class="cbod">SCCM requires VPN or CMG for remote devices. Intune works everywhere over the internet. Co-management lets remote employees get Intune-managed while office devices still leverage SCCM for bandwidth-intensive software deployment.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔐</div>
+        <div class="ctit">Conditional Access for Legacy Devices</div>
+        <div class="cbod">SCCM-only devices can't participate in Azure AD Conditional Access (they have no Azure AD identity). Co-management + Hybrid Azure AD Join gives these devices an Azure AD identity — enabling CA policies and compliance evaluation.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📈</div>
+        <div class="cbod">Gradual Cloud Migration</div>
+        <div class="ctit">Risk-Free Cloud Migration</div>
+        <div class="cbod">Move workloads one at a time. Test Intune compliance policies before SCCM's, move Windows Update management to Intune while keeping software deployment in SCCM. Rollback any workload instantly. No big-bang migration risk.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📊</div>
+        <div class="ctit">Unified Reporting</div>
+        <div class="cbod">Co-managed device health visible in both SCCM console AND Intune portal. Compliance visible in Azure AD for Conditional Access. Best of both worlds for reporting and monitoring.</div>
+      </div>
+    </div>
+
+    <div class="sh">The Migration Journey</div>
+    <p>Co-management isn't the destination — it's the <strong>bridge</strong>. The typical enterprise journey looks like this:</p>
+    <div class="phase-timeline">
+      <div class="phase-row">
+        <div class="phase-num"><div class="ph-label">Stage</div><div class="ph-value">1</div></div>
+        <div class="phase-content"><div class="pc-title">🏗️ SCCM Only</div><div class="pc-body">Starting point for most enterprises. All Windows devices managed exclusively by SCCM on-premises. No Azure AD identity. No Intune. Traditional management model.</div></div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-num"><div class="ph-label">Stage</div><div class="ph-value">2</div></div>
+        <div class="phase-content"><div class="pc-title">🔗 Co-Management Enabled</div><div class="pc-body">Devices are Hybrid Azure AD Joined. Both SCCM and Intune manage devices. Workloads initially stay in SCCM. Intune used for Conditional Access compliance and quick wins (Defender policy, compliance policies).</div></div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-num"><div class="ph-label">Stage</div><div class="ph-value">3</div></div>
+        <div class="phase-content"><div class="pc-title">🔄 Gradual Workload Migration</div><div class="pc-body">Over months/years, workloads shift to Intune — compliance policies, Windows Update, endpoint security, resource access policies. SCCM still handles OS deployment, software distribution, hardware inventory.</div></div>
+      </div>
+      <div class="phase-row">
+        <div class="phase-num"><div class="ph-label">Stage</div><div class="ph-value">4</div></div>
+        <div class="phase-content"><div class="pc-title">☁️ Intune-Primary (Target)</div><div class="pc-body">Most workloads in Intune. SCCM retained only for complex scenarios it does uniquely well (OSD, BIOS management, certain app deployments). New devices provisioned via Autopilot directly into Intune-only management.</div></div>
+      </div>
+    </div>
+
+    <div class="ib ibp">
+      <div class="bt">💡 SCCM Is Now Called MECM</div>
+      <p>System Center Configuration Manager (SCCM) was rebranded to <strong>Microsoft Endpoint Configuration Manager (MECM)</strong> in 2019 as part of the "Microsoft Endpoint Manager" umbrella. In conversations and interviews, both names are used interchangeably. Microsoft documentation uses MECM; most real-world IT shops still say "SCCM." Know both names — they mean the same product.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 86</div>
+      <div class="qa"><div class="qq">What is Co-Management in Intune and why is it important for enterprises?</div>
+      <div class="qans">Co-Management allows a Windows device to be simultaneously managed by both SCCM (on-premises) and Microsoft Intune (cloud). It's important for enterprises because it enables a risk-free, gradual cloud migration — you can move individual management workloads from SCCM to Intune one at a time without a big-bang migration. It also unlocks cloud capabilities like Conditional Access and remote device management for existing on-premises devices without requiring a complete re-enrollment or infrastructure change.</div></div>
+      <div class="qa"><div class="qq">What is a workload in the context of Co-Management?</div>
+      <div class="qans">A workload is a specific management function — like compliance policies, Windows Update management, or endpoint security configuration. In Co-Management, each workload can be independently assigned to either SCCM or Intune. Moving a workload to Intune means Intune takes over responsibility for that function while SCCM continues managing all other workloads it still owns. This granular control is what makes Co-Management a safe migration path.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T87 -->
+  <section class="ts" id="t87">
+    <div class="th"><div class="tnum">TOPIC 87</div>
+      <div><div class="ttl">Co-Management Prerequisites</div>
+      <div class="tsub">Everything that must be in place before enabling Co-Management</div></div>
+    </div>
+
+    <div class="sh">Infrastructure Prerequisites</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Requirement</th><th>Minimum Version / Detail</th><th>Why Required</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SCCM / MECM Version</strong></td><td>MECM version 1710 or later (2006+ strongly recommended)</td><td>Co-management feature was introduced in 1710. Newer versions have improved co-management health reporting, workload options, and stability.</td></tr>
+          <tr><td><strong>Windows Version</strong></td><td>Windows 10 version 1709 or later; Windows 11 (any version)</td><td>Co-management MDM enrollment requires Windows 10 1709+. Earlier versions can't use the automatic MDM enrollment triggered by SCCM.</td></tr>
+          <tr><td><strong>Azure AD Connect</strong></td><td>Any supported version, syncing device objects</td><td>Required to sync device computer accounts from on-premises AD to Azure AD — enabling Hybrid Azure AD Join which is prerequisite for co-management enrollment.</td></tr>
+          <tr><td><strong>Azure AD Tenant</strong></td><td>Azure AD Premium P1 (for dynamic groups and CA)</td><td>Devices need Azure AD identity for Conditional Access integration. P1 enables dynamic groups for targeting co-managed devices.</td></tr>
+          <tr><td><strong>Intune License</strong></td><td>Included in M365 E3/E5, EMS E3/E5, or standalone Intune</td><td>Co-managed devices consume Intune licenses for workloads managed by Intune.</td></tr>
+          <tr><td><strong>Hybrid Azure AD Join</strong></td><td>Configured and working — devices must appear in Azure AD</td><td>Co-management requires devices to be in both on-premises AD AND Azure AD. HAADJ is the mechanism that achieves this for existing domain-joined devices.</td></tr>
+          <tr><td><strong>SCCM CMG or Intranet</strong></td><td>Cloud Management Gateway (optional but recommended)</td><td>CMG allows internet-based SCCM management for remote devices. Without CMG, co-managed devices only connect to SCCM when on corporate network or VPN.</td></tr>
+          <tr><td><strong>MDM Authority</strong></td><td>Set to Intune (or co-management)</td><td>Intune must be the MDM authority for co-management to work. If SCCM was previously the MDM authority, this must be changed.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Network Requirements</div>
+    <ul class="bl">
+      <li><strong>Windows 10/11 devices must reach Intune endpoints:</strong> manage.microsoft.com, *.manage.microsoft.com, device.login.microsoftonline.com</li>
+      <li><strong>Devices must reach Azure AD:</strong> login.microsoftonline.com, enterpriseregistration.windows.net</li>
+      <li><strong>SCCM management point must be reachable:</strong> Either directly on intranet, or via Cloud Management Gateway (CMG) for internet-based clients</li>
+      <li><strong>Windows Update endpoints:</strong> If shifting Windows Update workload to Intune/WUfB, devices need direct Windows Update access (not WSUS-only)</li>
+    </ul>
+
+    <div class="sh">Checking Readiness — The SCCM Co-Management Dashboard</div>
+    <p>SCCM has a built-in <strong>Co-management Dashboard</strong> (SCCM Console → Monitoring → Co-management) that shows:</p>
+    <ul class="bl">
+      <li>How many devices are co-management eligible (Hybrid AADJ + correct Windows version)</li>
+      <li>How many are currently co-managed</li>
+      <li>Current workload assignments per workload</li>
+      <li>Client health status for co-managed devices</li>
+    </ul>
+
+    <div class="ib iby">
+      <div class="bt">⚠️ Hybrid Azure AD Join — The Most Common Blocker</div>
+      <p>The single most common blocker for co-management enablement is Hybrid Azure AD Join not working correctly. Devices may show as domain-joined in on-premises AD but NOT appear in Azure AD. Common causes: Azure AD Connect not syncing device objects (check device sync settings in Azure AD Connect), stale computer accounts in on-premises AD, time sync issues (devices more than 5 minutes out of sync will fail HAADJ), or proxy blocking the device's registration requests to Azure AD.<br/><br/>
+      <strong>Verify HAADJ:</strong> On any domain-joined PC, run <code>dsregcmd /status</code> — look for AzureAdJoined: YES AND DomainJoined: YES. Both must be YES for co-management to work.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 87</div>
+      <div class="qa"><div class="qq">What is the minimum SCCM/MECM version required for Co-Management and why?</div>
+      <div class="qans">MECM version 1710 introduced Co-Management support. However, version 2006 or later is strongly recommended as it includes significant improvements to co-management health reporting, the Co-management Dashboard, additional workload options, and better stability. Running an older version risks hitting bugs that are fixed in current branch, and Microsoft only supports current branch releases within a certain time window.</div></div>
+      <div class="qa"><div class="qq">What is Hybrid Azure AD Join and why is it required for Co-Management?</div>
+      <div class="qans">Hybrid Azure AD Join is the state where a device is joined to both on-premises Active Directory AND registered in Azure AD simultaneously. It's required for Co-Management because Intune needs an Azure AD identity to manage the device — without it, Intune has no way to identify or communicate with the device. Azure AD Connect syncs the device's computer account from on-prem AD to Azure AD, and the device runs an auto-registration task that completes the hybrid join. Co-Management uses this Azure AD identity to enroll the device in Intune MDM alongside SCCM.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T88 -->
+  <section class="ts" id="t88">
+    <div class="th"><div class="tnum">TOPIC 88</div>
+      <div><div class="ttl">Enabling Co-Management — Step by Step</div>
+      <div class="tsub">The exact configuration process from SCCM to co-managed devices</div></div>
+    </div>
+
+    <div class="sh">The Two Enrollment Paths</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🤖</div>
+        <div class="ctit">Path 1: Auto-Enrollment via SCCM</div>
+        <div class="cbod">SCCM triggers Intune MDM enrollment on domain-joined devices automatically. No user interaction. Best for bulk enrollment of existing SCCM-managed fleet. SCCM deploys an enrollment task that silently registers devices in Intune.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔗</div>
+        <div class="ctit">Path 2: Azure AD Join (New Devices)</div>
+        <div class="cbod">New devices are Azure AD Joined (pure cloud) and enrolled in Intune via Autopilot. SCCM manages them via CMG. Used for new device provisioning strategy — gradually moving away from hybrid join as old devices age out.</div>
+      </div>
+    </div>
+
+    <div class="sh">Path 1 — Enabling Co-Management from SCCM</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Verify prerequisites:</strong> Confirm HAADJ is working (dsregcmd /status on sample devices). Confirm Intune license assigned. Confirm MDM authority = Intune in Azure AD.</div></li>
+      <li><div class="sn">2</div><div><strong>In SCCM Console:</strong> Go to <strong>Administration → Cloud Services → Co-management</strong> → Click <strong>Configure co-management</strong>.</div></li>
+      <li><div class="sn">3</div><div><strong>Sign into Azure AD:</strong> The wizard prompts you to authenticate with your Azure AD Global Admin or Intune Admin credentials. This links SCCM to your Intune tenant.</div></li>
+      <li><div class="sn">4</div><div><strong>Configure automatic enrollment:</strong>
+        <ul class="bl" style="margin-top:6px;">
+          <li><strong>Pilot:</strong> SCCM enrolls only devices in a specific SCCM Collection into Intune. Start here.</li>
+          <li><strong>All:</strong> SCCM enrolls ALL eligible devices into Intune. Use after pilot validation.</li>
+        </ul>
+      </div></li>
+      <li><div class="sn">5</div><div><strong>Select the Pilot collection:</strong> Choose an SCCM Device Collection containing your pilot devices (e.g., "IT Team Laptops" or "Co-Mgmt Pilot"). These devices will be automatically enrolled in Intune.</div></li>
+      <li><div class="sn">6</div><div><strong>Configure workload assignments:</strong> For each workload, choose whether it's managed by SCCM, Intune, or a Pilot collection. Keep all workloads in SCCM initially.</div></li>
+      <li><div class="sn">7</div><div><strong>Complete the wizard.</strong> SCCM deploys a policy to pilot collection devices. The SCCM client on each device triggers Windows MDM auto-enrollment into Intune via the device's Azure AD identity.</div></li>
+      <li><div class="sn">8</div><div><strong>Verify enrollment:</strong> In Intune portal → Devices → All Devices → filter by "Co-managed" enrollment type. Pilot devices should appear within 15–60 minutes. In SCCM dashboard → Co-management → confirm devices show as co-managed.</div></li>
+    </ol>
+
+    <div class="sh">What SCCM Does Behind the Scenes</div>
+    <p>When SCCM triggers co-management enrollment, it uses a special MDM enrollment mechanism built into the Windows 10/11 MDM client. SCCM sends a client policy instructing Windows to enroll in Intune using the device's existing Hybrid Azure AD Join token — no user credentials needed, completely silent.</p>
+    <div class="code">
+<span class="cm"># Registry key SCCM sets to trigger MDM enrollment:</span>
+<span class="hl">HKLM\SOFTWARE\Microsoft\CCM\CoManagement</span>
+<span class="vl">CoManagementFlags</span> = <span class="st">1</span> <span class="cm">(co-management enabled)</span>
+<span class="vl">AutoEnrollEnabled</span> = <span class="st">1</span> <span class="cm">(auto-enroll in Intune)</span>
+
+<span class="cm"># Verify co-management status on a device:</span>
+<span class="cm"># Open SCCM client (Control Panel → Configuration Manager)</span>
+<span class="cm"># Or run PowerShell:</span>
+(Get-WmiObject -Namespace root\ccm -Class SMS_Client).CoManagementState
+<span class="cm"># Returns: 1 = co-managed, 0 = SCCM only, 97 = transitioning</span>
+
+<span class="cm"># Verify from Intune portal:</span>
+<span class="cm"># Device → Properties → Enrollment type: Co-managed</span>
+    </div>
+
+    <div class="sh">The Cloud Management Gateway (CMG)</div>
+    <p>Without CMG, SCCM can only manage devices connected to the corporate network (or VPN). <strong>Cloud Management Gateway</strong> is a cloud-based service that extends SCCM management to internet-connected devices — acting as an HTTPS proxy between internet clients and the SCCM on-premises infrastructure.</p>
+    <ul class="bl">
+      <li><strong>Required for:</strong> Co-managing devices that are often off the corporate network (remote workers, laptop users)</li>
+      <li><strong>CMG runs in Azure:</strong> It's an Azure VM deployed from the SCCM console. SCCM clients use it to communicate with SCCM over the internet.</li>
+      <li><strong>Cost:</strong> Azure VM + outbound data transfer costs. Size the CMG VM appropriately for your client count.</li>
+      <li><strong>Alternative:</strong> Without CMG, co-managed remote devices only check in with SCCM when on VPN — Intune handles them the rest of the time.</li>
+    </ul>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 88</div>
+      <div class="qa"><div class="qq">How does SCCM enroll existing domain-joined devices into Intune for Co-Management?</div>
+      <div class="qans">SCCM uses the Windows MDM auto-enrollment mechanism triggered by the SCCM client. When the co-management policy reaches a device, SCCM sets registry keys that instruct Windows to enroll in Intune using the device's Hybrid Azure AD Join token — completely silently, without user interaction. The enrollment uses the device identity in Azure AD (established by HAADJ) to authenticate with Intune. The device then appears in both SCCM (as always) and Intune (new) simultaneously.</div></div>
+      <div class="qa"><div class="qq">What is Cloud Management Gateway (CMG) and why is it needed for Co-Management?</div>
+      <div class="qans">CMG is a cloud-hosted service (Azure VM deployed from the SCCM console) that allows internet-based SCCM clients to communicate with the on-premises SCCM hierarchy without VPN. Without CMG, SCCM can only manage devices on the corporate network or connected via VPN — remote workers are effectively SCCM-dark. For co-management with a remote workforce, CMG ensures SCCM continues managing its workloads for off-network devices while Intune manages its workloads from the cloud. Without CMG, remote device management falls entirely to Intune.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T89 -->
+  <section class="ts" id="t89">
+    <div class="th"><div class="tnum">TOPIC 89</div>
+      <div><div class="ttl">Workload Switching — Which Workloads to Move to Intune</div>
+      <div class="tsub">The most important co-management decision — what moves first and why</div></div>
+    </div>
+
+    <div class="sh">The Eight Co-Management Workloads</div>
+    <p>Co-Management has <strong>8 configurable workloads</strong>. Each can be independently set to <strong>SCCM</strong>, <strong>Intune</strong>, or a <strong>Pilot collection</strong> (a subset of devices). This granular control is what makes co-management safe — you don't have to move everything at once.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Workload</th><th>What It Controls</th><th>SCCM Strength</th><th>Intune Advantage</th><th>When to Switch</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Compliance Policies</strong></td>
+            <td>Device compliance evaluation (BitLocker, OS version, AV etc.)</td>
+            <td>SCCM compliance settings (DCM)</td>
+            <td>Required for Conditional Access integration — only Intune compliance feeds Azure AD CA</td>
+            <td><span class="tag tg">Move First</span> — Most impactful. CA requires Intune compliance. Low risk to switch.</td>
+          </tr>
+          <tr>
+            <td><strong>Device Configuration</strong></td>
+            <td>Configuration profiles (Wi-Fi, VPN, certificates, device restrictions)</td>
+            <td>SCCM Configuration Items and Baselines</td>
+            <td>Cloud delivery, mobile device support, Settings Catalog</td>
+            <td><span class="tag ty">Move Second</span> — After compliance. Test thoroughly — many orgs have complex config items.</td>
+          </tr>
+          <tr>
+            <td><strong>Endpoint Protection</strong></td>
+            <td>Defender AV, Firewall, BitLocker, ASR, Windows Defender ATP</td>
+            <td>SCCM Endpoint Protection policies</td>
+            <td>MDE integration, Tamper Protection, modern security features, Endpoint Security node</td>
+            <td><span class="tag tg">Move Early</span> — Intune Endpoint Security is superior. Unlocks MDE integration.</td>
+          </tr>
+          <tr>
+            <td><strong>Resource Access Policies</strong></td>
+            <td>Wi-Fi, VPN, Email, Certificate profiles</td>
+            <td>SCCM SCEP certificates, VPN profiles</td>
+            <td>Cloud PKI, modern certificate management, per-app VPN</td>
+            <td><span class="tag ty">Move When Ready</span> — Requires validating certificates work via Intune before cutting over.</td>
+          </tr>
+          <tr>
+            <td><strong>Client Apps</strong></td>
+            <td>Application deployment to Windows devices</td>
+            <td>SCCM is superior — complex deployment types, content delivery, BranchCache, peer cache</td>
+            <td>Win32 apps, Store apps, simpler deployment</td>
+            <td><span class="tag to">Move Later</span> — SCCM app deployment is powerful. Only move if migrating fully to cloud.</td>
+          </tr>
+          <tr>
+            <td><strong>Office Click-to-Run Apps</strong></td>
+            <td>Microsoft 365 Apps (Office) updates and version management</td>
+            <td>SCCM manages M365 Apps servicing via ODT</td>
+            <td>Intune M365 Apps deployment type, Autopatch for updates</td>
+            <td><span class="tag ty">Move When M365 Ready</span> — Switch if moving to Autopatch for M365 Apps updates.</td>
+          </tr>
+          <tr>
+            <td><strong>Windows Update Policies</strong></td>
+            <td>Windows Update management (quality + feature updates, deferral)</td>
+            <td>SCCM Software Update Management, WSUS integration</td>
+            <td>Windows Update for Business, Windows Autopatch, no WSUS needed</td>
+            <td><span class="tag ty">Move When Infrastructure Ready</span> — Requires devices to reach Windows Update directly (no WSUS dependency).</td>
+          </tr>
+          <tr>
+            <td><strong>Endpoint Analytics</strong></td>
+            <td>Device health, boot performance, reliability scoring</td>
+            <td>SCCM reporting and hardware inventory</td>
+            <td>Intune Endpoint Analytics provides cloud-native insights, proactive recommendations</td>
+            <td><span class="tag tg">Move Early</span> — Low risk. Intune analytics are more modern. No user impact.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">The Recommended Workload Migration Order</div>
+    <div class="cg">
+      <div class="card" style="border-color:rgba(52,211,153,.3);">
+        <div class="cico">🥇</div>
+        <div class="ctit">Phase 1 — Quick Wins (Low Risk)</div>
+        <div class="cbod"><strong>Compliance Policies</strong> — Essential for Conditional Access. Move this first — critical business value, low complexity.<br/><strong>Endpoint Protection</strong> — Intune's security stack is superior. Unlocks MDE integration and Tamper Protection.<br/><strong>Endpoint Analytics</strong> — Zero user impact. Better insights immediately.</div>
+      </div>
+      <div class="card" style="border-color:rgba(251,191,36,.3);">
+        <div class="cico">🥈</div>
+        <div class="ctit">Phase 2 — Configuration (Test Carefully)</div>
+        <div class="cbod"><strong>Device Configuration</strong> — Migrate config items to Intune profiles. Validate each policy in pilot before broad rollout.<br/><strong>Resource Access</strong> — Certificate, Wi-Fi, VPN. Test thoroughly — certificate misconfiguration can break Wi-Fi for entire fleet.</div>
+      </div>
+      <div class="card" style="border-color:rgba(251,146,60,.3);">
+        <div class="cico">🥉</div>
+        <div class="ctit">Phase 3 — Updates (Infrastructure Prep)</div>
+        <div class="cbod"><strong>Windows Update Policies</strong> — Remove WSUS dependency first. Test WUfB or Autopatch in pilot.<br/><strong>Office Click-to-Run</strong> — Move when ready to align with Autopatch strategy.</div>
+      </div>
+      <div class="card" style="border-color:rgba(248,113,113,.3);">
+        <div class="cico">🏁</div>
+        <div class="ctit">Phase 4 — Apps (Last or Never)</div>
+        <div class="cbod"><strong>Client Apps</strong> — Many organizations keep this in SCCM permanently. SCCM app deployment is mature, handles complex scenarios, has BranchCache for bandwidth management. Only move if going fully cloud-native.</div>
+      </div>
+    </div>
+
+    <div class="sh">Switching a Workload — The Mechanics</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>In SCCM Console:</strong> Administration → Cloud Services → Co-management → Properties → Workloads tab</div></li>
+      <li><div class="sn">2</div><div>Find the workload to switch (e.g., Compliance Policies). Slider has three positions: <strong>Configuration Manager</strong> | <strong>Pilot Intune</strong> | <strong>Intune</strong></div></li>
+      <li><div class="sn">3</div><div>Move the slider to <strong>Pilot Intune</strong> → Select a small pilot SCCM Collection (e.g., IT team). Only devices in that collection switch to Intune for this workload.</div></li>
+      <li><div class="sn">4</div><div>Validate over 2–4 weeks. Verify Intune policies are applying correctly. Test that no functionality was lost. Confirm compliance status in Azure AD.</div></li>
+      <li><div class="sn">5</div><div>When confident: move slider to <strong>Intune</strong> — ALL co-managed devices now use Intune for this workload. SCCM stops managing it.</div></li>
+    </ol>
+
+    <div class="ib ibr">
+      <div class="bt">🚨 Never Move the Same Workload to Both</div>
+      <p>When a workload is set to Intune, SCCM automatically <strong>stops</strong> managing that workload on co-managed devices. Do NOT configure the same settings in both SCCM and Intune simultaneously — you'll get conflicts and unpredictable behavior. Before switching a workload to Intune, ensure you have equivalent Intune policies ready and validated. The moment you switch the slider, SCCM withdraws its policies for that workload on targeted devices.</p>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔄</div><div class="rwl">Real-World Workload Migration Example</div></div>
+      <p><strong>Company:</strong> 3,000-device enterprise bank. SCCM-managed for 8 years. Co-management enabled 6 months ago with all workloads in SCCM. Now ready to start moving workloads.<br/>
+      <strong>Month 1:</strong> Move Compliance Policies to Intune (Pilot: 50 IT devices first, then all). Immediately unlocks Conditional Access — devices must be Intune-compliant to access Exchange Online. BitLocker requirement added. 200 devices fail compliance (BitLocker off) — automatically blocked from Exchange until fixed. Security team is happy.<br/>
+      <strong>Month 2:</strong> Move Endpoint Protection to Intune. Deploy MDE via Intune EDR policy. Tamper Protection enabled. SCCM Endpoint Protection policies withdrawn automatically.<br/>
+      <strong>Month 3–4:</strong> Move Device Configuration. Test Wi-Fi and VPN certificates via Intune SCEP. Pilot validation takes 3 weeks (complex certificate chain). Broad rollout in month 4.<br/>
+      <strong>Month 6–12:</strong> Windows Update to Intune/Autopatch. Client Apps stay in SCCM — too complex to migrate, SCCM's app model is better for their environment.<br/>
+      <strong>Outcome:</strong> Hybrid model. Intune manages security and compliance. SCCM manages apps and OS deployment. Best of both worlds.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 89</div>
+      <div class="qa"><div class="qq">Which Co-Management workload should typically be moved to Intune first and why?</div>
+      <div class="qans">Compliance Policies. This is typically the first workload to move because it has the highest immediate business value (Conditional Access requires Intune compliance to work — SCCM compliance doesn't feed Azure AD), the lowest risk (compliance policies evaluate rather than change device settings, so if something is misconfigured, devices show non-compliant but nothing breaks functionally), and it unlocks security controls that depend on Azure AD knowing device health status.</div></div>
+      <div class="qa"><div class="qq">Why do many organizations keep the Client Apps workload in SCCM even after heavily using Intune?</div>
+      <div class="qans">SCCM's application deployment capabilities are mature and powerful — it handles complex deployment types, bandwidth management via BranchCache and peer cache, complex dependency trees, task sequences, and application supersedence at a scale and complexity that Intune Win32 apps can't always match. SCCM can deploy multi-gigabyte software packages efficiently across slow WAN links. Many organizations find that SCCM app deployment works so well that there's no compelling reason to migrate it, especially since co-management allows keeping this workload in SCCM indefinitely while moving all other workloads to Intune.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T90 -->
+  <section class="ts" id="t90">
+    <div class="th"><div class="tnum">TOPIC 90</div>
+      <div><div class="ttl">Pilot Collections &amp; Gradual Migration</div>
+      <div class="tsub">How to de-risk co-management rollout using SCCM collections as a safety net</div></div>
+    </div>
+
+    <div class="sh">Why Pilot Collections Are Essential</div>
+    <p>Every workload migration carries risk. Even well-tested Intune policies can behave differently on a specific hardware model, driver version, or line-of-business app combination. <strong>Pilot collections</strong> are the risk mitigation mechanism — you test each workload on a small, representative set of devices before rolling out to thousands.</p>
+
+    <div class="sh">Building Your Pilot Collection Strategy</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🧪</div>
+        <div class="ctit">Phase 0 — Smoke Test (5–10 devices)</div>
+        <div class="cbod">IT team's own laptops. The smallest, safest starting point. If something breaks, IT handles it themselves without impacting end users. Validates basic co-management enrollment and Intune communication are working.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔬</div>
+        <div class="ctit">Phase 1 — IT Pilot (50–100 devices)</div>
+        <div class="cbod">Wider IT department + tech-savvy volunteers. Diverse hardware and software coverage. People who can self-troubleshoot. Run each new workload at this stage for 2–4 weeks before expanding.</div>
+      </div>
+      <div class="card">
+        <div class="cico">👥</div>
+        <div class="ctit">Phase 2 — Business Pilot (5–10% of fleet)</div>
+        <div class="cbod">Representative sample of the real user population. Different departments, hardware models, job functions. Covers more edge cases. Run for 2–4 weeks. Confirms no business-critical app or workflow is affected.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🌐</div>
+        <div class="ctit">Phase 3 — Broad Rollout (All Devices)</div>
+        <div class="cbod">Full fleet switch. Only after Phase 2 validates no issues. Have a rollback plan ready (sliding the workload back to SCCM is a one-click operation).</div>
+      </div>
+    </div>
+
+    <div class="sh">Creating SCCM Collections for Pilot Phases</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>In SCCM Console:</strong> Assets and Compliance → Device Collections → Create Device Collection</div></li>
+      <li><div class="sn">2</div><div>Name: "Co-Mgmt Pilot Phase 1 — IT Team" → Limiting Collection: All Windows 10/11 Clients</div></li>
+      <li><div class="sn">3</div><div>Add membership rule: <strong>Direct rule</strong> → Manually add specific device names (IT team laptops). Or <strong>Query rule</strong> → e.g., "SELECT * FROM SMS_R_System WHERE SMS_R_System.Name LIKE 'IT-%'"</div></li>
+      <li><div class="sn">4</div><div>For Phase 2: Create a new collection with a percentage-based or department-based query rule, or use an existing SCCM collection (e.g., "Finance Department Laptops")</div></li>
+      <li><div class="sn">5</div><div>In Co-management wizard → Workloads tab → Set each workload to <strong>Pilot Intune</strong> → Select the Phase 1 collection as the pilot collection</div></li>
+    </ol>
+
+    <div class="sh">The Pilot Validation Checklist</div>
+    <p>For each workload switch, validate these before expanding to broad rollout:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Workload</th><th>Validation Points</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Compliance Policies</strong></td><td>Pilot devices appear in Intune compliance reports. Azure AD shows device as compliant. Conditional Access works — can access Exchange while compliant, blocked when non-compliant.</td></tr>
+          <tr><td><strong>Endpoint Protection</strong></td><td>Defender AV policies applied (check Windows Security app settings). Tamper Protection active. MDE devices appear in security.microsoft.com portal. No conflict with previous SCCM AV policy.</td></tr>
+          <tr><td><strong>Device Configuration</strong></td><td>All migrated config items have Intune equivalent deployed. Test Wi-Fi, VPN, certificates on pilot devices. Verify no settings reverted to defaults after SCCM config items were removed.</td></tr>
+          <tr><td><strong>Windows Update Policies</strong></td><td>Pilot devices getting updates from Windows Update (not WSUS). Check Windows Update history. WUfB deferral settings applied. Devices not stuck on old updates.</td></tr>
+          <tr><td><strong>Client Apps</strong></td><td>Required apps still installed after switch. New app deployments from Intune installing correctly. No apps broken by SCCM management withdrawal. Check IME log on pilot devices.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Rollback — The Safety Net</div>
+    <p>If a workload switch causes issues in the pilot, rollback is a single slider move:</p>
+    <ul class="bl">
+      <li><strong>In SCCM Console:</strong> Co-management Properties → Workloads → Move slider back to "Configuration Manager"</li>
+      <li><strong>What happens:</strong> SCCM immediately re-asserts management of that workload. SCCM policies for that workload are re-deployed to devices within the next client policy cycle (default 60 minutes).</li>
+      <li><strong>Intune policies:</strong> The Intune policies for that workload don't automatically delete — you need to manually remove or unassign the Intune policies if you're rolling back permanently.</li>
+    </ul>
+
+    <div class="tip">
+      <div class="tpic">💡</div>
+      <div><strong>Communication is Critical:</strong> Before each pilot phase expansion, inform the pilot group's users and their managers. Explain what's changing, what they might notice (if anything), and who to contact if issues arise. Even if the change is invisible to end users (compliance policies, AV settings), a heads-up email builds trust and ensures you have a feedback channel if something does go wrong that IT hasn't noticed yet.</div>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 90</div>
+      <div class="qa"><div class="qq">Why use pilot collections in Co-Management instead of switching all devices at once?</div>
+      <div class="qans">Pilot collections allow testing each workload on a small, controlled device set before rolling out to the entire fleet. Even thoroughly tested Intune policies can interact unexpectedly with specific hardware models, driver versions, or line-of-business applications in the real environment. By validating on 50 IT team devices first, then 5% of the production fleet, you catch issues affecting only a small number of users rather than discovering a critical bug on 5,000 devices simultaneously. Rollback from a pilot issue is simple; rollback from a broken fleet-wide switch is complex.</div></div>
+      <div class="qa"><div class="qq">If a Co-Management workload switch causes problems in the pilot, how do you roll back?</div>
+      <div class="qans">In the SCCM console, go to Administration → Cloud Services → Co-management → Properties → Workloads tab. Move the affected workload's slider back to "Configuration Manager." SCCM re-asserts its policies for that workload and re-deploys them to devices within the next client policy interval (default 60 minutes). Note that the Intune policies for that workload remain in Intune — you need to manually remove their assignments from co-managed device groups to prevent them from conflicting while SCCM has regained management authority.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T91 -->
+  <section class="ts" id="t91">
+    <div class="th"><div class="tnum">TOPIC 91</div>
+      <div><div class="ttl">Troubleshooting Co-Management Issues</div>
+      <div class="tsub">Diagnosing the most common co-management failures and how to fix them</div></div>
+    </div>
+
+    <div class="sh">The Troubleshooting Mindset for Co-Management</div>
+    <p>Co-management failures are complex because the issue could be in <strong>any of four layers</strong>: SCCM, Azure AD/HAADJ, Intune enrollment, or workload configuration. Always identify which layer is failing before jumping to solutions. The diagnostic tools span all four layers.</p>
+
+    <div class="sh">Common Co-Management Issues &amp; Fixes</div>
+
+    <div class="ts-card">
+      <div class="ts-title">❌ Device Not Showing as Co-Managed in Intune or SCCM Dashboard</div>
+      <div class="ts-cause"><strong>Possible Causes:</strong> HAADJ not working (device not in Azure AD), SCCM co-management policy not reaching the device, Intune license not assigned, MDM auto-enrollment blocked by Azure AD MDM scope settings.</div>
+      <div class="ts-fix"><strong>Diagnostic steps:</strong><br/>
+      1. Run <code>dsregcmd /status</code> on the device → AzureAdJoined must be YES AND DomainJoined must be YES<br/>
+      2. If AzureAdJoined is NO → HAADJ is broken. Check Azure AD Connect device sync. Check AADTroubleShooter on the device.<br/>
+      3. Check SCCM client logs: <code>C:\Windows\CCM\Logs\CoManagementHandler.log</code> — shows co-management enrollment attempts and errors<br/>
+      4. Verify user has Intune license assigned in Azure AD<br/>
+      5. Verify MDM User Scope in Azure AD Mobility settings includes the device's user</div>
+    </div>
+
+    <div class="ts-card">
+      <div class="ts-title">❌ Co-Managed Device Shows Wrong Workload Authority</div>
+      <div class="ts-cause"><strong>Problem:</strong> Compliance workload was moved to Intune but device still shows SCCM compliance policies applying. Or vice versa — policy from the "wrong" manager applying to a device.</div>
+      <div class="ts-fix"><strong>Fix:</strong><br/>
+      1. Verify the co-management workload slider setting in SCCM — check which collection the device belongs to and confirm it's assigned to the expected pilot or full workload setting<br/>
+      2. Trigger a SCCM client policy refresh: Right-click device in SCCM → Run Script → "Trigger Machine Policy Retrieval" or run <code>Invoke-WmiMethod -Namespace root\ccm -Class SMS_Client -Name TriggerSchedule -ArgumentList "{00000000-0000-0000-0000-000000000021}"</code><br/>
+      3. In Intune, trigger device sync. Check the device's configuration profiles — workload-related profiles should be applying<br/>
+      4. Check <code>CoManagementHandler.log</code> on the device for workload switching events</div>
+    </div>
+
+    <div class="ts-card">
+      <div class="ts-title">❌ Hybrid Azure AD Join Failing (HAADJ Broken)</div>
+      <div class="ts-cause"><strong>Most common co-management blocker.</strong> Device has AzureAdJoined: NO in dsregcmd. Computer accounts in Azure AD are missing or stale.</div>
+      <div class="ts-fix"><strong>Fix process:</strong><br/>
+      1. Check Azure AD Connect sync: in Azure AD Connect health or Azure AD portal → Devices — is this device's computer account synced?<br/>
+      2. Enable device sync in Azure AD Connect if not configured: Azure AD Connect → Device options → Configure Hybrid Azure AD join<br/>
+      3. Check <code>C:\Windows\System32\winevt\Logs\Microsoft-Windows-AAD%4Operational.evtx</code> for HAADJ registration errors<br/>
+      4. Run AAD Troubleshooter: <code>dsregcmd /debug /status</code> for verbose output<br/>
+      5. Verify device time sync — time skew >5 minutes from domain controller will fail HAADJ<br/>
+      6. Check proxy — if corporate proxy blocks *.microsoftonline.com, HAADJ registration will fail silently</div>
+    </div>
+
+    <div class="ts-card">
+      <div class="ts-title">❌ Intune Policies Not Applying After Workload Switch</div>
+      <div class="ts-cause"><strong>Problem:</strong> Moved compliance workload to Intune. Device is co-managed. But Intune compliance policy shows "Not applicable" or "Pending" on the device.</div>
+      <div class="ts-fix"><strong>Fix:</strong><br/>
+      1. Verify the device appears in Intune → All Devices → Enrolled as "Co-managed"<br/>
+      2. Check if the device is in the Azure AD group that the Intune policy is assigned to<br/>
+      3. Check for dynamic group membership delay (up to 24 hours for dynamic groups)<br/>
+      4. Trigger a manual Intune sync: Settings → Access work or school → Info → Sync<br/>
+      5. Check MDMDiagReport on the device: run <code>MDMDiagnosticsTool.exe -out C:\Temp\MDM</code> and review the HTML report for policy delivery errors<br/>
+      6. Verify no conflicting SCCM policies still assigned to this device for the same workload</div>
+    </div>
+
+    <div class="ts-card">
+      <div class="ts-title">❌ Device Shows "Not Ready" in Co-Management Dashboard</div>
+      <div class="ts-cause"><strong>Problem:</strong> SCCM shows the device as eligible for co-management but it's not enrolled. Common causes: SCCM client not healthy, auto-enrollment blocked, Azure AD token issue.</div>
+      <div class="ts-fix"><strong>Fix:</strong><br/>
+      1. Check SCCM client health: Monitoring → Client Status → Verify device is active and healthy<br/>
+      2. Check <code>CoManagementHandler.log</code> for specific error messages<br/>
+      3. Manually trigger enrollment: On the device, run SCCM client repair or force a policy evaluation<br/>
+      4. Check Event Viewer on device: Applications and Services → Microsoft → Windows → DeviceManagement-Enterprise-Diagnostics-Provider → look for enrollment errors<br/>
+      5. Run <code>MDMDiagnosticsTool.exe</code> to capture full enrollment state<br/>
+      6. Verify the device's Azure AD device object is not disabled or stale — check in Azure AD portal</div>
+    </div>
+
+    <div class="sh">Key Log Files for Co-Management Troubleshooting</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Log File</th><th>Location</th><th>What It Shows</th></tr></thead>
+        <tbody>
+          <tr><td><code>CoManagementHandler.log</code></td><td><code>C:\Windows\CCM\Logs\</code></td><td>SCCM's co-management enrollment actions, workload switches, enrollment status and errors. Primary SCCM co-management log.</td></tr>
+          <tr><td><code>ComanagementStateReport.log</code></td><td><code>C:\Windows\CCM\Logs\</code></td><td>Periodic reporting of co-management state from device to SCCM. Shows what SCCM thinks the device's co-management status is.</td></tr>
+          <tr><td><code>ADALOperationProvider.log</code></td><td><code>C:\Windows\CCM\Logs\</code></td><td>Azure AD authentication operations by SCCM client — token acquisition for Azure AD/Intune enrollment. Token errors appear here.</td></tr>
+          <tr><td><code>MDMEnrollment.log</code></td><td><code>C:\Windows\SysWOW64\CCM\Logs\</code></td><td>MDM enrollment attempts initiated by SCCM. Shows enrollment request, Azure AD auth result, and Intune response.</td></tr>
+          <tr><td>MDMDiagReport.html</td><td>Run: <code>MDMDiagnosticsTool.exe -out C:\Temp</code></td><td>Full Intune MDM state — applied policies, enrollment state, error codes. View in browser.</td></tr>
+          <tr><td>AAD Event Log</td><td>Event Viewer → AAD%4Operational.evtx</td><td>Azure AD Join / HAADJ events — registration success/failure, token errors.</td></tr>
+          <tr><td>DeviceManagement Event Log</td><td>Event Viewer → DeviceManagement-Enterprise-Diagnostics-Provider</td><td>Windows MDM enrollment events — what Windows MDM client is doing during enrollment.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Quick Diagnostic Commands</div>
+    <div class="code">
+<span class="cm"># 1. Check Hybrid Azure AD Join + MDM enrollment state</span>
+dsregcmd /status
+<span class="cm"># Key fields: AzureAdJoined, DomainJoined, MDMUrl, WorkplaceJoined</span>
+<span class="cm"># For co-management: AzureAdJoined=YES, DomainJoined=YES, MDMUrl should show Intune</span>
+
+<span class="cm"># 2. Check co-management state via WMI</span>
+(Get-WmiObject -Namespace <span class="st">root\ccm</span> -Class <span class="hl">SMS_Client</span>).CoManagementState
+<span class="cm"># 1=co-managed, 0=SCCM only, 97=enrolling, 98=error</span>
+
+<span class="cm"># 3. Force SCCM policy download (triggers co-management enrollment check)</span>
+Invoke-WmiMethod -Namespace <span class="st">root\ccm</span> -Class <span class="hl">SMS_Client</span> -Name TriggerSchedule `
+  -ArgumentList <span class="st">"{00000000-0000-0000-0000-000000000021}"</span>
+<span class="cm"># Schedule ID 21 = Machine Policy Retrieval and Evaluation Cycle</span>
+
+<span class="cm"># 4. Check if Intune MDM is enrolled</span>
+Get-Item <span class="st">"HKLM:\SOFTWARE\Microsoft\Enrollments\*"</span> | 
+  Where-Object { (Get-ItemProperty $_.PSPath).EnrollmentType -eq <span class="vl">6</span> }
+<span class="cm"># EnrollmentType 6 = MDM enrollment (Intune)</span>
+
+<span class="cm"># 5. List active MDM enrollment details</span>
+Get-ChildItem <span class="st">"HKLM:\SOFTWARE\Microsoft\Enrollments"</span> | 
+  ForEach-Object { Get-ItemProperty $_.PSPath } | 
+  Where-Object EnrollmentType -ne <span class="vl">0</span> | 
+  Select-Object EnrollmentID, UPN, EnrollmentType, ProviderID
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔧</div><div class="rwl">Real Co-Management Troubleshooting Case</div></div>
+      <p><strong>Ticket:</strong> "We enabled co-management 2 weeks ago. 800 of our 1,200 devices are co-managed. But 400 devices still show as 'Not Ready' in the SCCM co-management dashboard. They're all Windows 10 devices. The 800 that worked are Windows 11."<br/>
+      <strong>Investigation:</strong><br/>
+      Step 1: Run <code>dsregcmd /status</code> on one of the failing Windows 10 devices → AzureAdJoined: NO (HAADJ failing)<br/>
+      Step 2: Check Azure AD portal → Devices → filter by OS = Windows 10 → Most Windows 10 computer accounts have "Registered" date = None (never synced to Azure AD)<br/>
+      Step 3: Check Azure AD Connect configuration → Device sync settings → "Hybrid Azure AD join" was configured only for Windows 11 domain suffix, not for the older Windows 10 OU<br/>
+      Step 4: Fix — open Azure AD Connect → Device options → Add the Windows 10 devices' OU to the sync scope → Run delta sync<br/>
+      Step 5: Wait 24 hours for HAADJ auto-registration to run on Windows 10 devices. Run <code>dsregcmd /status</code> again → AzureAdJoined: YES<br/>
+      <strong>Result:</strong> Within 48 hours, 380 of 400 remaining devices co-enrolled successfully. The last 20 had clock skew issues — fixed by re-syncing time with DC.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 91</div>
+      <div class="qa"><div class="qq">A device shows "Not Ready" for Co-Management. What is your troubleshooting process?</div>
+      <div class="qans">Start with the foundational check: run dsregcmd /status on the device. If AzureAdJoined is NO, Hybrid Azure AD Join is failing — troubleshoot HAADJ (check Azure AD Connect device sync, time sync, proxy blocking registration endpoints). If HAADJ is working but device still shows Not Ready, open CoManagementHandler.log in C:\Windows\CCM\Logs to see what SCCM is doing and any errors. Verify the device is in the SCCM collection targeted for co-management enrollment. Check that the user has an Intune license. Trigger a SCCM policy refresh and check MDMEnrollment.log for the enrollment attempt result.</div></div>
+      <div class="qa"><div class="qq">What is the CoManagementHandler.log and when do you use it?</div>
+      <div class="qans">CoManagementHandler.log at C:\Windows\CCM\Logs\ is the primary SCCM log for co-management operations. It records every co-management enrollment attempt, the workload switching events, enrollment success or failure with error codes, and the Azure AD token acquisition used during MDM enrollment. I use it whenever a device isn't enrolling into co-management as expected — it shows exactly what step failed and often includes the error code and diagnostic information needed to identify the root cause, whether it's an Azure AD authentication issue, a network connectivity problem, or an SCCM client issue.</div></div>
+      <div class="qa"><div class="qq">After switching the Compliance workload to Intune, devices show compliant in SCCM but non-compliant in Intune. What's happening?</div>
+      <div class="qans">This means the workload switch was successful — Intune is now evaluating compliance, not SCCM. But the Intune compliance policy is stricter or different from the SCCM compliance settings, so devices that met SCCM requirements may not meet Intune requirements. Common causes: Intune compliance policy requires BitLocker (SCCM didn't), or the Intune minimum OS version is set higher. This is expected and correct — the goal is to get devices to meet the Intune compliance requirements. Investigate which specific settings are failing in Intune's compliance report (Device → Device compliance → per-setting results) and remediate accordingly.</div></div>
+    </div>
+  </section>
+
+  <!-- Block Complete -->
+  <div style="background:linear-gradient(135deg,rgba(124,58,237,.07),rgba(56,189,248,.05));border:1px solid rgba(124,58,237,.22);border-radius:16px;padding:30px;margin-top:48px;text-align:center;">
+    <div style="font-size:30px;margin-bottom:11px;">🎉</div>
+    <div style="font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--h);margin-bottom:9px;">Block 10 Complete!</div>
+    <div style="color:var(--text2);font-size:13.5px;max-width:600px;margin:0 auto 18px;line-height:1.7;">You've mastered Co-Management — the enterprise bridge between SCCM and Intune. You understand the architecture, prerequisites, step-by-step enablement, all 8 workloads and their migration order, pilot collection strategy, rollback mechanics, and every major troubleshooting scenario with diagnostic commands.</div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap;">
+      <div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;">✅ Blocks 1–10 Done — 91 Topics</div>
+      <div style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;">⬡ Block 11 Next: Intune for Education &amp; Frontline</div>
+      <div style="background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;">📋 38 Topics Remaining</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<a href="#" class="stup">↑</a>
+<script>
+  const secs=document.querySelectorAll('.ts');
+  const navs=document.querySelectorAll('.ni[href^="#"]');
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;navs.forEach(n=>{n.classList.remove('active');if(n.getAttribute('href')==='#'+id)n.classList.add('active');});}});},{rootMargin:'-20% 0px -60% 0px'});
+  secs.forEach(s=>obs.observe(s));
+  navs.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(n.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});}));
+</script>
+</body>
+</html>

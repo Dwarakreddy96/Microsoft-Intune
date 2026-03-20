@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 13: Troubleshooting Mastery</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1525;
+    --bg3: #151c30;
+    --sidebar-bg: #0c1120;
+    --border: #1e2d4a;
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --accent3: #8b5cf6;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --heading: #f8fafc;
+    --card: #111827;
+    --card2: #0f1729;
+    --glow: rgba(59,130,246,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    display: flex;
+    min-height: 100vh;
+    line-height: 1.7;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 290px;
+    min-width: 290px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .sidebar-header {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #0c1120 0%, #111827 100%);
+  }
+  .sidebar-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--heading);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 20px rgba(59,130,246,0.3);
+  }
+  .sidebar-subtitle {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 6px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .block-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(245,158,11,0.2));
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: #fca5a5;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .sidebar-nav { padding: 16px 0; flex:1; }
+  .nav-section-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 8px 24px 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .nav-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+    color: var(--text2);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .nav-item:hover {
+    background: rgba(59,130,246,0.06);
+    color: var(--text);
+    border-left-color: var(--accent);
+  }
+  .nav-item.active {
+    background: rgba(59,130,246,0.1);
+    color: var(--accent2);
+    border-left-color: var(--accent);
+  }
+  .nav-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    min-width: 20px;
+    margin-top: 1px;
+  }
+  .nav-item.active .nav-num { color: var(--accent); }
+
+  .sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 93%; /* block 13 of 14 */
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    animation: progressGlow 2s ease-in-out infinite alternate;
+  }
+  @keyframes progressGlow {
+    from { box-shadow: 0 0 4px var(--accent); }
+    to { box-shadow: 0 0 12px var(--accent2); }
+  }
+
+  /* ── MAIN CONTENT ── */
+  #main {
+    margin-left: 290px;
+    flex: 1;
+    min-height: 100vh;
+  }
+
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(10,14,26,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .breadcrumb {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .breadcrumb span { color: var(--accent); }
+  .topic-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+  }
+
+  .content { padding: 56px 48px 80px; max-width: 960px; }
+
+  /* Hero */
+  .block-hero {
+    margin-bottom: 64px;
+    position: relative;
+    padding: 48px;
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .block-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(239,68,68,0.10) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .block-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    color: #fca5a5;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+  .hero-title span {
+    background: linear-gradient(135deg, var(--red), var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-desc {
+    font-size: 16px;
+    color: var(--text2);
+    max-width: 600px;
+    line-height: 1.7;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text2);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .hero-meta-item .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+  }
+  .hero-meta-item .dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .hero-meta-item .dot.orange { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+
+  /* Topic sections */
+  .topic-section {
+    margin-bottom: 72px;
+    scroll-margin-top: 70px;
+  }
+  .topic-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topic-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--red);
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+  .topic-title-wrap {}
+  .topic-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--heading);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .topic-subtitle {
+    font-size: 13px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* Content blocks */
+  .section-heading {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--heading);
+    margin: 32px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-heading::before {
+    content: '';
+    width: 3px;
+    height: 18px;
+    background: linear-gradient(180deg, var(--red), var(--orange));
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  p {
+    color: var(--text2);
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+  p strong { color: var(--text); font-weight: 500; }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover { border-color: rgba(239,68,68,0.4); transform: translateY(-2px); }
+  .card-icon { font-size: 24px; margin-bottom: 10px; }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 8px;
+  }
+  .card-body { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { background: linear-gradient(135deg, var(--bg3), var(--bg2)); }
+  th {
+    padding: 14px 18px;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--heading);
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 18px;
+    color: var(--text2);
+    border-bottom: 1px solid rgba(30,45,74,0.5);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(59,130,246,0.03); }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .tag-blue { background: rgba(59,130,246,0.15); color: var(--accent2); border: 1px solid rgba(59,130,246,0.2); }
+  .tag-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+  .tag-orange { background: rgba(245,158,11,0.15); color: var(--orange); border: 1px solid rgba(245,158,11,0.2); }
+  .tag-purple { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
+  .tag-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+
+  /* Info boxes */
+  .info-box {
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    border-left: 3px solid;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .info-box .box-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .info-box p { margin: 0; font-size: 14px; }
+  .info-blue { background: rgba(59,130,246,0.06); border-color: var(--accent); }
+  .info-blue .box-title { color: var(--accent2); }
+  .info-green { background: rgba(16,185,129,0.06); border-color: var(--green); }
+  .info-green .box-title { color: var(--green); }
+  .info-orange { background: rgba(245,158,11,0.06); border-color: var(--orange); }
+  .info-orange .box-title { color: var(--orange); }
+  .info-purple { background: rgba(139,92,246,0.06); border-color: var(--accent3); }
+  .info-purple .box-title { color: #a78bfa; }
+  .info-red { background: rgba(239,68,68,0.06); border-color: var(--red); }
+  .info-red .box-title { color: var(--red); }
+
+  /* Code block */
+  .code-block {
+    background: #060b14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: #7dd3fc;
+    overflow-x: auto;
+    line-height: 1.7;
+    position: relative;
+  }
+  .code-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .code-block .comment { color: var(--text3); }
+  .code-block .keyword { color: #c084fc; }
+  .code-block .string { color: #86efac; }
+
+  /* Step list */
+  .steps {
+    list-style: none;
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .steps li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .step-num {
+    min-width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--red), var(--orange));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    flex-shrink: 0;
+  }
+  .steps li strong { color: var(--text); }
+
+  /* Bullet list */
+  .bullet-list {
+    list-style: none;
+    margin: 12px 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bullet-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .bullet-list li::before {
+    content: '▹';
+    color: var(--red);
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .bullet-list li strong { color: var(--text); }
+
+  /* Real world box */
+  .realworld {
+    background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(6,182,212,0.05));
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 12px;
+    padding: 22px;
+    margin: 24px 0;
+  }
+  .realworld-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .realworld-icon { font-size: 20px; }
+  .realworld-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--green);
+    letter-spacing: 0.3px;
+  }
+  .realworld p { color: var(--text2); font-size: 14px; margin: 0; line-height: 1.6; }
+
+  /* Interview Q&A */
+  .interview-section {
+    background: linear-gradient(135deg, rgba(139,92,246,0.05), rgba(59,130,246,0.05));
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 14px;
+    padding: 24px;
+    margin: 28px 0;
+  }
+  .interview-header {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: #a78bfa;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .qa-item { margin-bottom: 18px; }
+  .qa-item:last-child { margin-bottom: 0; }
+  .qa-q {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: flex;
+    gap: 8px;
+  }
+  .qa-q::before { content: 'Q.'; color: #a78bfa; font-family: 'IBM Plex Mono', monospace; flex-shrink: 0; }
+  .qa-a {
+    font-size: 13px;
+    color: var(--text2);
+    padding-left: 24px;
+    line-height: 1.6;
+    display: flex;
+    gap: 8px;
+  }
+  .qa-a::before { content: 'A.'; color: var(--accent2); font-family: 'IBM Plex Mono', monospace; flex-shrink: 0; }
+
+  /* Tip block */
+  .tip-block {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: rgba(245,158,11,0.05);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .tip-icon { font-size: 18px; flex-shrink: 0; }
+
+  /* Error box */
+  .error-box {
+    background: rgba(239,68,68,0.05);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+  }
+  .error-box-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .error-code {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--red);
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+  }
+  .error-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fca5a5;
+  }
+  .error-desc { font-size: 13px; color: var(--text2); margin-bottom: 8px; line-height: 1.6; }
+  .error-fix { font-size: 13px; color: var(--green); line-height: 1.6; }
+  .error-fix::before { content: '✓ Fix: '; font-weight: 600; }
+
+  /* Flowchart */
+  .flowchart {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin: 24px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .flow-node {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    text-align: center;
+    max-width: 380px;
+    width: 100%;
+  }
+  .flow-node.decision {
+    background: rgba(59,130,246,0.08);
+    border-color: rgba(59,130,246,0.3);
+    color: var(--accent2);
+    border-radius: 6px;
+    transform: rotate(0deg);
+  }
+  .flow-node.action {
+    background: rgba(16,185,129,0.08);
+    border-color: rgba(16,185,129,0.3);
+    color: var(--green);
+  }
+  .flow-node.error {
+    background: rgba(239,68,68,0.08);
+    border-color: rgba(239,68,68,0.3);
+    color: var(--red);
+  }
+  .flow-arrow {
+    font-size: 20px;
+    color: var(--text3);
+    margin: 4px 0;
+    line-height: 1;
+  }
+  .flow-label {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+    margin: 0 0 2px;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  /* Scroll to top */
+  .scroll-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--red), var(--orange));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.3);
+    border: none;
+    color: white;
+    z-index: 200;
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+  .scroll-top:hover { transform: translateY(-2px); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    #sidebar { transform: translateX(-100%); }
+    #main { margin-left: 0; }
+    .content { padding: 32px 20px; }
+    .hero-title { font-size: 28px; }
+    .top-bar { padding: 12px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SIDEBAR ══════════════ -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🛡️</div>
+      Intune Mastery
+    </div>
+    <div class="sidebar-subtitle">Zero to Expert</div>
+    <div class="block-badge">⚡ Block 13 · Troubleshooting</div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Topics 106–115</div>
+    <a class="nav-item active" href="#topic106">
+      <span class="nav-num">106</span>Troubleshooting Methodology
+    </a>
+    <a class="nav-item" href="#topic107">
+      <span class="nav-num">107</span>Key Log Files
+    </a>
+    <a class="nav-item" href="#topic108">
+      <span class="nav-num">108</span>MDMDiagnosticsTool
+    </a>
+    <a class="nav-item" href="#topic109">
+      <span class="nav-num">109</span>Enrollment Failures
+    </a>
+    <a class="nav-item" href="#topic110">
+      <span class="nav-num">110</span>App Deployment Failures
+    </a>
+    <a class="nav-item" href="#topic111">
+      <span class="nav-num">111</span>Policy Not Applying
+    </a>
+    <a class="nav-item" href="#topic112">
+      <span class="nav-num">112</span>Autopilot Failures
+    </a>
+    <a class="nav-item" href="#topic113">
+      <span class="nav-num">113</span>Conditional Access Blocks
+    </a>
+    <a class="nav-item" href="#topic114">
+      <span class="nav-num">114</span>Intune Troubleshooting Blade
+    </a>
+    <a class="nav-item" href="#topic115">
+      <span class="nav-num">115</span>Real-World Tickets
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    BLOCK 13 OF 14
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+  </div>
+</nav>
+
+<!-- ══════════════ MAIN ══════════════ -->
+<div id="main">
+  <div class="top-bar">
+    <div class="breadcrumb">
+      Intune Mastery <span>›</span> Block 13 <span>›</span> Troubleshooting Mastery
+    </div>
+    <div class="topic-count">10 Topics · 106–115</div>
+  </div>
+
+  <div class="content">
+
+    <!-- Hero -->
+    <div class="block-hero">
+      <div class="hero-tag">🔧 BLOCK 13</div>
+      <div class="hero-title">Troubleshooting<br/><span>Mastery</span></div>
+      <div class="hero-desc">Real-world Intune breaks — and how to fix them systematically. Master logs, tools, and methodologies that senior engineers use in production environments to diagnose and resolve issues fast.</div>
+      <div class="hero-meta">
+        <div class="hero-meta-item"><div class="dot"></div>10 Topics</div>
+        <div class="hero-meta-item"><div class="dot orange"></div>Advanced Level</div>
+        <div class="hero-meta-item"><div class="dot green"></div>Topics 106–115</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 106: Troubleshooting Methodology          -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic106">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 106</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">Intune Troubleshooting Methodology</div>
+          <div class="topic-subtitle">The Step-by-Step Approach That Senior Engineers Use</div>
+        </div>
+      </div>
+
+      <div class="section-heading">Why Methodology Matters</div>
+      <p>Random clicking and hoping is not troubleshooting. Senior Intune engineers follow a structured approach that finds root causes quickly — even for issues they've never seen before. The method below works for 95% of Intune issues.</p>
+
+      <div class="section-heading">The 7-Step Intune Troubleshooting Framework</div>
+      <ol class="steps">
+        <li><div class="step-num">1</div><div><strong>Define the problem precisely.</strong> "Intune is broken" is not useful. "Policy X is not applying to device Y, assigned via group Z, and compliance shows Non-Compliant since date W" is actionable. Collect: device name, user UPN, OS version, enrollment date, which policy/app/profile is failing.</div></li>
+        <li><div class="step-num">2</div><div><strong>Check the Intune portal first.</strong> Go to Devices → the specific device → Device configuration / Compliance / Apps. Look at assignment status. Is it showing "Not applicable", "Error", "Pending", or "Succeeded"? The portal gives you the first clue before touching any log.</div></li>
+        <li><div class="step-num">3</div><div><strong>Verify assignment and targeting.</strong> Is the policy actually assigned to the correct group? Is the user or device in that group? Dynamic group filters — are they evaluating correctly? Check group membership in Azure AD.</div></li>
+        <li><div class="step-num">4</div><div><strong>Check the device sync status.</strong> When did the device last check in? If it was 7 days ago, the policy may have been assigned after the last sync. Trigger a manual sync: Intune portal → Device → Sync, or on the device via Settings → Accounts → Access work or school → Info → Sync.</div></li>
+        <li><div class="step-num">5</div><div><strong>Read the logs.</strong> IME log for app issues, MDMDiagReport for policy issues, Event Viewer for enrollment issues. Logs tell you the exact error code and what the device tried to do.</div></li>
+        <li><div class="step-num">6</div><div><strong>Look up the error code.</strong> Every Intune error has a code (e.g., 0x87D1FDE8, 0x80070005). Search Microsoft Docs or the Intune error code reference. Never guess what an error means — look it up.</div></li>
+        <li><div class="step-num">7</div><div><strong>Test in isolation.</strong> Create a test group with a single test device. Apply only the failing policy. This eliminates conflicts and confirms the issue is reproducible. If it works in isolation, the problem is likely a conflict with another policy.</div></li>
+      </ol>
+
+      <div class="section-heading">Triage Flowchart</div>
+      <div class="flowchart">
+        <div class="flow-node">Issue Reported — App/Policy/Enrollment/Compliance</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-node decision">Is the device enrolled in Intune?</div>
+        <div class="flow-arrow">↓ Yes</div>
+        <div class="flow-node decision">Is the policy/app assigned to the correct group?</div>
+        <div class="flow-arrow">↓ Yes</div>
+        <div class="flow-node decision">Has the device synced recently (last 8 hours)?</div>
+        <div class="flow-arrow">↓ No → Force Sync</div>
+        <div class="flow-arrow">↓ Yes</div>
+        <div class="flow-node decision">Does the Intune portal show an error status?</div>
+        <div class="flow-arrow">↓ Yes</div>
+        <div class="flow-node action">Read logs → Look up error code → Apply fix</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-node action">Test in isolated group → Confirm resolution</div>
+      </div>
+
+      <div class="section-heading">Common First Questions to Ask</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Question</th><th>Why It Matters</th></tr></thead>
+          <tbody>
+            <tr><td>When did this start?</td><td>Recent change = likely culprit. Check change log, audit logs.</td></tr>
+            <tr><td>Is it one device or many?</td><td>One device = device-specific issue. Many = policy or assignment issue.</td></tr>
+            <tr><td>Is it one user or all users?</td><td>One user = user group/license issue. All users = tenant-level issue.</td></tr>
+            <tr><td>Was anything recently changed?</td><td>New policy, updated profile, new app version — correlate with when issue started.</td></tr>
+            <tr><td>What platform?</td><td>Windows/iOS/Android behave differently. Platform-specific MDM channels and logs differ.</td></tr>
+            <tr><td>What's the enrollment type?</td><td>Autopilot, manual, ADE, Co-managed — each has unique failure modes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box info-green">
+        <div class="box-title">✅ Senior Engineer Habit</div>
+        <p>Before doing anything, open the Intune Troubleshooting blade (Troubleshooting + Support → Troubleshoot) and search for the user. This single screen shows device list, enrollment status, app install status, compliance state, and policy assignments — all in one place. It saves 10 minutes of clicking around.</p>
+      </div>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 106</div>
+        <div class="qa-item">
+          <div class="qa-q">Walk me through how you'd troubleshoot a policy that's not applying to a device.</div>
+          <div class="qa-a">I follow a structured approach: first confirm the device is enrolled and synced recently; check the portal for assignment status on that device; verify group membership; then check logs — MDMDiagReport or Event Viewer for Windows. If I see an error code, I look it up in Microsoft Docs. Finally, I test in isolation with a clean test group to rule out conflicts.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">A user says "Intune isn't working." What's your first step?</div>
+          <div class="qa-a">I ask clarifying questions first: what specifically isn't working, which device, when did it start, and has anything changed recently. Then I open the Intune Troubleshooting blade, search for the user, and check the overview — device enrollment, last sync, compliance, app install status. This gives me a starting point in under 2 minutes.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 107: Key Log Files                        -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic107">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 107</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">Key Log Files</div>
+          <div class="topic-subtitle">IME Log, MDMDiagReport, Event Viewer — Know Where to Look</div>
+        </div>
+      </div>
+
+      <div class="section-heading">Why Logs Are Your Best Friend</div>
+      <p>Every Intune action leaves a trace. When a policy fails, a log records why. When an app fails to install, a log shows the exact exit code. Knowing which log to read — and how to read it — is what separates a junior admin from a senior engineer.</p>
+
+      <div class="section-heading">Log #1 — IntuneManagementExtension.log (IME Log)</div>
+      <p><strong>Location:</strong> <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:13px;">C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log</code></p>
+      <p><strong>Use it for:</strong> Win32 app deployments, PowerShell script execution, proactive remediations, shell script issues. This is the most-used log file for day-to-day Intune troubleshooting on Windows.</p>
+      <div class="code-block">
+        <span class="code-label">Sample IME Log Entry — App Install Failure</span>
+        <span class="comment">[Win32App] Processing app: Chrome Enterprise</span><br/>
+        <span class="comment">[Win32App] Detection rule result: Not Detected</span><br/>
+        <span class="keyword">Downloading content for app</span> <span class="string">Chrome Enterprise</span> from CDN...<br/>
+        <span class="keyword">Install command:</span> <span class="string">GoogleChromeEnterpriseBundle64.msi /quiet</span><br/>
+        <span class="comment">[Win32App] Install exit code: 1603</span><br/>
+        <span class="comment">[Win32App] App install failed. Retry attempt 1 of 3.</span>
+      </div>
+      <div class="tip-block">
+        <div class="tip-icon">💡</div>
+        <div>Exit code <strong>1603</strong> = Fatal error during installation. Usually means a prerequisite is missing, another installer is running, or the system needs a reboot. Exit code <strong>0</strong> = success. Exit code <strong>3010</strong> = success but reboot required.</div>
+      </div>
+
+      <div class="section-heading">Log #2 — MDMDiagReport.xml / HTML</div>
+      <p><strong>Generated by:</strong> MDMDiagnosticsTool.exe (covered in Topic 108)</p>
+      <p><strong>Use it for:</strong> MDM enrollment status, policy CSP application status, certificate issues, MDM channel communication. It shows every MDM policy that was sent down, whether it applied, and any errors. Essential for compliance and configuration profile troubleshooting.</p>
+      <div class="info-box info-blue">
+        <div class="box-title">📋 What MDMDiagReport Shows</div>
+        <p>Device info (OS version, join type, enrollment date) · MDM enrollment state · Certificate store · All applied MDM policies and their status · Defender status · Wi-Fi/VPN profiles · Windows Update policies · Event log snapshots. The HTML version is easiest to read — open in a browser.</p>
+      </div>
+
+      <div class="section-heading">Log #3 — Windows Event Viewer</div>
+      <p>Event Viewer contains several Intune/MDM-relevant channels. Know these paths:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Event Log Path</th><th>What It Covers</th><th>Key Event IDs</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-blue">Applications and Services Logs → Microsoft → Windows → DeviceManagement-Enterprise-Diagnostics-Provider → Admin</span></td>
+              <td>MDM policy application, enrollment events, CSP errors</td>
+              <td>72, 404, 405, 814</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-orange">Microsoft → Windows → AAD → Operational</span></td>
+              <td>Azure AD join events, token acquisition, PRT issues</td>
+              <td>1098, 1104</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-purple">Microsoft → Windows → User Device Registration → Admin</span></td>
+              <td>Device registration, Hybrid AADJ events, Workplace Join</td>
+              <td>300, 304, 360</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-green">Application Log</span></td>
+              <td>MSI installer events, Win32 app install errors</td>
+              <td>1033, 1034, 11707</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-red">Microsoft → Windows → Autopilot → Operational</span></td>
+              <td>Autopilot provisioning events, profile download, ESP phases</td>
+              <td>100, 101, 109</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-heading">Log #4 — AgentExecutor.log</div>
+      <p><strong>Location:</strong> <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:13px;">C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\AgentExecutor.log</code></p>
+      <p>Specifically tracks PowerShell script execution via Intune. If a script assigned via Intune isn't running or is failing, this log shows the exact PowerShell output and error.</p>
+
+      <div class="section-heading">Log #5 — Microsoft Endpoint Manager Portal Audit Logs</div>
+      <p>Not a file on the device — these are in the Intune portal under <strong>Tenant administration → Audit logs</strong>. They answer "who changed what and when?" Essential for change-related troubleshooting and compliance audits.</p>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 107</div>
+        <div class="qa-item">
+          <div class="qa-q">Where is the IME log and what is it used for?</div>
+          <div class="qa-a">The IntuneManagementExtension log is at C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\. It's the primary log for troubleshooting Win32 app deployments, PowerShell scripts, and proactive remediations on Windows. It shows the full install flow including download, detection, install command, exit code, and retry attempts.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">An app deploys fine to 99 devices but fails on one. Where do you look first?</div>
+          <div class="qa-a">The IME log on the failing device. I'd look for the app name in the log, find the install attempt, and check the exit code. Then cross-reference the exit code — 1603 means fatal install error, often a dependency or reboot issue. I'd also check the Application Event Log for MSI installer events that give more detail.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 108: MDMDiagnosticsTool                   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic108">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 108</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">MDMDiagnosticsTool</div>
+          <div class="topic-subtitle">Collecting and Reading the Full Diagnostic Package</div>
+        </div>
+      </div>
+
+      <div class="section-heading">What Is MDMDiagnosticsTool?</div>
+      <p>MDMDiagnosticsTool.exe is a built-in Windows command-line utility that collects a comprehensive snapshot of the device's MDM state into a single report. It's the first thing Microsoft Support asks for when you raise an Intune support ticket. Learning to run it and read it yourself saves hours.</p>
+
+      <div class="section-heading">How to Run MDMDiagnosticsTool</div>
+      <p><strong>Method 1 — Command Prompt (Admin):</strong></p>
+      <div class="code-block">
+        <span class="code-label">Collect full MDM diagnostics to a folder</span>
+        <span class="keyword">MDMDiagnosticsTool.exe</span> <span class="string">-area Autopilot;DeviceEnrollment;DeviceProvisioning;TPM -zip C:\Temp\MDMLogs.zip</span><br/><br/>
+        <span class="comment"># For all areas (most complete):</span><br/>
+        <span class="keyword">MDMDiagnosticsTool.exe</span> <span class="string">-area all -zip C:\Temp\MDMDiag_Full.zip</span>
+      </div>
+      <p><strong>Method 2 — Settings App (No Admin Required):</strong> Settings → Accounts → Access work or school → select the enrolled account → Info → Create Report. This saves the report to <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:13px;">C:\Users\Public\Documents\MDMDiagnostics</code></p>
+
+      <div class="section-heading">What's Inside the Diagnostic Package</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">📄</div>
+          <div class="card-title">MDMDiagReport.html</div>
+          <div class="card-body">The main readable report. Open in a browser. Shows enrollment info, applied policies, CSP status, and errors in organized sections.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <div class="card-title">MDMDiagReport.xml</div>
+          <div class="card-body">Machine-readable version. Useful for scripting or comparing two device states programmatically. Same data as HTML but in XML format.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🪵</div>
+          <div class="card-title">Event Log Exports</div>
+          <div class="card-body">Zipped .evtx files from the DeviceManagement, AAD, UserDeviceRegistration, and Autopilot event channels.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔐</div>
+          <div class="card-title">Registry Exports</div>
+          <div class="card-body">Key MDM-related registry paths exported as .txt. Includes enrollment keys, policy CSP values, and certificate thumbprints.</div>
+        </div>
+      </div>
+
+      <div class="section-heading">How to Read MDMDiagReport.html</div>
+      <ol class="steps">
+        <li><div class="step-num">1</div><div><strong>Enrollment Information section:</strong> Confirm device is enrolled, MDM authority is Intune, enrollment date, UPN of enrolled user, and device AAD join type. If enrollment info is missing or wrong, stop here — enrollment itself is the issue.</div></li>
+        <li><div class="step-num">2</div><div><strong>Policies section:</strong> Lists every MDM policy CSP that was delivered to the device. Each entry shows: policy name, area, setting, value applied, and result (success/error code). Look for anything with an error code.</div></li>
+        <li><div class="step-num">3</div><div><strong>Certificates section:</strong> Shows all certificates in the device's certificate stores. Critical for SCEP/PKCS troubleshooting — verify the expected cert is present, not expired, and in the right store.</div></li>
+        <li><div class="step-num">4</div><div><strong>Windows Update / Autopatch section:</strong> Shows WUfB policies applied, deferral settings, and last scan/install times. Use for patching-related issues.</div></li>
+        <li><div class="step-num">5</div><div><strong>Autopilot section (if applicable):</strong> Deployment profile details, ESP configuration, phase completion status. Essential for Autopilot troubleshooting.</div></li>
+      </ol>
+
+      <div class="realworld">
+        <div class="realworld-header">
+          <div class="realworld-icon">🌏</div>
+          <div class="realworld-label">Real-World Scenario</div>
+        </div>
+        <p><strong>Problem:</strong> A device shows compliant in Intune but BitLocker reports in Defender for Endpoint show it as unencrypted. No error in the portal.<br/><br/>
+        <strong>Action:</strong> Run MDMDiagnosticsTool on the device. Open MDMDiagReport.html → Policies section → search for "BitLocker". Find: BitLocker policy was delivered successfully, but CSP result shows error 0x80310059 — "BitLocker is already enabled but for the wrong drive."<br/><br/>
+        <strong>Root cause:</strong> Device had a pre-existing partial BitLocker encryption from before Intune enrollment. The Intune policy couldn't complete because of the conflict.<br/><br/>
+        <strong>Fix:</strong> Decrypt the drive, let Intune re-apply the policy, encryption completes silently.</p>
+      </div>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 108</div>
+        <div class="qa-item">
+          <div class="qa-q">How do you collect MDM diagnostics from a Windows device?</div>
+          <div class="qa-a">Two ways: run MDMDiagnosticsTool.exe from an elevated command prompt with the -area and -zip flags to get a full diagnostic package, or go to Settings → Accounts → Access work or school → Info → Create Report for a no-admin option. The output is an HTML and XML report plus event log exports. I open the HTML in a browser and look at the Enrollment, Policies, and Certificates sections.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">What's in the MDMDiagReport and why is it useful?</div>
+          <div class="qa-a">It's a complete snapshot of the device's MDM state — enrollment info, every policy that was applied with its result code, certificate store contents, registry exports, and event log captures. It's useful because it shows you in one file what Intune sent to the device and whether the device accepted it successfully or threw an error, which narrows down where the break is.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 109: Enrollment Failures                  -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic109">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 109</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">Troubleshooting Device Enrollment Failures</div>
+          <div class="topic-subtitle">Why Devices Won't Enroll — and How to Fix It</div>
+        </div>
+      </div>
+
+      <div class="section-heading">The Enrollment Pipeline</div>
+      <p>Before fixing enrollment errors, understand the pipeline: User authenticates with Azure AD → MDM Terms of Use accepted → MDM auto-enrollment triggered → Intune agent installed → Device syncs policies. A break at any stage shows a different error.</p>
+
+      <div class="section-heading">Common Enrollment Errors — Windows</div>
+
+      <div class="error-box">
+        <div class="error-box-header">
+          <span class="error-code">0x80180026</span>
+          <div class="error-title">MDM enrollment not permitted</div>
+        </div>
+        <div class="error-desc">MDM enrollment scope is set to "None" or user is not in the MDM enrollment scope group. This is the most common enrollment error for new Intune setups.</div>
+        <div class="error-fix">Go to Azure AD → Mobility (MDM and MAM) → Microsoft Intune → MDM user scope. Set to "All" or add the user's group to "Some". Then have user retry enrollment.</div>
+      </div>
+
+      <div class="error-box">
+        <div class="error-box-header">
+          <span class="error-code">0x80180014</span>
+          <div class="error-title">Enrollment limit reached</div>
+        </div>
+        <div class="error-desc">The user or device has hit the enrollment limit (default: 15 devices per user, but org may set lower). Intune refuses new enrollments once the limit is hit.</div>
+        <div class="error-fix">Check Intune → Devices → Enrollment restrictions → Device limit restrictions. Either increase the limit, or delete old/stale device records for this user in Azure AD and Intune.</div>
+      </div>
+
+      <div class="error-box">
+        <div class="error-box-header">
+          <span class="error-code">0x80180003</span>
+          <div class="error-title">This device is already enrolled</div>
+        </div>
+        <div class="error-desc">A stale MDM enrollment exists on the device from a previous tenant or partial enrollment. The registry still has old MDM keys.</div>
+        <div class="error-fix">Run: dsregcmd /status to check join state. If stale, use dsregcmd /leave to remove old enrollment. Then re-enroll. On older devices, manually clean the registry under HKLM\SOFTWARE\Microsoft\Enrollments.</div>
+      </div>
+
+      <div class="error-box">
+        <div class="error-box-header">
+          <span class="error-code">0x80090016</span>
+          <div class="error-title">TPM keyset not available</div>
+        </div>
+        <div class="error-desc">TPM-related error during enrollment certificate creation. Common on devices with a dirty/locked TPM or after a system image deployment where TPM wasn't cleared.</div>
+        <div class="error-fix">Clear the TPM: Settings → Windows Security → Device Security → Security processor details → Clear TPM. Reboot and retry enrollment. If persistent, check BIOS TPM settings.</div>
+      </div>
+
+      <div class="section-heading">Common Enrollment Errors — iOS/iPadOS</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Error / Symptom</th><th>Likely Cause</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Profile installation fails — "Cannot Install Profile"</td>
+              <td>MDM profile conflicts with an existing MDM profile (e.g., from Apple Configurator or another MDM)</td>
+              <td>Remove existing MDM profile from Settings → General → VPN & Device Management. Retry enrollment.</td>
+            </tr>
+            <tr>
+              <td>ADE device doesn't show MDM enrollment prompt</td>
+              <td>Device not assigned to MDM server in Apple Business Manager, or sync hasn't completed</td>
+              <td>In ABM, assign device to Intune MDM server. In Intune, sync ABM tokens. Factory reset device and re-run Setup Assistant.</td>
+            </tr>
+            <tr>
+              <td>User enrollment fails — "Your organization has not configured enrollment"</td>
+              <td>iOS/iPadOS enrollment not configured in Intune, or Apple MDM Push Certificate missing or expired</td>
+              <td>Check Intune → Devices → iOS/iPadOS enrollment → Apple MDM Push certificate. Renew if expired. Must use same Apple ID to renew — using a different Apple ID requires re-enrollment of all iOS devices.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-heading">Useful Commands for Enrollment Troubleshooting</div>
+      <div class="code-block">
+        <span class="code-label">Windows — Enrollment Diagnostics Commands</span>
+        <span class="comment"># Check device Azure AD join and MDM enrollment status</span><br/>
+        <span class="keyword">dsregcmd</span> <span class="string">/status</span><br/><br/>
+        <span class="comment"># Key fields to look for:</span><br/>
+        <span class="comment"># AzureAdJoined : YES</span><br/>
+        <span class="comment"># MDMUrl : https://enrollment.manage.microsoft.com (Intune)</span><br/>
+        <span class="comment"># MdmEnrollmentURL: should match your tenant</span><br/><br/>
+        <span class="comment"># Force MDM enrollment sync (run as SYSTEM via Task Scheduler)</span><br/>
+        <span class="keyword">deviceenroller.exe</span> <span class="string">/c /AutoEnrollMDM</span><br/><br/>
+        <span class="comment"># Check enrollment registry key</span><br/>
+        <span class="keyword">reg query</span> <span class="string">HKLM\SOFTWARE\Microsoft\Enrollments /s</span>
+      </div>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 109</div>
+        <div class="qa-item">
+          <div class="qa-q">A user gets error 0x80180026 when trying to enroll their Windows device. What's the problem?</div>
+          <div class="qa-a">This means MDM enrollment is not permitted for that user. The MDM user scope in Azure AD Mobility settings is either set to None or the user isn't in the allowed group. Fix: go to Azure AD → Mobility → Microsoft Intune → MDM user scope and either set to All or add the user's group to the scope.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">What command do you run on a Windows device to verify MDM enrollment status?</div>
+          <div class="qa-a">dsregcmd /status — this shows the device's Azure AD join state, whether MDM is enrolled, the MDM URL (which should point to Intune), and the Primary Refresh Token (PRT) status. It's the first command I run for any enrollment or Conditional Access issue on Windows.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 110: App Deployment Failures              -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic110">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 110</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">Troubleshooting App Deployment Failures</div>
+          <div class="topic-subtitle">Win32, Store, and LOB App — Diagnosing Install Failures</div>
+        </div>
+      </div>
+
+      <div class="section-heading">App Deployment Flow (Win32)</div>
+      <p>Understanding the flow helps you know where to look when it breaks: Intune portal assigns app → IME agent downloads content from Azure CDN → IME extracts and runs install command → Detection rule runs → Result reported back to Intune portal.</p>
+
+      <div class="section-heading">Most Common Win32 App Failures</div>
+
+      <div class="error-box">
+        <div class="error-box-header">
+          <span class="error-code">0x87D1FDE8</span>
+          <div class="error-title">Remediation failed</div>
+        </div>
+        <div class="error-desc">One of the most common Win32 app error codes. Usually means the install command ran but returned a non-zero exit code. The installer itself failed. Also triggered if the detection rule doesn't find the app after a successful install.</div>
+        <div class="error-fix">Check IME log for the actual installer exit code. Fix the installer command or detection rule. Most common cause: detection rule path is wrong (wrong registry key or file path after install).</div>
+      </div>
+
+      <div class="error-box">
+        <div class="error-box-header">
+          <span class="error-code">0x80070005</span>
+          <div class="error-title">Access denied</div>
+        </div>
+        <div class="error-desc">IME runs in SYSTEM context by default. If install command requires user context or tries to write to user-specific paths, it gets access denied. Also triggered if antivirus blocks the installer.</div>
+        <div class="error-fix">In the Win32 app config, change "Install behavior" to "User" context if the app is per-user. Or adjust the install script to not require user paths. Check Defender exclusions if AV is blocking.</div>
+      </div>
+
+      <div class="error-box">
+        <div class="error-box-header">
+          <span class="error-code">-2016281112</span>
+          <div class="error-title">Intune app not applicable</div>
+        </div>
+        <div class="error-desc">The app requirement rules aren't met on the device. OS version, disk space, or a custom requirement script returned "not applicable."</div>
+        <div class="error-fix">Review the app's Requirement rules in Intune. Test requirement scripts manually on the device. Most common: minimum OS version set too high, or disk space requirement not met.</div>
+      </div>
+
+      <div class="section-heading">Troubleshooting Steps — Win32 App</div>
+      <ol class="steps">
+        <li><div class="step-num">1</div><div><strong>Check portal status:</strong> Devices → the device → Apps tab. Note the status — "Failed", "Not Applicable", "Pending Install". The error code is shown here.</div></li>
+        <li><div class="step-num">2</div><div><strong>Open IME log:</strong> <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:12px;">C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log</code>. Search for the app name. Find the install attempt, note exit code.</div></li>
+        <li><div class="step-num">3</div><div><strong>Test install manually:</strong> Run the exact same install command that Intune uses, from an elevated command prompt as SYSTEM (use PsExec: <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:12px;">psexec -s cmd.exe</code>). This confirms if the installer itself is the problem.</div></li>
+        <li><div class="step-num">4</div><div><strong>Test detection rule manually:</strong> After a manual install, check if the detection rule condition is met — does the registry key exist? Does the file exist at the path specified? Detection rule mismatch is the #1 cause of "failed" status even when the app installed successfully.</div></li>
+        <li><div class="step-num">5</div><div><strong>Force sync and monitor:</strong> After fixing, trigger a device sync and monitor IME log in real time using: <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:12px;">Get-Content -Path "...\IntuneManagementExtension.log" -Wait -Tail 50</code></div></li>
+      </ol>
+
+      <div class="section-heading">Common App Deployment Error Code Reference</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Exit Code</th><th>Meaning</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-green">0</span></td><td>Success</td><td>No action needed</td></tr>
+            <tr><td><span class="tag tag-orange">3010</span></td><td>Success, reboot required</td><td>Configure "Restart behavior" in app settings to reboot device</td></tr>
+            <tr><td><span class="tag tag-red">1603</span></td><td>Fatal error during installation</td><td>Check if another installer is running, prerequisites missing, or log for specific sub-error</td></tr>
+            <tr><td><span class="tag tag-red">1618</span></td><td>Another installation is in progress</td><td>Wait for other installs to complete; Intune retries automatically</td></tr>
+            <tr><td><span class="tag tag-red">1619</span></td><td>Installation package could not be opened</td><td>Check if .msi/.exe file is corrupted; re-upload the package</td></tr>
+            <tr><td><span class="tag tag-red">2</span></td><td>File not found</td><td>Check install command path — file not in expected location within .intunewin</td></tr>
+            <tr><td><span class="tag tag-orange">1641</span></td><td>Success, reboot initiated</td><td>Expected behavior — device will reboot</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 110</div>
+        <div class="qa-item">
+          <div class="qa-q">An app shows "Failed" in Intune portal but the user says it's actually installed. What happened?</div>
+          <div class="qa-a">Almost certainly a detection rule mismatch. The app installed successfully (exit code 0 or 3010) but Intune's detection rule didn't find the expected registry key, file, or product code after install. I'd open the IME log to confirm the exit code, then manually verify if the detection rule condition exists on the device. Fix the detection rule to match the actual installed state.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">How do you run an Intune install command manually as SYSTEM for testing?</div>
+          <div class="qa-a">Use PsExec from Sysinternals: psexec -s cmd.exe — this opens a command prompt running as the SYSTEM account, which is the same context IME uses. From there, run the exact install command string from the Intune app configuration. This lets you see the raw installer output and exit code without waiting for Intune to retry.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 111: Policy Not Applying                  -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic111">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 111</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">Troubleshooting Policy Not Applying</div>
+          <div class="topic-subtitle">Configuration Profiles, Compliance Policies, and Security Baselines</div>
+        </div>
+      </div>
+
+      <div class="section-heading">The Policy Delivery Chain</div>
+      <p>For a policy to apply: it must be assigned → device must be in the target group → device must sync → MDM channel must accept the CSP setting → no conflict with another policy overriding it. Any break in this chain = policy not applying.</p>
+
+      <div class="section-heading">Diagnostic Steps</div>
+      <ol class="steps">
+        <li><div class="step-num">1</div><div><strong>Check per-device policy status in portal:</strong> Intune → Devices → [Device] → Device configuration. Each profile shows: Succeeded / Error / Conflict / Not Applicable / Pending. "Not Applicable" often means platform mismatch or assignment filtering excluded this device.</div></li>
+        <li><div class="step-num">2</div><div><strong>Check group membership:</strong> Open the group the policy is assigned to in Azure AD. Confirm the device or user is a member. For dynamic groups, check if the dynamic rule evaluates correctly for this device's attributes.</div></li>
+        <li><div class="step-num">3</div><div><strong>Check for Conflict:</strong> If status shows "Conflict", two policies are targeting the same setting with different values. Intune marks the setting as conflicted and applies neither. Go to the specific setting in the profile to see which other profile is conflicting.</div></li>
+        <li><div class="step-num">4</div><div><strong>Check MDMDiagReport:</strong> Open the Policies section. Find your policy's CSP. See if it was delivered and what the result code was. Error code 65007 = compliance policy not met as prerequisite. Error 0x87D1FDE8 = setting couldn't be applied by the OS.</div></li>
+        <li><div class="step-num">5</div><div><strong>Check Registry (for Settings Catalog policies):</strong> Most Settings Catalog policies write to registry. Verify the expected registry key/value exists after a sync. Example: Password complexity policies write to HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\DeviceLock.</div></li>
+      </ol>
+
+      <div class="section-heading">Common Policy Issues</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Policy shows "Not Applicable"</td>
+              <td>Platform mismatch (e.g., iOS profile assigned to Windows device), or Assignment Filter excluded the device</td>
+              <td>Verify platform target in profile. Check and test Assignment Filters against the device.</td>
+            </tr>
+            <tr>
+              <td>Policy shows "Conflict"</td>
+              <td>Two or more policies setting the same value differently</td>
+              <td>Use the conflict details in Intune to identify both conflicting policies. Consolidate settings into one authoritative policy or remove duplicate settings from one profile.</td>
+            </tr>
+            <tr>
+              <td>Policy shows "Succeeded" but setting not enforced on device</td>
+              <td>Policy applied via MDM but superseded by a local Group Policy (GPO) or registry value set by another mechanism</td>
+              <td>Check if GPO is applying the conflicting setting. In hybrid environments, GPO often wins over MDM for the same setting. Use ADMX-backed policies or move device to cloud-only management.</td>
+            </tr>
+            <tr>
+              <td>Policy "Pending" for a long time</td>
+              <td>Device hasn't synced. Device offline, user hasn't logged in, or Intune Management Extension not running</td>
+              <td>Force sync from portal. Check device is online. Check IME service is running: Services.msc → Microsoft Intune Management Extension.</td>
+            </tr>
+            <tr>
+              <td>Custom OMA-URI not applying</td>
+              <td>Wrong OMA-URI path, wrong data type, or CSP not supported on device OS version</td>
+              <td>Verify CSP path in Microsoft documentation. Check the exact data type (String, Integer, Boolean). Check Windows build requirements for the CSP.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-box info-orange">
+        <div class="box-title">⚠️ GPO vs MDM Conflict — Very Common in Hybrid Environments</div>
+        <p>When a device is Hybrid Azure AD Joined, both Group Policy and Intune MDM can apply settings. If a GPO sets the same registry key as an Intune policy, GPO usually wins (it writes to the same path later). The Intune portal may show "Succeeded" — because MDM successfully sent the setting — but the device shows the GPO value. Fix: block inheritance for the OU, move the setting to MDM-only, or use ADMX-backed Intune policies which write to the same "Policy" registry hive as GPO and therefore follow MDM/GPO precedence rules.</p>
+      </div>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 111</div>
+        <div class="qa-item">
+          <div class="qa-q">A configuration profile shows "Succeeded" in Intune but the setting isn't enforced on the device. What are the possible causes?</div>
+          <div class="qa-a">Several possibilities: a Group Policy Object is overriding the MDM setting — especially common on Hybrid AADJ devices; a local registry value was manually set and isn't being overwritten; the setting requires a reboot to take effect; or there's a platform limitation where that particular CSP isn't fully supported on that OS build. I'd check Event Viewer's DeviceManagement channel, run dsregcmd /status, and check for conflicting GPOs using gpresult /h.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">What does a "Conflict" status mean on a configuration profile setting?</div>
+          <div class="qa-a">It means two or more Intune policies are targeting the exact same setting with different values on the same device. When Intune detects this, it marks the setting as conflicted and doesn't apply either value — leaving the device in whatever state it was in before. The fix is to identify both conflicting profiles, decide which is authoritative, and remove the duplicate setting from the other profile.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 112: Autopilot Failures                   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic112">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 112</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">Troubleshooting Autopilot Failures</div>
+          <div class="topic-subtitle">Profile Not Applying, ESP Stuck, and Deployment Errors</div>
+        </div>
+      </div>
+
+      <div class="section-heading">The Autopilot Deployment Stages</div>
+      <p>Autopilot failures happen in distinct stages. Knowing which stage failed narrows your investigation dramatically: Hardware hash registration → Profile download (OOBE) → Azure AD join → Intune enrollment → Enrollment Status Page (ESP) — Device phase → ESP — Account/User phase → Desktop.</p>
+
+      <div class="section-heading">Stage 1: Device Doesn't Get Autopilot Profile</div>
+      <div class="error-box">
+        <div class="error-box-header">
+          <span class="error-code">OOBE</span>
+          <div class="error-title">No branded/custom OOBE — standard Windows setup instead</div>
+        </div>
+        <div class="error-desc">The device didn't download an Autopilot profile during OOBE. Usually means device isn't registered in Intune/ABM, or profile assignment isn't targeting the device.</div>
+        <div class="error-fix">Verify the hardware hash is imported in Intune → Devices → Windows → Windows enrollment → Devices. Check the Autopilot profile is assigned to a group containing this device. Confirm internet connectivity during OOBE (Autopilot requires connectivity to download profile).</div>
+      </div>
+
+      <div class="section-heading">Stage 2: ESP Gets Stuck or Times Out</div>
+      <p>The Enrollment Status Page (ESP) blocks the user from the desktop until all assigned apps and policies install. If it gets stuck or times out:</p>
+      <ol class="steps">
+        <li><div class="step-num">1</div><div><strong>Check which phase is stuck:</strong> ESP has two phases — Device Setup and Account Setup. The screen tells you which phase and often which app/policy is blocking.</div></li>
+        <li><div class="step-num">2</div><div><strong>Collect logs during ESP:</strong> Press Ctrl+Shift+F3 (Audit mode shortcut — careful), or in newer Windows 11 builds, Shift+F10 opens Command Prompt during ESP. Run MDMDiagnosticsTool from there to capture state mid-deployment.</div></li>
+        <li><div class="step-num">3</div><div><strong>Check IME log:</strong> App installs during ESP are tracked in the IME log. Find which app is stuck downloading or installing.</div></li>
+        <li><div class="step-num">4</div><div><strong>Check ESP timeout settings:</strong> In Intune → Devices → Enrollment Status Page profile → review timeout (default 60 min). If complex deployments exceed this, increase the timeout or move non-critical apps to "not blocking" in ESP.</div></li>
+      </ol>
+
+      <div class="section-heading">Common Autopilot Error Codes</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Error / Code</th><th>Meaning</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td><span class="tag tag-red">0x800705B4</span></td><td>Timeout — ESP blocked waiting for an app or policy that never completed</td><td>Check IME log for stuck app. Either fix the app install or mark it as non-blocking in ESP profile.</td></tr>
+            <tr><td><span class="tag tag-red">0x80180018</span></td><td>MDM enrollment failed — Terms of Use not accepted or user not licensed</td><td>Check user has an Intune license. Check Terms of Use page configured in Azure AD is reachable.</td></tr>
+            <tr><td><span class="tag tag-orange">0x80070774</span></td><td>OOBE network failure — Autopilot profile download failed</td><td>Ensure device has internet during OOBE. Check proxy/firewall isn't blocking *.manage.microsoft.com and *.windows.com endpoints.</td></tr>
+            <tr><td><span class="tag tag-red">AAD Join error</span></td><td>Azure AD join failed during Autopilot — often a network or DNS issue</td><td>Run dsregcmd /status after deployment attempt. Check Event Viewer → AAD and UserDeviceRegistration logs. Ensure device can reach login.microsoftonline.com.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="realworld">
+        <div class="realworld-header">
+          <div class="realworld-icon">🌏</div>
+          <div class="realworld-label">Real-World Scenario — ESP Stuck at "Identifying"</div>
+        </div>
+        <p><strong>Problem:</strong> 50 new devices deployed via Autopilot. ESP gets stuck at "Identifying" for 20+ minutes before progressing. Affects all devices.<br/><br/>
+        <strong>Investigation:</strong> Shifted+F10 during ESP, ran MDMDiagnosticsTool. Event Viewer → Autopilot logs showed devices were waiting on TPM attestation which was timing out.<br/><br/>
+        <strong>Root cause:</strong> Corporate proxy was blocking <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:12px;">ekop.intel.com</code> and <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:12px;">ekcert.spserv.microsoft.com</code> — required for TPM attestation during Autopilot.<br/><br/>
+        <strong>Fix:</strong> Added TPM attestation endpoints to proxy allowlist. ESP "Identifying" phase reduced from 20 minutes to under 60 seconds.</p>
+      </div>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 112</div>
+        <div class="qa-item">
+          <div class="qa-q">A new device goes through Autopilot but ESP gets stuck and eventually times out. How do you troubleshoot?</div>
+          <div class="qa-a">First, note which ESP phase is stuck — Device Setup or Account Setup — and which app/policy is shown blocking. During ESP, press Shift+F10 to get a command prompt, then run MDMDiagnosticsTool to capture state. Check the IME log for which app is failing. Common causes: an app install timing out, a required app has an install error, or a required policy can't be applied. I'd either fix the failing app or mark non-critical apps as non-blocking in the ESP profile.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">A device goes through OOBE but doesn't show the company's branded Autopilot screen. What's wrong?</div>
+          <div class="qa-a">The device didn't receive an Autopilot deployment profile. Check: is the device's hardware hash registered in Intune? Is there an Autopilot profile created and assigned to a group? Is the device in that group? Is internet available during OOBE? Autopilot profile download requires connectivity to Microsoft endpoints at the very start of OOBE, before any user interaction.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 113: Conditional Access Blocks            -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic113">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 113</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">Troubleshooting Conditional Access Blocks</div>
+          <div class="topic-subtitle">Why Users Are Being Blocked and How to Diagnose CA Policies</div>
+        </div>
+      </div>
+
+      <div class="section-heading">How Conditional Access Blocks Work</div>
+      <p>When a user is blocked by CA, Azure AD evaluates all applicable CA policies at the time of sign-in and denies the token. The user sees an error page explaining why. The key is understanding <em>which CA policy</em> triggered the block and <em>which condition</em> wasn't met.</p>
+
+      <div class="section-heading">Step 1 — Read the Block Screen</div>
+      <p>When a user is blocked, the error page contains a <strong>Correlation ID</strong> and an explanation. Always capture this. The Correlation ID is the link between the user's experience and the Azure AD Sign-In logs entry for that exact authentication attempt.</p>
+
+      <div class="section-heading">Step 2 — Azure AD Sign-In Logs</div>
+      <ol class="steps">
+        <li><div class="step-num">1</div><div>Go to <strong>Azure AD → Monitoring → Sign-in logs</strong></div></li>
+        <li><div class="step-num">2</div><div>Filter by the user's UPN and the approximate time of the block</div></li>
+        <li><div class="step-num">3</div><div>Find the failed sign-in entry (Status: Failure, Conditional Access: Failure)</div></li>
+        <li><div class="step-num">4</div><div>Click the entry → <strong>Conditional Access tab</strong>. This shows every CA policy that evaluated — which passed, which failed, and exactly which condition failed (compliant device? MFA? approved app?)</div></li>
+      </ol>
+
+      <div class="section-heading">Common CA Block Scenarios</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Block Reason</th><th>Cause</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Device not compliant</strong></td>
+              <td>CA policy requires compliant device. Device compliance status in Intune is Non-Compliant (grace period expired, compliance policy not met).</td>
+              <td>Check compliance policy status on the device in Intune. Fix the non-compliant setting (e.g., enable BitLocker, set password). Sync the device. Allow up to 15 min for compliance state to refresh in CA.</td>
+            </tr>
+            <tr>
+              <td><strong>Device not managed</strong></td>
+              <td>CA requires Hybrid AADJ or AADJ device. Device is only registered (BYOD) or not enrolled at all.</td>
+              <td>Enroll the device in Intune. If personal device, verify the CA policy targets managed devices — should BYOD be excluded?</td>
+            </tr>
+            <tr>
+              <td><strong>MFA required but not satisfied</strong></td>
+              <td>CA requires MFA, user doesn't have MFA registered or was denied step-up auth.</td>
+              <td>Register MFA method at aka.ms/mfasetup. Check if user's MFA method was recently disabled or reset.</td>
+            </tr>
+            <tr>
+              <td><strong>App not approved</strong></td>
+              <td>CA policy requires approved client app. User is using an app not on the approved list (e.g., native Mail app instead of Outlook).</td>
+              <td>Use an approved app (Outlook, Teams, OneDrive). Or review the CA policy to confirm app restriction is intentional.</td>
+            </tr>
+            <tr>
+              <td><strong>Location block</strong></td>
+              <td>CA policy blocks sign-in from specific countries/IP ranges. User is travelling or on a new network.</td>
+              <td>Check if user is in a blocked location. If legitimate, temporarily add their IP to a Named Location exclude, or add the user to a CA exclusion group.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-heading">What If You Can't See Sign-In Logs?</div>
+      <p>In some organizations, only Global Admins or Security Readers can see Sign-In logs. If you're working helpdesk, use the <strong>Intune Troubleshooting blade</strong> instead. Search for the user → Troubleshoot → look at the "Conditional Access" section which shows a simplified view of CA policy states for that user's device.</p>
+
+      <div class="tip-block">
+        <div class="tip-icon">💡</div>
+        <div><strong>CA What-If Tool:</strong> Before creating or modifying CA policies, use the <strong>What If</strong> tool in Azure AD → Conditional Access → What If. Enter a user, app, device, and location — it simulates which CA policies would apply and what the result would be. Essential for testing before deploying CA changes in production.</div>
+      </div>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 113</div>
+        <div class="qa-item">
+          <div class="qa-q">A user is being blocked accessing Exchange Online. They say nothing has changed on their end. How do you investigate?</div>
+          <div class="qa-a">I start with Azure AD Sign-In logs, filter by the user and time. I open the failed sign-in entry and go to the Conditional Access tab. This shows exactly which CA policy triggered the block and which condition failed. Common reasons: the device recently became non-compliant, MFA was reset, or the user is accessing from a new location. Once I know the exact failing condition, I fix it at the source — not by disabling the CA policy.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">How long does it take for a device to go from Non-Compliant to Compliant in Azure AD after the issue is fixed?</div>
+          <div class="qa-a">After the compliance issue is fixed on the device, the device needs to sync with Intune (which can be forced), Intune then re-evaluates compliance (near real-time after sync), and then Azure AD receives the updated compliance signal — this can take 5 to 15 minutes. CA policies then evaluate the new compliance state on the next sign-in or token refresh. Tell users to wait 15 minutes after fixing the compliance issue and then try signing in again.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 114: Intune Troubleshooting Blade         -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic114">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 114</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">Using the Intune Troubleshooting Blade</div>
+          <div class="topic-subtitle">The Underused Feature That Solves 80% of Helpdesk Tickets</div>
+        </div>
+      </div>
+
+      <div class="section-heading">What Is the Troubleshooting Blade?</div>
+      <p>The Intune Troubleshooting blade is a dedicated support view in the Intune portal that aggregates all relevant information about a specific user in one place. It was designed to help helpdesk technicians quickly diagnose issues without navigating through multiple menus.</p>
+      <p><strong>Location:</strong> Intune portal → Troubleshooting + Support → Troubleshoot (or direct URL: <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:13px;">endpoint.microsoft.com/#view/Microsoft_Intune_DeviceSettings/TroubleshootingDetailViewBlade</code>)</p>
+
+      <div class="section-heading">What the Troubleshooting Blade Shows</div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">👤</div>
+          <div class="card-title">User Summary</div>
+          <div class="card-body">User UPN, display name, Intune license status, last Intune activity. First check — if user has no Intune license, nothing else matters.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">💻</div>
+          <div class="card-title">Devices</div>
+          <div class="card-body">All devices enrolled to this user — device name, OS, enrollment date, compliance status, last check-in. Click any device for deep details.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">📦</div>
+          <div class="card-title">App Installations</div>
+          <div class="card-body">All apps assigned to the user and their install status per device — Installed, Failed, Not Applicable, Pending. Shows error codes for failures.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">✅</div>
+          <div class="card-title">Compliance Policies</div>
+          <div class="card-body">All compliance policies assigned to the user, per device, with individual setting results. See exactly which setting caused Non-Compliance.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">⚙️</div>
+          <div class="card-title">Configuration Profiles</div>
+          <div class="card-body">All configuration profiles applied to the user's devices with Succeeded/Error/Conflict/Not Applicable status for each.</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔐</div>
+          <div class="card-title">App Protection Policies</div>
+          <div class="card-body">MAM policy assignment and status — whether app protection policies are applied correctly to managed apps on personal devices.</div>
+        </div>
+      </div>
+
+      <div class="section-heading">How to Use It Effectively</div>
+      <ol class="steps">
+        <li><div class="step-num">1</div><div><strong>Search by user UPN.</strong> Type the user's email address. This is the fastest way to get a complete picture of one user's Intune state.</div></li>
+        <li><div class="step-num">2</div><div><strong>Check license first.</strong> User summary section shows if the user has an Intune license. No license = nothing works. This is a 30-second first check that catches a surprisingly large number of issues.</div></li>
+        <li><div class="step-num">3</div><div><strong>Check last check-in time.</strong> In the Devices section, check when the device last synced. If it was days ago, force a sync before investigating further — the issue may have resolved and just not been reported back.</div></li>
+        <li><div class="step-num">4</div><div><strong>Use the app status table.</strong> App Installations section shows every assigned app with status per device. Filter by "Failed" to immediately jump to problem apps.</div></li>
+        <li><div class="step-num">5</div><div><strong>Drill into compliance details.</strong> Click the compliance policy entry. It expands to show individual setting results — which specific setting is "Not compliant". This saves opening the MDMDiagReport for simple compliance questions.</div></li>
+      </ol>
+
+      <div class="realworld">
+        <div class="realworld-header">
+          <div class="realworld-icon">🌏</div>
+          <div class="realworld-label">Real-World: 3-Minute Helpdesk Resolution</div>
+        </div>
+        <p><strong>Ticket:</strong> "User Jane Smith can't access SharePoint from her laptop — getting blocked."<br/><br/>
+        <strong>Action:</strong> Open Troubleshooting blade → search "jane.smith@company.com".<br/>
+        → Devices: Surface Pro, last check-in 2 days ago, compliance: Non-Compliant.<br/>
+        → Compliance policy: BitLocker setting = Non-Compliant.<br/>
+        → App installs: everything Succeeded.<br/><br/>
+        <strong>Resolution:</strong> Tell Jane to enable BitLocker (or IT enables it remotely via policy), sync device, wait 10 minutes, try SharePoint again. Total time: 3 minutes. Zero log diving needed.</p>
+      </div>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 114</div>
+        <div class="qa-item">
+          <div class="qa-q">What is the Intune Troubleshooting blade and when do you use it?</div>
+          <div class="qa-a">It's a user-centric view in the Intune portal under Troubleshooting + Support that shows all enrolled devices, app install statuses, compliance states, configuration profiles, and app protection policies for a specific user — all in one screen. I use it as my first stop for any user-reported Intune issue. It answers 80% of helpdesk questions without needing to open logs or navigate through multiple menus.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">What's the first thing you check in the Troubleshooting blade?</div>
+          <div class="qa-a">The user's Intune license status. If the user doesn't have a valid Intune license, enrollment won't work, policies won't apply, and apps won't install. It's a 5-second check that eliminates a whole category of issues before looking at anything else.</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- TOPIC 115: Real-World Tickets                   -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <section class="topic-section" id="topic115">
+      <div class="topic-header">
+        <div class="topic-number">TOPIC 115</div>
+        <div class="topic-title-wrap">
+          <div class="topic-title">Common Real-World Tickets and Resolutions</div>
+          <div class="topic-subtitle">10 Scenarios You'll Actually Face in Production</div>
+        </div>
+      </div>
+
+      <p>This topic brings everything together. These are real-world support tickets based on common enterprise Intune deployments, with structured resolution approaches.</p>
+
+      <div class="section-heading">Ticket 1: "My new laptop won't let me log in — it says device not recognized"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 1 — Device Not Recognized</div></div>
+        <p><strong>Likely cause:</strong> Conditional Access policy requires compliant/managed device. New device is not yet enrolled or not yet compliant after Autopilot.<br/>
+        <strong>Resolution:</strong> Confirm Autopilot completed (ESP finished, desktop accessible). Check if device enrolled in Intune portal. Force sync. Wait 15 min for compliance to propagate to Azure AD. If Autopilot not used, manually enroll via Settings → Accounts → Access work or school.</p>
+      </div>
+
+      <div class="section-heading">Ticket 2: "Chrome was deployed to all devices last week but 12 devices still don't have it"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 2 — App Not On Some Devices</div></div>
+        <p><strong>Investigation:</strong> Open Intune → Apps → Chrome → Device install status. Filter by "Failed" and "Pending." Check the 12 devices specifically.<br/>
+        <strong>Common findings:</strong> (a) 8 devices show "Pending" — haven't synced in 5+ days (offline devices or remote workers). Force sync or wait. (b) 4 devices show error 0x87D1FDE8 — open IME log on one device, find exit code 1603, discover those 4 devices have a corrupted VC++ redistributable that Chrome depends on. Fix prerequisite on those 4 devices.<br/>
+        <strong>Resolution:</strong> Different fix for different root causes — always segment the failing population first.</p>
+      </div>
+
+      <div class="section-heading">Ticket 3: "BitLocker key recovery option isn't working — can't find key in Azure AD"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 3 — BitLocker Key Not in Azure AD</div></div>
+        <p><strong>Likely causes:</strong> (a) Device was encrypted before Intune enrollment — key backed up to old MDM or not backed up. (b) BitLocker policy configured to encrypt but not set to escrow recovery key to Azure AD. (c) Device encrypted manually and key never escrowed.<br/>
+        <strong>Resolution:</strong> Check Intune → Devices → [device] → Recovery keys. If not there: on the device run <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:13px;">manage-bde -protectors -get C:</code> to find the Key ID. Then force escrow: <code style="font-family:'IBM Plex Mono',monospace;color:var(--accent2);font-size:13px;">BackupToAAD-BitLockerKeyProtector -MountPoint C: -KeyProtectorId "{KEY-ID}"</code>. Review BitLocker policy to ensure "Save BitLocker recovery information to Azure Active Directory" is enabled.</p>
+      </div>
+
+      <div class="section-heading">Ticket 4: "PowerShell script deployed via Intune ran once but won't run again"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 4 — PowerShell Script Won't Re-run</div></div>
+        <p><strong>Cause:</strong> By default, Intune PowerShell scripts run once per device. After successful execution, Intune marks it as "Success" and doesn't re-run it, even if you want it to run again.<br/>
+        <strong>Resolution:</strong> To force re-run: (a) Delete the script assignment and re-create it. (b) Or delete the device record from the script's device status — Intune will re-deliver next sync. (c) For scripts that need to run regularly, use Proactive Remediations (Detect + Remediate scripts) which run on a configurable schedule instead of once.</p>
+      </div>
+
+      <div class="section-heading">Ticket 5: "iPhone enrolled fine but Outlook shows 'Your organization is managing this device' — user upset"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 5 — User Concerned About Personal Device Management</div></div>
+        <p><strong>Context:</strong> This is a communication/expectation issue more than a technical one. If the device is BYOD (user-enrolled), Intune only manages the work profile/apps — it cannot see personal data, apps, photos, or messages.<br/>
+        <strong>Resolution:</strong> Explain to the user what Intune can and cannot do on a BYOD device. On iOS BYOD: Intune manages only the apps deployed by IT and enforces MAM policies on those apps. It cannot wipe personal data — only a "selective wipe" that removes corporate apps and data. If the device was enrolled as ADE/DEP (supervised), then it is fully managed — confirm if this is appropriate or if user should be on BYOD instead.</p>
+      </div>
+
+      <div class="section-heading">Ticket 6: "Wi-Fi profile deployed but devices keep prompting for password"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 6 — Wi-Fi Profile Password Prompt</div></div>
+        <p><strong>Likely cause:</strong> Certificate-based Wi-Fi authentication where the device certificate isn't deploying correctly, so it falls back to prompting for credentials. Or the SSID in the profile doesn't match the actual network name (case-sensitive).<br/>
+        <strong>Resolution:</strong> Check if a SCEP/PKCS certificate profile is assigned alongside the Wi-Fi profile and delivering successfully (check cert in device keystore). Verify SSID is exact match including case. For PSK Wi-Fi, re-enter the pre-shared key in the profile — the key could have been updated on the AP.</p>
+      </div>
+
+      <div class="section-heading">Ticket 7: "Compliance shows Non-Compliant for OS version but the device is up to date"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 7 — False Non-Compliance on OS Version</div></div>
+        <p><strong>Cause:</strong> Compliance policy has a minimum OS version set (e.g., 22H2 10.0.19045.3803) but device reports a slightly different build. Also common when compliance policy was updated to require a newer build but device hasn't synced yet.<br/>
+        <strong>Resolution:</strong> Check exact OS build on device (winver) vs what the compliance policy requires. If device is actually compliant: force sync, allow 10 minutes. If the policy minimum version is too specific (patch Tuesday builds), consider setting the minimum version to the major feature update only (e.g., 10.0.19045 without the patch suffix).</p>
+      </div>
+
+      <div class="section-heading">Ticket 8: "Bulk enrolled devices show in Intune but policies aren't applying"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 8 — Bulk Enrolled Devices Without Policies</div></div>
+        <p><strong>Cause:</strong> Devices bulk enrolled via Provisioning Package (PPKG) enroll without a user — they are "userless" device enrollments. If policies are assigned to user groups, they won't apply. Policies must be assigned to device groups.<br/>
+        <strong>Resolution:</strong> Move all policy and app assignments for bulk-enrolled devices to device groups (not user groups). Create a dynamic device group for these devices (filter by enrollment type or device name prefix). Reassign policies to the device group.</p>
+      </div>
+
+      <div class="section-heading">Ticket 9: "Android device enrolled but Google Play managed apps not showing"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 9 — Managed Google Play Apps Missing</div></div>
+        <p><strong>Likely cause:</strong> Managed Google Play isn't approved/synced to Intune, or device is enrolled as a personal (BYOD) profile but app is set to require fully managed. Also, newly approved apps can take up to 24 hours to appear in the managed work profile.<br/>
+        <strong>Resolution:</strong> Check Intune → Apps → Android → the specific app → is it approved in Managed Google Play? Sync: Intune → Tenant admin → Connectors → Android Enterprise → Sync. Check the device's work profile (separate badged apps section) — apps appear there, not in the personal profile.</p>
+      </div>
+
+      <div class="section-heading">Ticket 10: "After a Windows Update, Defender ATP stopped reporting to Intune"</div>
+      <div class="realworld">
+        <div class="realworld-header"><div class="realworld-icon">🎫</div><div class="realworld-label">Ticket 10 — Defender ATP Integration Broken After Update</div></div>
+        <p><strong>Cause:</strong> Windows Updates occasionally reset Defender for Endpoint's onboarding state, particularly on shared/reimaged devices. The device loses its MDE onboarding blob.<br/>
+        <strong>Resolution:</strong> Check Intune → Endpoint Security → Microsoft Defender for Endpoint → Connector status. If connector is healthy: on the device, check Services.msc for "Microsoft Defender Advanced Threat Protection Service" — is it running? Check Event Viewer → Microsoft → Windows → SENSE logs. If onboarding state is lost, re-deploy the MDE onboarding configuration profile from Intune (Endpoint Security → Endpoint Detection & Response). Device will re-onboard on next sync.</p>
+      </div>
+
+      <div class="info-box info-green">
+        <div class="box-title">✅ The Pattern Behind All 10 Tickets</div>
+        <p>Every ticket above follows the same pattern: <strong>confirm what's actually happening</strong> (don't take the ticket at face value) → <strong>check assignment and sync</strong> → <strong>look at the specific error</strong> → <strong>fix at the root cause</strong> (not a workaround). The engineers who resolve tickets fastest are those who ask clarifying questions first and look at data (portal + logs) before touching anything.</p>
+      </div>
+
+      <div class="interview-section">
+        <div class="interview-header">🎤 Interview Questions — Topic 115</div>
+        <div class="qa-item">
+          <div class="qa-q">Tell me about a complex Intune issue you've resolved (or walk through how you'd handle one).</div>
+          <div class="qa-a">I walk through a structured approach: first clarify the exact symptom (which device, which user, what error, when started); check the Intune portal for assignment status and error codes; verify group membership and last sync time; read the relevant log (IME for apps, MDMDiagReport for policies, Event Viewer for enrollment); look up the error code; test in isolation; apply fix and verify. I always document the root cause and resolution so the team can learn from it.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">A policy is assigned to a user group but isn't applying to bulk-enrolled devices. Why?</div>
+          <div class="qa-a">Bulk-enrolled devices (PPKG, or tokenless enrollment) don't have a user associated with them during enrollment. Policies assigned to user groups only apply when a user is associated with the device. For userless or shared devices, all policies must be assigned to device groups, not user groups. The fix is to create a device group for these devices and reassign the policies to that group.</div>
+        </div>
+        <div class="qa-item">
+          <div class="qa-q">How do you verify a BitLocker recovery key is escrowed to Azure AD from a Windows device?</div>
+          <div class="qa-a">Two ways: in the Intune portal, go to Devices → the device → Recovery keys — if the key is there, it's escrowed. Or on the device itself, run manage-bde -protectors -get C: to get the Key Protector ID, then use the PowerShell cmdlet BackupToAAD-BitLockerKeyProtector to force escrow. Confirm it appears in the portal after about 5 minutes.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Block Complete Banner -->
+    <div style="background: linear-gradient(135deg, rgba(239,68,68,0.08), rgba(245,158,11,0.08)); border: 1px solid rgba(239,68,68,0.25); border-radius: 16px; padding: 32px; margin-top: 48px; text-align: center;">
+      <div style="font-size: 32px; margin-bottom: 12px;">🔧</div>
+      <div style="font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--heading); margin-bottom: 10px;">Block 13 Complete!</div>
+      <div style="color: var(--text2); font-size: 14px; max-width: 500px; margin: 0 auto 20px; line-height: 1.6;">You now have the tools, methodology, and real-world pattern recognition to troubleshoot any Intune issue confidently. Logs, error codes, and structured thinking — that's what separates a senior engineer.</div>
+      <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 8px 16px; font-size: 13px; color: #fca5a5; font-family: 'IBM Plex Mono', monospace;">✅ 10 Topics Done</div>
+        <div style="background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); border-radius: 8px; padding: 8px 16px; font-size: 13px; color: #a78bfa; font-family: 'IBM Plex Mono', monospace;">⬡ Block 14 Next: Advanced & Real World</div>
+        <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); border-radius: 8px; padding: 8px 16px; font-size: 13px; color: var(--green); font-family: 'IBM Plex Mono', monospace;">📋 1 Block Remaining</div>
+      </div>
+    </div>
+
+  </div><!-- end .content -->
+</div><!-- end #main -->
+
+<!-- Scroll to top -->
+<a href="#" class="scroll-top" title="Back to top">↑</a>
+
+<script>
+// Highlight active nav item on scroll
+const sections = document.querySelectorAll('.topic-section');
+const navItems = document.querySelectorAll('.nav-item[href]');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + id) {
+          item.classList.add('active');
+        }
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

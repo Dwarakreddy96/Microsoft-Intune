@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 3: Device Enrollment</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:         #08090e;
+    --bg2:        #0d0f18;
+    --bg3:        #111420;
+    --sidebar-bg: #090b15;
+    --border:     #1b2035;
+    --accent:     #0ea5e9;   /* sky blue */
+    --accent2:    #38bdf8;
+    --accent3:    #06b6d4;   /* cyan */
+    --green:      #22c55e;
+    --orange:     #f97316;
+    --yellow:     #eab308;
+    --red:        #ef4444;
+    --purple:     #a855f7;
+    --pink:       #ec4899;
+    --text:       #dde6f0;
+    --text2:      #8fa5be;
+    --text3:      #4a5568;
+    --heading:    #f0f6ff;
+    --card:       #0c0e18;
+    --card2:      #10131f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Nunito',sans-serif;font-weight:300;
+    display:flex;min-height:100vh;line-height:1.75;
+  }
+
+  /* ─── SIDEBAR ─── */
+  #sidebar{
+    width:285px;min-width:285px;background:var(--sidebar-bg);
+    border-right:1px solid var(--border);position:fixed;
+    top:0;left:0;height:100vh;overflow-y:auto;z-index:100;
+    display:flex;flex-direction:column;
+  }
+  #sidebar::-webkit-scrollbar{width:3px;}
+  #sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  .sidebar-header{
+    padding:24px 20px 16px;border-bottom:1px solid var(--border);
+    background:linear-gradient(160deg,#090b15 0%,#0d1020 100%);
+  }
+  .sidebar-logo{
+    font-family:'Syne',sans-serif;font-weight:800;font-size:18px;
+    color:var(--heading);letter-spacing:-0.5px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .logo-icon{
+    width:34px;height:34px;
+    background:linear-gradient(135deg,var(--accent),var(--accent3));
+    border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-size:16px;box-shadow:0 0 16px rgba(14,165,233,0.35);
+  }
+  .sidebar-subtitle{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .block-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    background:linear-gradient(135deg,rgba(14,165,233,0.16),rgba(6,182,212,0.1));
+    border:1px solid rgba(14,165,233,0.28);border-radius:20px;padding:4px 12px;
+    font-size:10px;color:var(--accent2);font-family:'IBM Plex Mono',monospace;
+    margin-top:11px;letter-spacing:0.5px;
+  }
+  .sidebar-nav{padding:12px 0;flex:1;}
+  .nav-section-label{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 20px 4px;font-family:'IBM Plex Mono',monospace;}
+  .nav-item{
+    display:flex;align-items:flex-start;gap:9px;padding:8px 20px;
+    cursor:pointer;transition:all 0.2s;border-left:2px solid transparent;
+    text-decoration:none;color:var(--text2);font-size:12.5px;line-height:1.4;
+  }
+  .nav-item:hover{background:rgba(14,165,233,0.07);color:var(--text);border-left-color:var(--accent);}
+  .nav-item.active{background:rgba(14,165,233,0.11);color:var(--accent2);border-left-color:var(--accent);}
+  .nav-num{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;margin-top:1px;}
+  .nav-item.active .nav-num{color:var(--accent);}
+  .prev-link{
+    display:flex;align-items:center;gap:7px;padding:7px 11px;
+    font-size:11px;color:var(--text3);text-decoration:none;
+    background:rgba(255,255,255,0.02);border:1px solid var(--border);
+    border-radius:7px;margin:0 12px 4px;transition:all 0.2s;
+  }
+  .prev-link:hover{color:var(--text2);border-color:rgba(14,165,233,0.25);}
+  .sidebar-footer{padding:13px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .progress-bar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .progress-fill{height:100%;width:21%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;animation:pglow 2s ease-in-out infinite alternate;}
+  @keyframes pglow{from{box-shadow:0 0 4px var(--accent);}to{box-shadow:0 0 14px var(--accent3);}}
+
+  /* ─── MAIN ─── */
+  #main{margin-left:285px;flex:1;min-height:100vh;}
+  .top-bar{
+    position:sticky;top:0;z-index:50;
+    background:rgba(8,9,14,0.96);backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);padding:13px 46px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .breadcrumb{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:7px;}
+  .breadcrumb span{color:var(--accent2);}
+  .topic-count{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 13px;}
+
+  .content{padding:50px 46px 80px;max-width:980px;}
+
+  /* Hero */
+  .block-hero{
+    margin-bottom:58px;position:relative;padding:44px;
+    background:linear-gradient(135deg,var(--bg2),var(--bg3));
+    border:1px solid var(--border);border-radius:20px;overflow:hidden;
+  }
+  .block-hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(14,165,233,0.12) 0%,transparent 70%);border-radius:50%;}
+  .block-hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(6,182,212,0.08) 0%,transparent 70%);border-radius:50%;}
+  .hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.25);border-radius:20px;padding:5px 14px;font-size:10.5px;color:var(--accent2);font-family:'IBM Plex Mono',monospace;margin-bottom:17px;letter-spacing:1px;}
+  .hero-title{font-family:'Syne',sans-serif;font-size:39px;font-weight:800;color:var(--heading);line-height:1.1;letter-spacing:-1px;margin-bottom:13px;}
+  .hero-title span{background:linear-gradient(135deg,var(--accent),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hero-desc{font-size:14.5px;color:var(--text2);max-width:620px;line-height:1.8;}
+  .hero-meta{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .hero-meta-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+  .dot.g{background:var(--green);box-shadow:0 0 8px var(--green);}
+  .dot.o{background:var(--orange);box-shadow:0 0 8px var(--orange);}
+
+  /* Topic */
+  .topic-section{margin-bottom:68px;scroll-margin-top:66px;opacity:0;animation:fadeUp 0.5s ease forwards;}
+  .topic-section:nth-child(1){animation-delay:.05s;}.topic-section:nth-child(2){animation-delay:.1s;}.topic-section:nth-child(3){animation-delay:.15s;}.topic-section:nth-child(4){animation-delay:.2s;}.topic-section:nth-child(5){animation-delay:.25s;}.topic-section:nth-child(6){animation-delay:.3s;}.topic-section:nth-child(7){animation-delay:.35s;}.topic-section:nth-child(8){animation-delay:.4s;}.topic-section:nth-child(9){animation-delay:.45s;}.topic-section:nth-child(10){animation-delay:.5s;}.topic-section:nth-child(11){animation-delay:.55s;}.topic-section:nth-child(12){animation-delay:.6s;}.topic-section:nth-child(13){animation-delay:.65s;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+
+  .topic-header{display:flex;align-items:flex-start;gap:15px;margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--border);}
+  .topic-number{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent);background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.2);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+  .topic-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--heading);letter-spacing:-0.5px;line-height:1.2;margin-bottom:4px;}
+  .topic-subtitle{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+
+  .section-heading{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--heading);margin:28px 0 10px;display:flex;align-items:center;gap:10px;}
+  .section-heading::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,var(--accent),var(--accent3));border-radius:2px;flex-shrink:0;}
+  p{color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:12px;}
+  p strong{color:var(--text);font-weight:600;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(14,165,233,0.1);color:var(--accent2);padding:2px 6px;border-radius:4px;border:1px solid rgba(14,165,233,0.2);}
+
+  /* Cards */
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:17px;transition:border-color 0.2s,transform 0.2s;}
+  .card:hover{border-color:rgba(14,165,233,0.35);transform:translateY(-2px);}
+  .card-icon{font-size:21px;margin-bottom:8px;}
+  .card-title{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:var(--heading);margin-bottom:6px;}
+  .card-body{font-size:12.5px;color:var(--text2);line-height:1.6;}
+
+  /* Table */
+  .table-wrap{overflow-x:auto;margin:16px 0;border-radius:11px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+  th{padding:12px 15px;text-align:left;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--heading);letter-spacing:0.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 15px;color:var(--text2);border-bottom:1px solid rgba(27,32,53,0.5);vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(14,165,233,0.025);}
+
+  /* Tags */
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+  .tag-sky{background:rgba(14,165,233,0.15);color:var(--accent2);border:1px solid rgba(14,165,233,0.2);}
+  .tag-green{background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.2);}
+  .tag-orange{background:rgba(249,115,22,0.15);color:var(--orange);border:1px solid rgba(249,115,22,0.2);}
+  .tag-yellow{background:rgba(234,179,8,0.15);color:var(--yellow);border:1px solid rgba(234,179,8,0.2);}
+  .tag-red{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.2);}
+  .tag-purple{background:rgba(168,85,247,0.15);color:var(--purple);border:1px solid rgba(168,85,247,0.2);}
+  .tag-pink{background:rgba(236,72,153,0.15);color:var(--pink);border:1px solid rgba(236,72,153,0.2);}
+
+  /* Info boxes */
+  .info-box{border-radius:10px;padding:16px 18px;margin:16px 0;border-left:3px solid;font-size:13.5px;line-height:1.65;}
+  .info-box .box-title{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:6px;}
+  .info-box p{margin:0;font-size:13.5px;}
+  .ib-sky{background:rgba(14,165,233,0.06);border-color:var(--accent);}
+  .ib-sky .box-title{color:var(--accent2);}
+  .ib-green{background:rgba(34,197,94,0.06);border-color:var(--green);}
+  .ib-green .box-title{color:var(--green);}
+  .ib-orange{background:rgba(249,115,22,0.06);border-color:var(--orange);}
+  .ib-orange .box-title{color:var(--orange);}
+  .ib-red{background:rgba(239,68,68,0.06);border-color:var(--red);}
+  .ib-red .box-title{color:var(--red);}
+  .ib-purple{background:rgba(168,85,247,0.06);border-color:var(--purple);}
+  .ib-purple .box-title{color:var(--purple);}
+  .ib-yellow{background:rgba(234,179,8,0.06);border-color:var(--yellow);}
+  .ib-yellow .box-title{color:var(--yellow);}
+
+  /* Steps */
+  .steps{list-style:none;margin:13px 0;display:flex;flex-direction:column;gap:10px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .step-num{min-width:25px;height:25px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .steps li strong{color:var(--text);}
+
+  /* Bullets */
+  .bullet-list{list-style:none;margin:10px 0 13px;display:flex;flex-direction:column;gap:7px;}
+  .bullet-list li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .bullet-list li::before{content:'▹';color:var(--accent);font-size:13px;flex-shrink:0;margin-top:2px;}
+  .bullet-list li strong{color:var(--text);}
+
+  /* Real world */
+  .realworld{background:linear-gradient(135deg,rgba(34,197,94,0.04),rgba(6,182,212,0.04));border:1px solid rgba(34,197,94,0.18);border-radius:12px;padding:19px;margin:20px 0;}
+  .realworld-header{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .realworld-icon{font-size:18px;}
+  .realworld-label{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--green);}
+  .realworld p{color:var(--text2);font-size:13px;margin:0;line-height:1.7;}
+  .realworld p+p{margin-top:8px;}
+
+  /* Interview */
+  .interview-section{background:linear-gradient(135deg,rgba(168,85,247,0.04),rgba(14,165,233,0.04));border:1px solid rgba(168,85,247,0.18);border-radius:13px;padding:21px;margin:24px 0;}
+  .interview-header{font-family:'Syne',sans-serif;font-weight:700;font-size:14.5px;color:var(--purple);margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+  .qa-item{margin-bottom:14px;}
+  .qa-item:last-child{margin-bottom:0;}
+  .qa-q{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;gap:8px;}
+  .qa-q::before{content:'Q.';color:var(--purple);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .qa-a{font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.65;display:flex;gap:8px;}
+  .qa-a::before{content:'A.';color:var(--accent2);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+
+  /* Tip */
+  .tip-block{display:flex;gap:12px;align-items:flex-start;background:rgba(234,179,8,0.05);border:1px solid rgba(234,179,8,0.18);border-radius:9px;padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.65;}
+  .tip-icon{font-size:16px;flex-shrink:0;}
+
+  /* Code block */
+  .code-block{background:#050810;border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#7dd3fc;overflow-x:auto;line-height:1.75;}
+  .code-block .cm{color:var(--text3);}
+  .code-block .kw{color:#c084fc;}
+  .code-block .st{color:#86efac);}
+  .code-block .hl{color:var(--accent2);}
+
+  /* Flow diagram */
+  .flow-wrap{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:flex-start;margin:16px 0;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:20px;}
+  .flow-node{background:linear-gradient(135deg,rgba(14,165,233,0.1),rgba(6,182,212,0.07));border:1px solid rgba(14,165,233,0.22);border-radius:9px;padding:10px 14px;font-size:12px;font-weight:600;color:var(--heading);font-family:'Syne',sans-serif;text-align:center;min-width:100px;}
+  .flow-node.green{background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(6,182,212,0.07));border-color:rgba(34,197,94,0.22);}
+  .flow-node.orange{background:linear-gradient(135deg,rgba(249,115,22,0.1),rgba(234,179,8,0.07));border-color:rgba(249,115,22,0.22);}
+  .flow-node.purple{background:linear-gradient(135deg,rgba(168,85,247,0.1),rgba(14,165,233,0.07));border-color:rgba(168,85,247,0.22);}
+  .flow-node.red{background:linear-gradient(135deg,rgba(239,68,68,0.1),rgba(249,115,22,0.07));border-color:rgba(239,68,68,0.22);}
+  .flow-node sub{display:block;font-size:9px;color:var(--text3);font-weight:400;margin-top:2px;font-family:'IBM Plex Mono',monospace;}
+  .flow-arrow{color:var(--text3);font-size:18px;padding:0 8px;flex-shrink:0;}
+
+  /* Platform pill */
+  .platform-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0;}
+  .platform-card{border-radius:11px;padding:16px;border:1px solid;position:relative;overflow:hidden;}
+  .platform-card::after{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:0 11px 0 100%;opacity:0.08;}
+  .pc-win{background:rgba(14,165,233,0.05);border-color:rgba(14,165,233,0.22);}
+  .pc-win::after{background:var(--accent);}
+  .pc-ios{background:rgba(168,85,247,0.05);border-color:rgba(168,85,247,0.22);}
+  .pc-ios::after{background:var(--purple);}
+  .pc-and{background:rgba(34,197,94,0.05);border-color:rgba(34,197,94,0.22);}
+  .pc-and::after{background:var(--green);}
+  .pc-mac{background:rgba(249,115,22,0.05);border-color:rgba(249,115,22,0.22);}
+  .pc-mac::after{background:var(--orange);}
+  .pc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13.5px;color:var(--heading);margin-bottom:6px;display:flex;align-items:center;gap:7px;}
+  .pc-body{font-size:12px;color:var(--text2);line-height:1.6;}
+
+  /* Troubleshoot log */
+  .log-item{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:15px;margin-bottom:10px;}
+  .log-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--heading);margin-bottom:5px;display:flex;align-items:center;gap:8px;}
+  .log-path{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);margin-bottom:7px;}
+  .log-desc{font-size:12.5px;color:var(--text2);line-height:1.6;}
+
+  /* Divider */
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0;}
+
+  .scroll-top{position:fixed;bottom:26px;right:26px;width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;box-shadow:0 4px 18px rgba(14,165,233,0.3);border:none;color:white;z-index:200;text-decoration:none;transition:transform 0.2s;}
+  .scroll-top:hover{transform:translateY(-3px);}
+
+  @media(max-width:768px){#sidebar{transform:translateX(-100%);}#main{margin-left:0;}.content{padding:26px 16px;}.hero-title{font-size:26px;}.top-bar{padding:11px 16px;}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo"><div class="logo-icon">🛡️</div>Intune Mastery</div>
+    <div class="sidebar-subtitle">Complete Learning Series</div>
+    <div class="block-badge">⬡ Block 3 of 14 — Device Enrollment</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Block 3 Topics</div>
+    <a href="#t16" class="nav-item active"><span class="nav-num">16</span>Enrollment Methods Overview</a>
+    <a href="#t17" class="nav-item"><span class="nav-num">17</span>Windows Autopilot — Concept &amp; Setup</a>
+    <a href="#t18" class="nav-item"><span class="nav-num">18</span>Autopilot — User-Driven vs Self-Deploying</a>
+    <a href="#t19" class="nav-item"><span class="nav-num">19</span>Windows Enrollment — Auto, Manual, Bulk</a>
+    <a href="#t20" class="nav-item"><span class="nav-num">20</span>iOS/iPadOS Enrollment — ADE, Configurator, BYOD</a>
+    <a href="#t21" class="nav-item"><span class="nav-num">21</span>Android Enrollment — Enterprise, BYOD, Knox</a>
+    <a href="#t22" class="nav-item"><span class="nav-num">22</span>macOS Enrollment — ADE &amp; Manual</a>
+    <a href="#t23" class="nav-item"><span class="nav-num">23</span>Android Enterprise — Work Profile vs Managed</a>
+    <a href="#t24" class="nav-item"><span class="nav-num">24</span>Apple Business Manager Integration</a>
+    <a href="#t25" class="nav-item"><span class="nav-num">25</span>Google Zero Touch Enrollment</a>
+    <a href="#t26" class="nav-item"><span class="nav-num">26</span>Enrollment Restrictions</a>
+    <a href="#t27" class="nav-item"><span class="nav-num">27</span>Device Categories &amp; Dynamic Targeting</a>
+    <a href="#t28" class="nav-item"><span class="nav-num">28</span>Troubleshooting Enrollment Failures</a>
+    <div class="nav-section-label" style="margin-top:12px;">Previous Blocks</div>
+    <a href="intune-block1-foundations.html" class="prev-link">← Block 1: Foundations</a>
+    <a href="intune-block2-azuread.html" class="prev-link">← Block 2: Azure AD Essentials</a>
+    <div class="nav-item" style="opacity:0.4;cursor:default;font-size:11.5px;"><span class="nav-num">→</span>Block 4: Config Profiles (Next)</div>
+  </div>
+  <div class="sidebar-footer">
+    <div>Overall Progress</div>
+    <div style="color:var(--accent2);margin:2px 0;">Block 3 / 14 — 28 Topics Done</div>
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div id="main">
+<div class="top-bar">
+  <div class="breadcrumb">Intune Mastery <span>›</span> Block 3 <span>›</span> Device Enrollment</div>
+  <div class="topic-count">13 Topics · ~4 Hours</div>
+</div>
+
+<div class="content">
+
+  <!-- Hero -->
+  <div class="block-hero">
+    <div class="hero-tag">📱 BLOCK 3 · DEVICE ENROLLMENT</div>
+    <h1 class="hero-title">Getting Devices<br/><span>Into Intune</span></h1>
+    <p class="hero-desc">Device enrollment is where Intune management begins. Every Windows laptop, iPhone, Android phone, and Mac must be enrolled before Intune can manage it. This block covers every enrollment method across all platforms — from the zero-touch magic of Autopilot to iOS ADE, Android Enterprise, and mass provisioning. You'll also master troubleshooting when enrollments go wrong.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><div class="dot"></div>13 Topics</div>
+      <div class="hero-meta-item"><div class="dot g"></div>All 4 Platforms Covered</div>
+      <div class="hero-meta-item"><div class="dot o"></div>Troubleshooting Guide Included</div>
+    </div>
+  </div>
+
+  <!-- ═══ TOPIC 16 ═══ -->
+  <section class="topic-section" id="t16">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 16</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Enrollment Methods Overview</div>
+        <div class="topic-subtitle">Every way to get a device into Intune — by platform and scenario</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Why So Many Methods?</div>
+    <p>There isn't one single way to enroll devices in Intune — there are at least <strong>15+ different methods</strong> across platforms. The right method depends on the platform (Windows, iOS, Android, Mac), who owns the device (company or employee), the volume (single device or 10,000), and how much user involvement you want. This topic gives you the master map.</p>
+
+    <div class="section-heading">Enrollment Methods Master Table</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Platform</th><th>Method</th><th>Best For</th><th>User Touch?</th><th>MDM/MAM</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="tag tag-sky">Windows</span></td><td>Windows Autopilot (User-Driven)</td><td>New company PCs — user sets up their own machine</td><td>Minimal</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-sky">Windows</span></td><td>Windows Autopilot (Self-Deploying)</td><td>Kiosk / shared PCs — zero user touch</td><td>None</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-sky">Windows</span></td><td>Autopilot for Hybrid Azure AD Join</td><td>On-prem domain + cloud management</td><td>Minimal</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-sky">Windows</span></td><td>Automatic Enrollment (Azure AD Join at OOBE)</td><td>Company PCs, user signs in during setup</td><td>Moderate</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-sky">Windows</span></td><td>Manual Enrollment (Settings &gt; Access Work)</td><td>Existing PCs already set up</td><td>Full</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-sky">Windows</span></td><td>Bulk Enrollment (PPKG)</td><td>Legacy devices, no internet at setup</td><td>None</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-sky">Windows</span></td><td>Group Policy Auto-Enrollment</td><td>Hybrid AADJ devices in existing domain</td><td>None</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-purple">iOS/iPadOS</span></td><td>ADE / DEP (Apple Business Manager)</td><td>Company iPhones/iPads — supervised, no user removal</td><td>Minimal</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-purple">iOS/iPadOS</span></td><td>Apple Configurator 2</td><td>Batch-enroll devices without ABM account</td><td>None</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-purple">iOS/iPadOS</span></td><td>Company Portal App (BYOD)</td><td>Employee personal iPhones</td><td>Full</td><td>MDM or MAM</td></tr>
+          <tr><td><span class="tag tag-green">Android</span></td><td>Android Enterprise — Fully Managed (COBO)</td><td>Company Android phones — full control</td><td>Minimal</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-green">Android</span></td><td>Android Enterprise — Work Profile (BYOD)</td><td>Personal Android with separate work container</td><td>Moderate</td><td>MDM (work profile)</td></tr>
+          <tr><td><span class="tag tag-green">Android</span></td><td>Android Enterprise — Dedicated (Kiosk)</td><td>Shared kiosk / frontline devices</td><td>None</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-green">Android</span></td><td>Google Zero Touch Enrollment</td><td>Bulk corporate Android devices — zero touch</td><td>None</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-green">Android</span></td><td>Samsung Knox Mobile Enrollment</td><td>Samsung-specific bulk enrollment</td><td>None</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-orange">macOS</span></td><td>ADE (Apple Business Manager)</td><td>Company Macs — supervised</td><td>Minimal</td><td>MDM</td></tr>
+          <tr><td><span class="tag tag-orange">macOS</span></td><td>Manual (Company Portal app)</td><td>Existing Macs not in ABM</td><td>Full</td><td>MDM</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">The Enrollment Decision Tree</div>
+    <div class="info-box ib-sky">
+      <div class="box-title">🧭 How to Pick the Right Enrollment Method</div>
+      <p><strong>Step 1 — What platform?</strong> Windows / iOS / Android / macOS<br/>
+      <strong>Step 2 — Company-owned or personal (BYOD)?</strong><br/>
+      → Company-owned: Use corporate enrollment methods (Autopilot, ADE, Fully Managed Android)<br/>
+      → Personal (BYOD): Use user-initiated methods (Company Portal, Work Profile, MAM-WE)<br/>
+      <strong>Step 3 — How many devices?</strong><br/>
+      → Scale (100+): Use zero-touch methods (Autopilot, ADE, Zero Touch, PPKG)<br/>
+      → Small batch: Manual or semi-automated methods<br/>
+      <strong>Step 4 — What level of control?</strong><br/>
+      → Full control (kiosk, shared): Self-deploying Autopilot, Dedicated Android, Apple Configurator<br/>
+      → User-owned, partial control: Work Profile, MAM-WE</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 16</div>
+      <div class="qa-item">
+        <div class="qa-q">What enrollment methods are available for company-owned Windows devices?</div>
+        <div class="qa-a">Windows Autopilot (user-driven or self-deploying), Automatic enrollment via Azure AD Join at OOBE, Bulk enrollment using Windows Configuration Designer (PPKG), and Group Policy-based auto-enrollment for Hybrid Azure AD Joined devices.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What's the difference between supervised and unsupervised iOS devices in Intune context?</div>
+        <div class="qa-a">Supervised iOS devices (enrolled via ADE/ABM) give Intune much deeper control — you can prevent device removal from MDM, disable the App Store, enforce restrictions that unsupervised devices can ignore, enable Single App Mode, and more. Unsupervised devices (BYOD via Company Portal) have limited management capabilities — users can always remove the MDM profile.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 17 ═══ -->
+  <section class="topic-section" id="t17">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 17</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Windows Autopilot — Concept, Setup &amp; Deployment</div>
+        <div class="topic-subtitle">Zero-touch Windows provisioning — the most powerful Intune enrollment feature</div>
+      </div>
+    </div>
+
+    <div class="section-heading">What Is Windows Autopilot?</div>
+    <p>Windows Autopilot is a <strong>zero-touch device provisioning service</strong>. It transforms the Out-of-Box Experience (OOBE) so that when an employee receives a brand-new laptop and turns it on, the machine automatically configures itself — joining Azure AD, enrolling in Intune, installing all required apps, applying all policies — without IT ever touching the machine physically.</p>
+    <p><strong>The old way:</strong> IT receives the laptop → images it → configures it → ships it to the employee. 2–4 hours of IT time per device.<br/>
+    <strong>The Autopilot way:</strong> Device ships directly from manufacturer to employee's home. Employee turns it on. Done. 0 hours of IT time per device.</p>
+
+    <div class="section-heading">How Autopilot Works — The Technical Flow</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div><strong>Hardware Hash Registration:</strong> The device's unique hardware identifier (hardware hash — contains CPU, motherboard, NIC details) is extracted and uploaded to the Autopilot service. This can be done by the OEM (Dell, HP, Lenovo) at the factory, or by IT using PowerShell.</div></li>
+      <li><div class="step-num">2</div><div><strong>Autopilot Profile Assignment:</strong> In Intune portal, you create an Autopilot Deployment Profile and assign it to the device or a device group. This profile defines the OOBE experience — skip privacy settings, skip license agreement, set the account type, etc.</div></li>
+      <li><div class="step-num">3</div><div><strong>Device Powers On:</strong> Employee receives the device, connects to internet (Wi-Fi or ethernet), powers it on.</div></li>
+      <li><div class="step-num">4</div><div><strong>Windows OOBE contacts Autopilot service:</strong> Windows detects it's an Autopilot device (by matching hardware hash), downloads the Autopilot profile, and applies the customized setup experience.</div></li>
+      <li><div class="step-num">5</div><div><strong>User signs in with Azure AD credentials:</strong> Instead of creating a local account, user enters name@company.com. Azure AD authenticates them (with MFA if required).</div></li>
+      <li><div class="step-num">6</div><div><strong>Azure AD Join + Intune Auto-enrollment:</strong> Device joins Azure AD. MDM scope is configured, so Intune enrollment triggers automatically. No enrollment URL needed.</div></li>
+      <li><div class="step-num">7</div><div><strong>Enrollment Status Page (ESP):</strong> Shows the employee progress — "Setting up your device... Installing apps... Applying policies..." This keeps the user from using the device before everything is done.</div></li>
+      <li><div class="step-num">8</div><div><strong>Device Ready:</strong> All apps installed, all policies applied, device renamed (if configured), user can start working. IT never touched it.</div></li>
+    </ol>
+
+    <div class="section-heading">Registering Devices into Autopilot</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🏭</div>
+        <div class="card-title">OEM Registration (Best)</div>
+        <div class="card-body">Dell, HP, Lenovo, Surface can register devices directly into your Autopilot tenant at the factory. You give them your tenant ID when ordering. Devices arrive ready. Zero effort.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤝</div>
+        <div class="card-title">Reseller/Partner Registration</div>
+        <div class="card-body">Microsoft CSP partners can register devices on behalf of customers. Common when buying through a Microsoft partner or VAR (Value Added Reseller).</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">Manual via PowerShell</div>
+        <div class="card-body">Run the Get-WindowsAutoPilotInfo script on an existing device to extract hardware hash, export as CSV, then import into Intune Autopilot blade. For existing devices or small batches.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📤</div>
+        <div class="card-title">CSV Import in Intune</div>
+        <div class="card-body">Upload a CSV file of hardware hashes directly in Intune → Devices → Enrollment → Windows → Autopilot Devices → Import. Works for any quantity.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">PowerShell Script to Extract Hardware Hash</div>
+    <div class="code-block">
+<span class="cm"># Step 1: Install the script module (run as admin)</span>
+Install-Script -Name Get-WindowsAutoPilotInfo
+
+<span class="cm"># Step 2: Extract hardware hash and save to CSV</span>
+Get-WindowsAutoPilotInfo -OutputFile C:\AutopilotHash.csv
+
+<span class="cm"># Step 3: For immediate Autopilot registration (needs internet)</span>
+Get-WindowsAutoPilotInfo -Online
+
+<span class="cm"># The CSV contains: Device Serial Number, Windows Product ID, Hardware Hash</span>
+<span class="cm"># Import this CSV into Intune → Devices → Enrollment → Autopilot → Import</span>
+    </div>
+
+    <div class="section-heading">Autopilot Deployment Profile — Key Settings</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Setting</th><th>Options</th><th>Recommendation</th></tr></thead>
+        <tbody>
+          <tr><td>Deployment Mode</td><td>User-Driven / Self-Deploying</td><td>User-Driven for personal devices, Self-Deploying for kiosks</td></tr>
+          <tr><td>Join to Azure AD as</td><td>Azure AD Joined / Hybrid Azure AD Joined</td><td>Azure AD Joined for cloud-native, Hybrid for on-prem domain needed</td></tr>
+          <tr><td>Microsoft Software License Terms</td><td>Show / Hide</td><td>Hide — reduces OOBE steps for users</td></tr>
+          <tr><td>Privacy settings</td><td>Show / Hide</td><td>Hide — pre-configure via policy instead</td></tr>
+          <tr><td>Account type</td><td>Administrator / Standard User</td><td>Standard User — principle of least privilege</td></tr>
+          <tr><td>Language / Region</td><td>OS Default / Skip / Pre-set</td><td>Skip for corporate (pre-configured)</td></tr>
+          <tr><td>Keyboard</td><td>OS Default / Skip / Pre-set</td><td>Skip for corporate</td></tr>
+          <tr><td>Apply device name template</td><td>E.g., IND-%RAND:4% or CORP-%SERIAL%</td><td>Use naming convention — helps in troubleshooting</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">Enrollment Status Page (ESP)</div>
+    <p>The <strong>Enrollment Status Page</strong> is a critical Autopilot component. It shows the user a progress screen while the device is being set up. More importantly, it <strong>blocks the user from using the device</strong> until all required apps and policies are installed. Without ESP, a user might start working before security policies are applied.</p>
+    <ul class="bullet-list">
+      <li><strong>Configure in:</strong> Intune → Devices → Enrollment → Windows → Enrollment Status Page</li>
+      <li><strong>Block device until apps install:</strong> Set this to Yes for required apps</li>
+      <li><strong>Allow users to reset device if error:</strong> Useful for Autopilot failures during initial setup</li>
+      <li><strong>Show error when installation takes longer than X minutes:</strong> Default 60 minutes, can increase for large app deployments</li>
+    </ul>
+
+    <div class="realworld">
+      <div class="realworld-header"><div class="realworld-icon">🚀</div><div class="realworld-label">Real-World Autopilot Deployment</div></div>
+      <p><strong>Company:</strong> IT services firm, hiring 200 new employees across India in 3 months.<br/><strong>Old process:</strong> IT team images 200 laptops. Each laptop takes 2 hours. 400 man-hours total. Laptops must be shipped to IT office first, then to employees.<br/>
+      <strong>Autopilot process:</strong> Company orders Dell laptops and tells Dell to register hardware hashes directly to their Autopilot tenant. Dell ships laptops directly to each employee's address. Each employee turns on laptop, connects to WiFi, signs in with company account. 45 minutes later, the machine is fully configured with all apps and policies. IT team spent 2 hours total setting up the Autopilot profile — not 400 hours.<br/>
+      <strong>Saving:</strong> 398 hours of IT time. Zero physical device handling. Laptops shipped from Dell warehouse to employees' homes directly.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 17</div>
+      <div class="qa-item">
+        <div class="qa-q">What is Windows Autopilot and what problem does it solve?</div>
+        <div class="qa-a">Autopilot is a zero-touch device provisioning service. It eliminates the need for IT to manually image or configure new Windows devices. Devices can be shipped directly from manufacturer to employee, and they self-configure on first boot by connecting to the Autopilot service and Intune — joining Azure AD, installing apps, applying policies automatically.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">How do you register a device into Autopilot?</div>
+        <div class="qa-a">Four methods: OEM registration (manufacturer registers at factory), CSP/reseller registration, manual registration using the Get-WindowsAutoPilotInfo PowerShell script to extract hardware hash and import as CSV, or using Windows Configuration Designer. For large deployments, OEM or CSP registration is preferred.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is the Enrollment Status Page and why is it important?</div>
+        <div class="qa-a">ESP displays a setup progress screen during Autopilot enrollment. Critically, it blocks the user from using the device until all required apps and policies are installed. Without ESP, a user could start working on an unsecured device before security baselines, antivirus, or encryption policies have been applied.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is a device naming template in Autopilot and give an example?</div>
+        <div class="qa-a">A naming template automatically sets the computer name during Autopilot. Example: "IND-%RAND:4%" would name devices IND-A3F2, IND-B7K9 etc. Or "CORP-%SERIAL%" uses the device serial number. Consistent naming helps with asset management, support tickets, and log searching.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 18 ═══ -->
+  <section class="topic-section" id="t18">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 18</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Autopilot — User-Driven vs Self-Deploying Mode</div>
+        <div class="topic-subtitle">Choosing the right Autopilot mode for your scenario</div>
+      </div>
+    </div>
+
+    <div class="section-heading">The Two Primary Autopilot Modes</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">👤</div>
+        <div class="card-title">User-Driven Mode</div>
+        <div class="card-body">The employee interacts with the device during setup. They enter their Azure AD credentials. The device gets associated with that specific user. All user-specific policies and apps are applied based on who they are. Most common mode for regular employee laptops.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <div class="card-title">Self-Deploying Mode</div>
+        <div class="card-body">Zero human interaction. Device provisions itself completely automatically — no username, no password entry needed. Uses the device's TPM 2.0 chip to authenticate with Azure AD. Used for kiosks, shared workstations, meeting room devices, digital signage.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Detailed Comparison</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Aspect</th><th>User-Driven</th><th>Self-Deploying</th></tr></thead>
+        <tbody>
+          <tr><td>User credentials required?</td><td>✅ Yes — user enters Azure AD credentials</td><td>❌ No — fully automatic</td></tr>
+          <tr><td>Device association</td><td>Associated with specific user</td><td>No user — device-only identity</td></tr>
+          <tr><td>TPM 2.0 required?</td><td>Not strictly required</td><td>✅ Required — used for device attestation</td></tr>
+          <tr><td>Azure AD Join type</td><td>Azure AD Joined or Hybrid Azure AD Joined</td><td>Azure AD Joined only</td></tr>
+          <tr><td>Best for</td><td>Personal-use corporate laptops</td><td>Kiosks, shared PCs, meeting rooms, digital signage</td></tr>
+          <tr><td>Policies applied</td><td>User-specific + device policies</td><td>Device policies only (no user context)</td></tr>
+          <tr><td>Local admin created?</td><td>Standard user (as configured)</td><td>No local user account</td></tr>
+          <tr><td>User experience</td><td>Minimal — just enter credentials</td><td>Zero — device boots straight to locked kiosk screen</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">Third Mode — Pre-Provisioning (White Glove)</div>
+    <p><strong>Autopilot Pre-Provisioning</strong> (formerly called White Glove) is a hybrid approach where IT or a reseller pre-stages the device before handing it to the user. In this mode:</p>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div><strong>IT/Reseller stage:</strong> Device boots, technician presses Windows key 5 times at OOBE, selects "Pre-provision." Device installs device-level apps and policies. A "success" provisioning key is stored.</div></li>
+      <li><div class="step-num">2</div><div><strong>Device is shipped/handed to user:</strong> The device is now partially configured with device-side content.</div></li>
+      <li><div class="step-num">3</div><div><strong>User completes setup:</strong> User turns on device, enters their credentials. Only user-specific apps and policies need to install — much faster than a full enrollment.</div></li>
+    </ol>
+    <div class="tip-block">
+      <div class="tip-icon">💡</div>
+      <div><strong>When to use Pre-Provisioning:</strong> When your devices have large apps (like Autodesk, Adobe suite) that take 2+ hours to install. Pre-install device-side apps in the warehouse, so the user only waits 10-15 minutes for their user-specific apps. Improves the first-day experience significantly.</div>
+    </div>
+
+    <div class="section-heading">Self-Deploying Mode Requirements</div>
+    <div class="info-box ib-orange">
+      <div class="box-title">⚠️ Critical Requirements for Self-Deploying Mode</div>
+      <p>1. <strong>TPM 2.0 chip is MANDATORY.</strong> The device uses TPM attestation to authenticate itself to Azure AD without user credentials. Virtual machines and older hardware without TPM 2.0 will fail self-deploying enrollment with error 0x800705B4.<br/>
+      2. <strong>Network connectivity at boot:</strong> The device must reach the internet immediately — before user login. Configure DHCP or ensure ethernet is available. Wi-Fi profile can't be applied before enrollment, so ethernet is recommended for first boot.<br/>
+      3. <strong>The device MUST be in Autopilot first.</strong> Hardware hash must be registered before the device ships.</p>
+    </div>
+
+    <div class="realworld">
+      <div class="realworld-header"><div class="realworld-icon">🏪</div><div class="realworld-label">Self-Deploying Kiosk Scenario</div></div>
+      <p><strong>Company:</strong> Retail chain deploying 500 self-checkout terminals across 100 stores.<br/>
+      <strong>Requirements:</strong> Each terminal must run exactly one app (checkout software) in kiosk mode. No user login. Device must auto-recover if something goes wrong. IT can't visit each store.<br/>
+      <strong>Solution:</strong> Self-Deploying Autopilot + Kiosk Mode profile. Each terminal arrives, boots, connects to store WiFi (pre-configured via PPKG on first boot), self-deploys via Autopilot, Intune pushes Kiosk profile restricting the device to only the checkout app. If terminal needs a reset, it re-provisions itself automatically. IT manages 500 terminals from one Intune portal in Mumbai.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 18</div>
+      <div class="qa-item">
+        <div class="qa-q">When would you use Self-Deploying Autopilot over User-Driven?</div>
+        <div class="qa-a">Self-Deploying is for devices with no dedicated user — kiosks, shared workstations, meeting room PCs, digital signage. No user credentials are entered during setup; the device provisions itself using TPM attestation. User-Driven is for personal-use corporate laptops where the device gets associated with the employee who signs in.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">A self-deploying Autopilot device fails with error 0x800705B4. What is the cause?</div>
+        <div class="qa-a">This error means the device does not have a TPM 2.0 chip, or TPM 2.0 is not enabled in BIOS/UEFI. Self-deploying mode requires TPM 2.0 for device attestation since no user credentials are entered. The fix is to either enable TPM in BIOS or replace with hardware that has TPM 2.0.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is Autopilot Pre-Provisioning and when is it useful?</div>
+        <div class="qa-a">Pre-provisioning (White Glove) allows IT or a reseller to pre-stage device-side apps and policies before handing the device to the user. The user then only needs to complete the user-side setup, which is much faster. It's useful when devices have large applications that take hours to install — IT installs those upfront, improving the employee's first-day experience.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 19 ═══ -->
+  <section class="topic-section" id="t19">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 19</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Windows Enrollment — Automatic, Manual &amp; Bulk (PPKG)</div>
+        <div class="topic-subtitle">Non-Autopilot Windows enrollment methods for various scenarios</div>
+      </div>
+    </div>
+
+    <div class="section-heading">1. Automatic Enrollment via Azure AD Join</div>
+    <p>When a device is Azure AD Joined (user signs in with work account during Windows setup), Intune auto-enrollment is triggered automatically — provided the MDM User Scope is configured in Azure AD. This is the simplest enrollment path for new devices.</p>
+    <p><strong>How it works:</strong> User sets up Windows → selects "Set up for an organization" → enters work email → authenticates → Windows joins Azure AD → Azure AD detects MDM scope → automatically enrolls in Intune. No separate enrollment step needed.</p>
+
+    <div class="section-heading">MDM User Scope — The Trigger for Auto-Enrollment</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Go to <strong>entra.microsoft.com</strong> → Identity → Mobility (MDM and MAM) → Microsoft Intune</div></li>
+      <li><div class="step-num">2</div><div>Set <strong>MDM User Scope</strong> to: <strong>All</strong> (everyone auto-enrolls) or <strong>Some</strong> (only specific Azure AD groups)</div></li>
+      <li><div class="step-num">3</div><div>Optionally set <strong>MAM User Scope</strong> for BYOD app management without full enrollment</div></li>
+      <li><div class="step-num">4</div><div>Save. Now any Azure AD Joined device for users in scope will auto-enroll in Intune.</div></li>
+    </ol>
+
+    <div class="section-heading">2. Manual Enrollment (Settings App)</div>
+    <p>For existing Windows devices that are already set up and need to be enrolled. User does this themselves or IT can do it remotely.</p>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Go to <strong>Settings → Accounts → Access work or school</strong></div></li>
+      <li><div class="step-num">2</div><div>Click <strong>Connect</strong></div></li>
+      <li><div class="step-num">3</div><div>Enter work email address</div></li>
+      <li><div class="step-num">4</div><div>Sign in with Azure AD credentials</div></li>
+      <li><div class="step-num">5</div><div>Device joins Azure AD and auto-enrolls in Intune (if MDM scope is configured)</div></li>
+    </ol>
+    <div class="info-box ib-sky">
+      <div class="box-title">💡 Difference: Connect vs Join</div>
+      <p>In Settings → Access work or school: <strong>"Connect"</strong> = Azure AD Register (BYOD — just registers, doesn't fully join). <strong>"Join this device to Azure AD"</strong> (found by clicking "Join this device to Azure Active Directory" option) = full Azure AD Join. For full MDM management, you want the device to be Azure AD Joined, not just registered.</p>
+    </div>
+
+    <div class="section-heading">3. Bulk Enrollment via PPKG (Provisioning Package)</div>
+    <p>A <strong>Provisioning Package (.ppkg)</strong> is a file created with <strong>Windows Configuration Designer (WCD)</strong> — a free tool from the Microsoft Store. The PPKG contains an enrollment token and configuration. You put it on a USB drive and run it on any compatible Windows device — it enrolls the device in Intune automatically, no internet during setup required.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">✅</div>
+        <div class="card-title">When to Use PPKG</div>
+        <div class="card-body">Devices that don't have internet at first boot (factory floors, ships, remote sites). Legacy hardware not supported by Autopilot. Bulk provisioning of devices bought from non-OEM-registered vendors. Quick enrollment of 10-50 devices without Autopilot setup.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚠️</div>
+        <div class="card-title">PPKG Limitations</div>
+        <div class="card-body">The enrollment token inside the PPKG expires (180 days by default). PPKG creates a bulk enrollment service account — devices won't be associated with individual users initially. Needs re-generation when token expires.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Creating a PPKG — Step by Step</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Download and install <strong>Windows Configuration Designer</strong> from Microsoft Store on a Windows PC.</div></li>
+      <li><div class="step-num">2</div><div>Open WCD → Click <strong>"Provision desktop devices"</strong></div></li>
+      <li><div class="step-num">3</div><div>Go to <strong>Set up device</strong> → Enter device name template</div></li>
+      <li><div class="step-num">4</div><div>Go to <strong>Set up network</strong> → Optionally pre-configure Wi-Fi SSID and password</div></li>
+      <li><div class="step-num">5</div><div>Go to <strong>Enroll in device management</strong> → Enter your organization's UPN domain (e.g., contoso.com) → Authenticate with Intune admin account → A bulk enrollment token is fetched and embedded in the PPKG.</div></li>
+      <li><div class="step-num">6</div><div>Click <strong>Create</strong> → Export as .ppkg file</div></li>
+      <li><div class="step-num">7</div><div>Copy .ppkg to USB drive. On target device, run the .ppkg file at any point during or after OOBE. Device enrolls automatically.</div></li>
+    </ol>
+
+    <div class="section-heading">4. Group Policy Auto-Enrollment (Hybrid AADJ)</div>
+    <p>For Hybrid Azure AD Joined devices (in both on-prem AD and Azure AD), you can trigger Intune enrollment automatically via Group Policy — no user action needed. IT sets a GPO and all domain-joined machines enroll in Intune silently in the background.</p>
+
+    <div class="code-block">
+<span class="cm"># GPO Path:</span>
+<span class="hl">Computer Configuration → Policies → Administrative Templates</span>
+<span class="hl">→ Windows Components → MDM → Enable automatic MDM enrollment</span>
+<span class="hl">   using default Azure AD credentials</span>
+
+<span class="cm"># Set to: Enabled</span>
+<span class="cm"># User Credential: Select "Device Credentials" (recommended)</span>
+
+<span class="cm"># After GPO applies, device enrolls in Intune silently</span>
+<span class="cm"># Check enrollment: Settings → Access work or school → Info button</span>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 19</div>
+      <div class="qa-item">
+        <div class="qa-q">What is a PPKG and when would you use it over Autopilot?</div>
+        <div class="qa-a">A Provisioning Package is a file created with Windows Configuration Designer containing an Intune enrollment token. It's used when Autopilot isn't available — devices without internet at setup, hardware not registered in Autopilot, or legacy devices. You put the PPKG on USB and run it on any device. Use Autopilot for modern deployments at scale; use PPKG for edge cases or legacy hardware.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What setting must be configured in Azure AD for automatic Intune enrollment to work?</div>
+        <div class="qa-a">The MDM User Scope in Azure AD → Mobility (MDM and MAM) → Microsoft Intune must be set to "All" or "Some" (targeting specific groups). Without this setting enabled, Azure AD Join won't trigger Intune enrollment automatically — the device joins Azure AD but doesn't enroll in Intune.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 20 ═══ -->
+  <section class="topic-section" id="t20">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 20</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">iOS/iPadOS Enrollment — ADE, Apple Configurator &amp; BYOD</div>
+        <div class="topic-subtitle">Every iOS enrollment method — supervised vs unsupervised, corporate vs personal</div>
+      </div>
+    </div>
+
+    <div class="section-heading">The Critical iOS Concept: Supervised vs Unsupervised</div>
+    <p>iOS has a concept that Android and Windows don't have in the same way: <strong>Supervised mode</strong>. A supervised iPhone/iPad gives Intune significantly more management capabilities. Understanding this is fundamental to iOS management.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Capability</th><th>Unsupervised (BYOD)</th><th>Supervised (ADE/Configurator)</th></tr></thead>
+        <tbody>
+          <tr><td>Prevent MDM removal</td><td>❌ User can remove anytime</td><td>✅ MDM profile locked, user cannot remove</td></tr>
+          <tr><td>Disable App Store</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Single App Mode / Kiosk</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Web Content Filter</td><td>Limited</td><td>✅ Full control</td></tr>
+          <tr><td>Software Update control</td><td>Limited</td><td>✅ Can enforce or delay updates</td></tr>
+          <tr><td>Activation Lock bypass</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Lost Mode</td><td>❌</td><td>✅ IT can lock and track device</td></tr>
+          <tr><td>Per-App VPN</td><td>⚠️ Limited</td><td>✅ Full support</td></tr>
+          <tr><td>AirPlay/AirDrop restrictions</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Silent app install</td><td>⚠️ With consent</td><td>✅ Fully silent</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">Method 1 — ADE (Automated Device Enrollment) via Apple Business Manager</div>
+    <p>ADE (formerly called DEP — Device Enrollment Program) is the gold standard for corporate iOS enrollment. Devices purchased through Apple or an authorized reseller are automatically enrolled in your Intune tenant when activated — the user can't bypass it.</p>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Purchase iPhones/iPads through Apple or an authorized ABM reseller. Ask them to link devices to your <strong>Apple Business Manager (ABM)</strong> account.</div></li>
+      <li><div class="step-num">2</div><div>In <strong>Apple Business Manager</strong> (business.apple.com): Go to MDM Servers → Add MDM Server → Download the public key certificate.</div></li>
+      <li><div class="step-num">3</div><div>In <strong>Intune Portal</strong> → Devices → iOS/iPadOS → Enrollment → Enrollment program tokens → Add. Upload the ABM server token. Download the Intune public key and upload to ABM. This creates the trusted connection.</div></li>
+      <li><div class="step-num">4</div><div>In Intune, create an <strong>Enrollment Profile</strong> for ADE: Set supervised mode = Yes. Configure OOBE setup screens to skip. Set MDM profile removal = Prohibited.</div></li>
+      <li><div class="step-num">5</div><div>Assign the enrollment profile to devices in Intune (they appear automatically since they're synced from ABM).</div></li>
+      <li><div class="step-num">6</div><div>Employee activates the iPhone. The device automatically pulls the enrollment profile from Apple's servers and enrolls in Intune. Supervised. IT-managed. User cannot remove MDM.</div></li>
+    </ol>
+
+    <div class="section-heading">Method 2 — Apple Configurator 2</div>
+    <p>For organizations that don't have ABM or need to enroll existing devices not purchased through an authorized channel. Requires a Mac with Apple Configurator 2 installed.</p>
+    <ul class="bullet-list">
+      <li><strong>Use case:</strong> Batch-enrolling 50 existing iPhones without ABM. School with donated iPads. Healthcare with older device inventory.</li>
+      <li><strong>How:</strong> Connect iPhones via USB to Mac running Configurator 2. Apply an enrollment profile that points to your Intune tenant. Devices get supervised and enrolled.</li>
+      <li><strong>Limitation:</strong> The enrollment profile CAN be removed by the user (unlike ADE where it's locked). Better than BYOD but not as locked as ADE.</li>
+      <li><strong>New method:</strong> Apple Configurator 2 can now add devices to ABM via QR code or Wi-Fi pairing — eliminating the need for USB cables.</li>
+    </ul>
+
+    <div class="section-heading">Method 3 — BYOD via Company Portal App</div>
+    <p>Employee uses their personal iPhone to access company resources. They install the <strong>Company Portal app</strong> from the App Store and follow the enrollment steps.</p>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Employee installs <strong>Intune Company Portal</strong> from App Store</div></li>
+      <li><div class="step-num">2</div><div>Opens app → Signs in with company Azure AD account</div></li>
+      <li><div class="step-num">3</div><div>Company Portal guides them through MDM profile installation</div></li>
+      <li><div class="step-num">4</div><div>A management profile is installed — device is now MDM enrolled</div></li>
+      <li><div class="step-num">5</div><div>Compliance policies apply. If non-compliant, Conditional Access blocks company resources until fixed.</div></li>
+    </ol>
+    <div class="info-box ib-orange">
+      <div class="box-title">⚠️ Important BYOD iOS Limitation</div>
+      <p>On personal iOS devices enrolled via Company Portal, the user CAN remove the MDM profile at any time from Settings → General → VPN &amp; Device Management. When they do, all company apps and data installed by Intune are removed. IT gets notified but cannot prevent it. This is by design for privacy reasons. For devices where you need permanent management, use ADE.</p>
+    </div>
+
+    <div class="realworld">
+      <div class="realworld-header"><div class="realworld-icon">🏥</div><div class="realworld-label">Healthcare iOS Deployment Scenario</div></div>
+      <p><strong>Company:</strong> Hospital deploying 300 iPhones to nurses for patient care app access.<br/>
+      <strong>Requirements:</strong> Devices must always be managed (nurses can't remove MDM). Single purpose — only the patient care app. Devices are shared between shifts. Must be supervised for full control.<br/>
+      <strong>Solution:</strong> Purchase iPhones through Apple Business Manager. Link to Intune via ADE token. Create enrollment profile: Supervised = Yes, MDM removal = Prohibited, Skip all OOBE screens. Create Kiosk mode configuration profile allowing only the patient care app. Result: Phones boot directly to the app. Nurses can't access personal apps. IT can remotely lock or wipe lost devices. MDM cannot be removed.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 20</div>
+      <div class="qa-item">
+        <div class="qa-q">What is ADE and how does it differ from enrolling via Company Portal?</div>
+        <div class="qa-a">ADE (Automated Device Enrollment) enrolls iOS devices automatically at activation using Apple Business Manager. Devices are supervised, and the MDM profile cannot be removed by the user. Company Portal enrollment is user-initiated for personal devices, gives less management control, and the user can remove the MDM profile at any time. ADE is for corporate-owned devices; Company Portal is for BYOD.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What does iOS Supervised mode enable that unsupervised does not?</div>
+        <div class="qa-a">Supervised mode enables: preventing MDM removal, disabling the App Store, Single App Mode / Kiosk mode, forced software updates, Activation Lock bypass, IT-managed Lost Mode, per-app VPN, web content filtering, and AirDrop/AirPlay restrictions. Unsupervised devices have very limited management capabilities.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is an APNs certificate and why is it required for iOS management?</div>
+        <div class="qa-a">Apple Push Notification service (APNs) certificate is required for Intune to communicate with iOS/iPadOS devices. Apple requires all MDM solutions to have an APNs certificate to push management commands to iOS devices. It must be renewed annually — if it expires, Intune loses the ability to manage all iOS devices. It's created in Apple's Push Certificates Portal and uploaded to Intune under Tenant Administration → Apple MDM Push Certificate.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 21 ═══ -->
+  <section class="topic-section" id="t21">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 21</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Android Enrollment — Android Enterprise, BYOD &amp; Knox</div>
+        <div class="topic-subtitle">The most complex enrollment landscape — multiple modes for multiple scenarios</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Android Enrollment is More Complex — Here's Why</div>
+    <p>Android has the most diverse enrollment landscape of any platform because Android is open — any manufacturer can customize it, and there are vastly different use cases (personal phones, kiosks, rugged scanners, tablets). Microsoft has aligned with <strong>Android Enterprise</strong> — Google's enterprise management framework — as the modern approach. Legacy <strong>Device Administrator (DA)</strong> mode is deprecated. Always use Android Enterprise.</p>
+
+    <div class="section-heading">Android Enterprise Enrollment Modes</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <div class="card-title">Work Profile (BYOD)</div>
+        <div class="card-body">Creates a separate encrypted work container on the employee's personal Android phone. Company manages only the work profile — personal apps and data are completely isolated. User privacy is maintained. Employee can remove the work profile at any time.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <div class="card-title">Fully Managed (COBO)</div>
+        <div class="card-body">Company-owned, dedicated to one user. Company has full control of the entire device. No personal use. Device is enrolled during first boot. All apps come from managed Google Play. Used for sales reps, field workers with company phones.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏪</div>
+        <div class="card-title">Dedicated Device (Kiosk)</div>
+        <div class="card-body">Company-owned, no user identity, single-purpose. Think warehouse scanner, retail checkout tablet, delivery driver device. Runs one or a small set of apps. No Google account. IT manages remotely.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏢</div>
+        <div class="card-title">Corporate-Owned Work Profile (COPE)</div>
+        <div class="card-body">Company owns the device but allows limited personal use. Creates a work profile like BYOD, but IT also has full device visibility. Best of both worlds — employees can have personal apps while IT manages work data and the full device.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Enrollment Methods per Android Mode</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Mode</th><th>Enrollment Method</th><th>How</th></tr></thead>
+        <tbody>
+          <tr><td>Work Profile (BYOD)</td><td>Company Portal app</td><td>User installs Company Portal from Play Store, follows setup wizard</td></tr>
+          <tr><td>Fully Managed</td><td>NFC, QR Code, Zero Touch, Token</td><td>Factory reset device → boot through enroll wizard using QR or NFC tap</td></tr>
+          <tr><td>Dedicated Device</td><td>QR Code, Zero Touch, Token, NFC</td><td>Factory reset → QR code enrollment during OOBE</td></tr>
+          <tr><td>COPE</td><td>QR Code, Zero Touch</td><td>Factory reset → corporate enrollment → work profile auto-created</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">QR Code Enrollment for Fully Managed — Step by Step</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>In Intune: Devices → Android → Android enrollment → Corporate-owned, fully managed user devices → Create profile. Configure enrollment token and download the QR code.</div></li>
+      <li><div class="step-num">2</div><div>Factory reset the Android device (or use new out-of-box device).</div></li>
+      <li><div class="step-num">3</div><div>On the first welcome screen, tap the screen <strong>6 times rapidly</strong>. This triggers QR code enrollment mode.</div></li>
+      <li><div class="step-num">4</div><div>Android downloads a QR code reader. Scan the QR code from Intune.</div></li>
+      <li><div class="step-num">5</div><div>Device downloads the enrollment profile, configures as Fully Managed, and enrolls in Intune. User signs in with their Azure AD account.</div></li>
+    </ol>
+
+    <div class="section-heading">Samsung Knox Mobile Enrollment (KME)</div>
+    <p>Samsung has their own enterprise enrollment framework called <strong>Knox Mobile Enrollment (KME)</strong>. Like Apple Business Manager, KME lets you register Samsung devices and have them auto-enroll in Intune when activated — without user interaction. Works only on Samsung devices with Knox hardware (most modern Samsung business phones).</p>
+    <ul class="bullet-list">
+      <li><strong>How:</strong> Register devices in Knox Mobile Enrollment portal (knox.samsung.com). Create an MDM profile pointing to Intune. Assign to devices.</li>
+      <li><strong>Benefit:</strong> Zero-touch Samsung enrollment — similar to Autopilot for Windows or ADE for iOS.</li>
+      <li><strong>Best for:</strong> Companies standardized on Samsung Android devices needing bulk zero-touch enrollment.</li>
+    </ul>
+
+    <div class="realworld">
+      <div class="realworld-header"><div class="realworld-icon">📦</div><div class="realworld-label">Logistics Company — Dedicated Android Scenario</div></div>
+      <p><strong>Company:</strong> Logistics firm with 800 delivery drivers, each with a company Android device for route navigation and delivery confirmation.<br/>
+      <strong>Requirements:</strong> Device runs only the logistics app. No WhatsApp, no personal use. Driver can't change settings. If lost, IT wipes remotely. Devices are reassigned between drivers.<br/>
+      <strong>Solution:</strong> Android Enterprise Dedicated Device mode. QR code enrollment at the warehouse. Intune pushes Kiosk profile — only the logistics app is accessible. WiFi config pushed automatically. If driver reports lost phone, IT issues a remote wipe from Intune portal in 2 clicks. Device resets and re-enrolls when next driver activates it.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 21</div>
+      <div class="qa-item">
+        <div class="qa-q">What is the difference between Android Enterprise Work Profile and Fully Managed?</div>
+        <div class="qa-a">Work Profile is for BYOD — it creates a separate work container on the employee's personal device. IT only manages the work profile; the personal side is completely private. Fully Managed is for company-owned devices dedicated to one user — IT has full control of the entire device, and it's typically not used for personal purposes. Work Profile protects employee privacy; Fully Managed gives IT maximum control.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is COPE in Android Enterprise?</div>
+        <div class="qa-a">COPE (Corporate-Owned, Personally Enabled) allows employees to use a company-owned Android device for both work and personal use. IT manages the full device AND a work profile is created for corporate apps. Employees can install personal apps outside the work profile. IT has more visibility than BYOD work profile but allows personal use, unlike Fully Managed mode.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is Legacy Device Administrator mode and why should you avoid it?</div>
+        <div class="qa-a">Device Administrator is the older Android management framework that gave MDM basic control but required users to grant admin rights manually and could be revoked. Google deprecated it and modern Android versions have significantly reduced its capabilities. Android Enterprise replaced it with much stronger, purpose-built management APIs. New Intune deployments should always use Android Enterprise modes, not Device Administrator.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 22 ═══ -->
+  <section class="topic-section" id="t22">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 22</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">macOS Enrollment — ADE &amp; Manual</div>
+        <div class="topic-subtitle">Managing Macs with Intune — corporate and user-initiated enrollment</div>
+      </div>
+    </div>
+
+    <div class="section-heading">macOS Management — What Intune Can Do</div>
+    <p>Intune for macOS has grown significantly. While it doesn't match JAMF Pro for depth in Apple-specific management, for organizations already using Intune for Windows and mobile, it provides a unified management experience.</p>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">Configuration</div>
+        <div class="card-body">Configuration profiles (device restrictions, certificates, Wi-Fi, VPN), custom profiles via Apple's PLIST format, Settings Catalog for macOS settings.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">App Management</div>
+        <div class="card-body">Deploy PKG and DMG apps, Microsoft 365 for Mac, line-of-business apps, App Store apps (VPP via ABM), scripts via Shell scripts deployment.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">✅</div>
+        <div class="card-title">Compliance &amp; Security</div>
+        <div class="card-body">FileVault (disk encryption) enforcement, Gatekeeper, password policies, macOS compliance policies for Conditional Access integration.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Method 1 — ADE via Apple Business Manager (Corporate Macs)</div>
+    <p>Same concept as iOS ADE — Macs purchased through ABM are automatically enrolled in Intune when set up. The process is identical to iOS ADE enrollment (same ABM token in Intune).</p>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Purchase Mac through Apple or ABM-authorized reseller. Ensure it appears in your ABM account.</div></li>
+      <li><div class="step-num">2</div><div>In Intune → Devices → macOS → Enrollment → Enrollment program tokens → use the same ABM token as iOS (ABM covers all Apple platforms).</div></li>
+      <li><div class="step-num">3</div><div>Create a <strong>macOS Enrollment Profile</strong> → Assign to the Mac devices in ABM.</div></li>
+      <li><div class="step-num">4</div><div>Mac is powered on and set up by the employee. During Setup Assistant, the Mac automatically downloads the MDM profile and enrolls in Intune.</div></li>
+      <li><div class="step-num">5</div><div>Intune pushes configuration profiles, apps, FileVault policy, and compliance requirements.</div></li>
+    </ol>
+
+    <div class="section-heading">Method 2 — Manual Enrollment via Company Portal</div>
+    <p>For Macs already in use that aren't in ABM. Employee downloads the <strong>Intune Company Portal app</strong> from the Mac App Store (or you push it via a script) and enrolls manually.</p>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Download <strong>Company Portal</strong> from Mac App Store</div></li>
+      <li><div class="step-num">2</div><div>Open Company Portal → Sign in with Azure AD work account</div></li>
+      <li><div class="step-num">3</div><div>Follow the enrollment wizard — a Management Profile is installed via System Preferences → Profiles</div></li>
+      <li><div class="step-num">4</div><div>Approve the profile in System Settings → Privacy &amp; Security → Profiles</div></li>
+      <li><div class="step-num">5</div><div>Mac is now enrolled. Compliance policies evaluate. Configuration profiles apply.</div></li>
+    </ol>
+    <div class="info-box ib-orange">
+      <div class="box-title">⚠️ macOS Limitations vs JAMF</div>
+      <p>For organizations heavily invested in Apple (all-Mac shops, design agencies, creative studios), JAMF Pro offers deeper macOS management. However, Intune + JAMF integration is available — JAMF manages Mac-specific features while Intune handles Conditional Access compliance. For mixed environments (Windows + Mac + Mobile), Intune alone is sufficient for most needs and avoids the cost of a separate JAMF license.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 22</div>
+      <div class="qa-item">
+        <div class="qa-q">How does FileVault work with Intune on macOS?</div>
+        <div class="qa-a">Intune can enforce FileVault encryption via a macOS endpoint security profile. When enforced, macOS prompts the user to enable FileVault at next login. Intune stores the personal recovery key in escrow — IT can retrieve it from the device record in Intune if the user forgets their password. You can also rotate the recovery key via Intune for additional security.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Can you use the same Apple Business Manager token for both iOS and macOS enrollment in Intune?</div>
+        <div class="qa-a">Yes. A single ABM account and the corresponding MDM server token in Intune covers all Apple platforms — iPhone, iPad, Mac. You create separate enrollment profiles per platform (iOS profile vs macOS profile) but they all use the same ABM/Intune connection.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 23 ═══ -->
+  <section class="topic-section" id="t23">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 23</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Android Enterprise — Work Profile vs Fully Managed vs Dedicated</div>
+        <div class="topic-subtitle">Deep dive into Android Enterprise modes and what each controls</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Android Enterprise Ownership Models Explained</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Mode</th><th>Acronym</th><th>Owner</th><th>Personal Use?</th><th>IT Control Level</th><th>Ideal Use Case</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Work Profile</strong></td>
+            <td><span class="tag tag-sky">BYOD</span></td>
+            <td>Employee</td>
+            <td>✅ Full personal side</td>
+            <td>Work profile only</td>
+            <td>Office workers with personal phones</td>
+          </tr>
+          <tr>
+            <td><strong>Fully Managed</strong></td>
+            <td><span class="tag tag-orange">COBO</span></td>
+            <td>Company</td>
+            <td>❌ No personal use</td>
+            <td>Full device</td>
+            <td>Sales reps, field engineers, dedicated company phone</td>
+          </tr>
+          <tr>
+            <td><strong>Dedicated Device</strong></td>
+            <td><span class="tag tag-green">COSU</span></td>
+            <td>Company</td>
+            <td>❌ Single purpose only</td>
+            <td>Full device + kiosk lock</td>
+            <td>Kiosks, scanners, delivery tablets, POS terminals</td>
+          </tr>
+          <tr>
+            <td><strong>COPE</strong></td>
+            <td><span class="tag tag-purple">COPE</span></td>
+            <td>Company</td>
+            <td>✅ Limited personal</td>
+            <td>Full device + work profile</td>
+            <td>Executives, managers who need personal apps on company device</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">Work Profile — Technical Deep Dive</div>
+    <p>When Work Profile is set up on an Android device, the operating system creates a <strong>separate encrypted partition</strong> called the work profile. Apps installed in the work profile (shown with a briefcase badge) are completely isolated from personal apps.</p>
+    <ul class="bullet-list">
+      <li><strong>Data isolation:</strong> Work apps cannot access personal photos, contacts, or files. Personal apps cannot access work data. Copy-paste can be blocked between profiles.</li>
+      <li><strong>Separate app instances:</strong> The user has TWO instances of some apps — e.g., personal Gmail AND work Gmail. They appear separately on the home screen.</li>
+      <li><strong>Profile toggle:</strong> Users can pause the work profile (e.g., on weekends) — work notifications stop, work apps are inaccessible. IT can disable this feature.</li>
+      <li><strong>IT visibility:</strong> IT can only see work profile apps and data. Personal side is completely invisible to IT. Android Enterprise guarantees this privacy by design.</li>
+      <li><strong>Removal:</strong> User can remove the work profile from Settings → Accounts → Work Profile → Remove. This is a trade-off for BYOD scenarios.</li>
+    </ul>
+
+    <div class="section-heading">Fully Managed — What IT Controls</div>
+    <ul class="bullet-list">
+      <li><strong>All apps:</strong> Only apps deployed via managed Google Play are allowed. User cannot install apps from Play Store directly.</li>
+      <li><strong>Factory reset protection:</strong> IT-managed — only IT can perform factory reset, not the user.</li>
+      <li><strong>System settings:</strong> Block access to device settings, prevent changing Wi-Fi, prevent USB file transfer.</li>
+      <li><strong>Screen capture:</strong> Can be blocked for sensitive apps.</li>
+      <li><strong>Location:</strong> Can enforce location reporting.</li>
+      <li><strong>Compliance:</strong> Full Intune compliance evaluation — blocks access if device compromised.</li>
+    </ul>
+
+    <div class="section-heading">Dedicated Device (Kiosk) Modes</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <div class="card-title">Single-App Kiosk</div>
+        <div class="card-body">Device locked to ONE app permanently. User cannot exit the app. Status bar hidden. Home button disabled. Perfect for self-checkout terminals or digital signage.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Multi-App Kiosk</div>
+        <div class="card-body">A custom launcher shows only approved apps. User can switch between them but cannot access system settings, install other apps, or leave the managed environment.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">Managed Home Screen</div>
+        <div class="card-body">Microsoft's Managed Home Screen app creates a controlled launcher with branding, approved apps, and optional virtual home button. Configurable via Intune App Configuration policies.</div>
+      </div>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 23</div>
+      <div class="qa-item">
+        <div class="qa-q">In Android Enterprise Work Profile, what can IT see about the personal side of the device?</div>
+        <div class="qa-a">Nothing. Android Enterprise Work Profile guarantees by design that IT cannot see personal apps, personal data, browsing history, or personal contacts on the employee's side of the device. IT only manages and has visibility into the work profile partition. This is a core privacy guarantee of the Android Enterprise architecture.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is the difference between COBO and COPE?</div>
+        <div class="qa-a">COBO (Corporate-Owned, Business Only) is Fully Managed mode — company owns the device and it's for work use only, no personal apps or data. COPE (Corporate-Owned, Personally Enabled) is for company devices that allow limited personal use — a work profile is created for corporate apps while the employee can use the device personally. COPE gives IT full device visibility while allowing some personal use.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 24 ═══ -->
+  <section class="topic-section" id="t24">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 24</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Apple Business Manager Integration</div>
+        <div class="topic-subtitle">The central hub for all Apple device and app management in the enterprise</div>
+      </div>
+    </div>
+
+    <div class="section-heading">What Is Apple Business Manager?</div>
+    <p><strong>Apple Business Manager (ABM)</strong> is Apple's web portal for enterprises to manage Apple device deployment, app purchasing, and content distribution. For educational institutions, the equivalent is <strong>Apple School Manager (ASM)</strong>. ABM is required to get the full benefits of ADE enrollment in Intune.</p>
+
+    <div class="section-heading">ABM's Three Core Functions</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <div class="card-title">Device Enrollment (ADE)</div>
+        <div class="card-body">Register corporate iOS, iPadOS, and macOS devices for automated supervised enrollment. Devices auto-enroll in your MDM (Intune) when activated. MDM profile locked — users can't remove it.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">App &amp; Content Purchasing (VPP)</div>
+        <div class="card-body">Buy app licenses in bulk — Volume Purchase Program. Assign app licenses to users or devices without requiring Apple IDs. Deploy paid apps silently without App Store interaction. Reclaim licenses from departing employees.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">👤</div>
+        <div class="card-title">Managed Apple IDs</div>
+        <div class="card-body">Create company-controlled Apple IDs (not personal). Used for corporate iCloud, FaceTime, device sign-in. IT controls these — employee leaves, IT deletes the Managed Apple ID.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Linking ABM to Intune — Step by Step</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div><strong>Create an APNs Certificate:</strong> In Intune → Tenant Administration → Apple MDM Push certificate. Download the CSR file. Upload to <strong>https://identity.apple.com/pushcert</strong>. Download the .pem certificate. Upload back to Intune. This enables Intune to communicate with Apple's push service for all iOS/macOS devices.</div></li>
+      <li><div class="step-num">2</div><div><strong>Create MDM Server in ABM:</strong> Go to business.apple.com → MDM Servers → Add MDM Server → Name it "Microsoft Intune" → Download the public key token (.p7m file).</div></li>
+      <li><div class="step-num">3</div><div><strong>Upload token to Intune:</strong> In Intune → Devices → iOS/iPadOS → Enrollment program tokens → Add → Upload the .p7m token file. Download Intune's public key and upload to ABM. This establishes secure trust between ABM and Intune.</div></li>
+      <li><div class="step-num">4</div><div><strong>Add VPP token:</strong> In ABM → Apps and Books → Your organization → Get token. Upload to Intune → Tenant Administration → Apple VPP Tokens. Now you can purchase and deploy apps via Intune.</div></li>
+      <li><div class="step-num">5</div><div><strong>Sync devices:</strong> Devices assigned to MDM in ABM will appear in Intune's Autopilot/ADE device list within 15 minutes (or force-sync in Intune).</div></li>
+    </ol>
+
+    <div class="section-heading">APNs Certificate — Critical Maintenance</div>
+    <div class="info-box ib-red">
+      <div class="box-title">🚨 APNs Certificate Expiry — A Real Incident Risk</div>
+      <p>The APNs certificate is valid for <strong>only 1 year</strong>. If it expires, Intune <strong>immediately loses the ability to manage ALL iOS and macOS devices</strong>. Commands stop being delivered. Apps stop deploying. Policies stop applying. Compliance evaluation stops.<br/><br/>
+      <strong>Critical rules:</strong><br/>
+      1. Set a calendar reminder 60 days before expiry.<br/>
+      2. The renewal MUST be done with the SAME Apple ID that created the original certificate. Using a different Apple ID creates a new APNs certificate — all currently enrolled devices immediately lose management and must re-enroll.<br/>
+      3. Never use a personal Apple ID for APNs — use a corporate Apple ID that IT controls.<br/>
+      4. Check expiry in Intune → Tenant Administration → Apple MDM Push Certificate.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 24</div>
+      <div class="qa-item">
+        <div class="qa-q">What happens if the APNs certificate in Intune expires?</div>
+        <div class="qa-a">Intune immediately loses the ability to send management commands to all enrolled iOS and macOS devices. Apps stop deploying, policies stop applying, and compliance evaluation stops. Existing apps and policies remain on devices but nothing new can be pushed. The certificate must be renewed with the SAME Apple ID used to create it — using a different Apple ID forces all devices to re-enroll.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is VPP and how does it benefit app deployment in Intune?</div>
+        <div class="qa-a">VPP (Volume Purchase Program, now part of Apple Business Manager) lets organizations buy app licenses in bulk without requiring employees to have personal Apple IDs or use their personal payment methods. IT deploys paid apps silently to company devices via Intune. When an employee leaves, the license is reclaimed and reassigned to the next user — licenses are not wasted.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 25 ═══ -->
+  <section class="topic-section" id="t25">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 25</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Google Zero Touch Enrollment</div>
+        <div class="topic-subtitle">Android's equivalent to Autopilot — bulk zero-touch corporate Android provisioning</div>
+      </div>
+    </div>
+
+    <div class="section-heading">What Is Zero Touch Enrollment?</div>
+    <p><strong>Google Zero Touch Enrollment</strong> is the Android equivalent of Windows Autopilot and Apple ADE. It allows organizations to pre-configure corporate Android devices so they automatically enroll in Intune when first activated — without any user or IT setup steps.</p>
+
+    <div class="section-heading">How Zero Touch Works</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div><strong>Purchase from Zero Touch authorized reseller.</strong> Not all resellers qualify — you must buy devices specifically from a reseller enrolled in Google's Zero Touch program (e.g., Ingram Micro, Synnex, many Samsung/Google enterprise resellers).</div></li>
+      <li><div class="step-num">2</div><div><strong>Reseller adds devices to your Zero Touch portal.</strong> Go to enterprise.google.com/zero-touch. Your purchased device IMEIs appear automatically.</div></li>
+      <li><div class="step-num">3</div><div><strong>Create a Zero Touch configuration in the portal.</strong> Select Microsoft Intune as the DPC (Device Policy Controller) app. Add the Intune enrollment JSON extras to tell the device what tenant to enroll into.</div></li>
+      <li><div class="step-num">4</div><div><strong>Assign configuration to devices</strong> in the Zero Touch portal by device IMEI or batch.</div></li>
+      <li><div class="step-num">5</div><div><strong>Device is activated by employee.</strong> On first boot, Android checks Google servers, finds the Zero Touch config, downloads the Intune Company Portal (or Intune app), and automatically starts enrollment as Fully Managed. Zero IT touch required.</div></li>
+    </ol>
+
+    <div class="section-heading">Intune JSON for Zero Touch Configuration</div>
+    <div class="code-block">
+<span class="cm">// Zero Touch Extras JSON for Microsoft Intune</span>
+{
+  <span class="hl">"android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME"</span>:
+    "com.microsoft.intune/com.microsoft.intune.DeviceAdminReceiver",
+
+  <span class="hl">"android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION"</span>:
+    "https://enterpriseregistration.windows.net/enrollmentserver/deviceenrollmentconfiguration.dll",
+
+  <span class="hl">"android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE"</span>: {
+    <span class="hl">"com.google.android.apps.work.clouddpc.EXTRA_ENROLLMENT_TOKEN"</span>:
+      "YOUR_INTUNE_ENROLLMENT_TOKEN_HERE"
+  }
+}
+<span class="cm">// Get the enrollment token from Intune: Devices → Android → Enrollment</span>
+    </div>
+
+    <div class="section-heading">Zero Touch vs Knox Mobile Enrollment vs QR Code</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Works On</th><th>Requires Reseller?</th><th>User Interaction</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td>Zero Touch</td><td>All Android Enterprise devices (8.0+)</td><td>✅ Authorized reseller</td><td>None</td><td>Large-scale multi-brand Android deployment</td></tr>
+          <tr><td>Knox Mobile Enrollment</td><td>Samsung only</td><td>✅ Samsung reseller or Samsung portal</td><td>None</td><td>Samsung-standardized fleet</td></tr>
+          <tr><td>QR Code</td><td>All Android Enterprise devices</td><td>❌ No reseller needed</td><td>Minimal (tap screen 6x + scan)</td><td>Smaller batches, existing devices</td></tr>
+          <tr><td>NFC</td><td>NFC-capable devices</td><td>❌</td><td>Minimal (NFC tap)</td><td>Enrolling devices in batches at a provisioning station</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 25</div>
+      <div class="qa-item">
+        <div class="qa-q">What is Google Zero Touch Enrollment and what are its requirements?</div>
+        <div class="qa-a">Zero Touch is Google's zero-touch provisioning for corporate Android devices — similar to Windows Autopilot. Devices automatically enroll in the MDM at first boot. Requirements: devices must be purchased from a Google-authorized Zero Touch reseller, and must run Android 8.0 or higher. The organization sets up configurations in the Zero Touch portal mapping devices to Intune.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What would you recommend for bulk enrollment of 1000 new Samsung Android phones?</div>
+        <div class="qa-a">For Samsung devices at scale, Knox Mobile Enrollment is ideal — purchase through a Samsung KME-authorized reseller, configure the KME portal to point to Intune, and devices auto-enroll on first boot without any user interaction. If a mix of Android brands is used, Google Zero Touch would be the better choice.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 26 ═══ -->
+  <section class="topic-section" id="t26">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 26</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Enrollment Restrictions</div>
+        <div class="topic-subtitle">Controlling WHAT can be enrolled, by WHOM, and under what conditions</div>
+      </div>
+    </div>
+
+    <div class="section-heading">What Are Enrollment Restrictions?</div>
+    <p>Enrollment Restrictions are Intune policies that control which devices are <strong>allowed to enroll</strong>. Before a device even gets managed, these restrictions act as a gatekeeper. You can block personal devices, require a minimum OS version, limit the number of devices per user, and more.</p>
+    <p><strong>Location in Intune:</strong> Devices → Enrollment → Enrollment device limit restrictions / Enrollment device platform restrictions</p>
+
+    <div class="section-heading">Type 1 — Device Platform Restrictions</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Restriction</th><th>What It Controls</th><th>Example Use</th></tr></thead>
+        <tbody>
+          <tr><td>Block platform</td><td>Block enrollment of specific OS platforms entirely</td><td>Block Linux or macOS if company doesn't support those</td></tr>
+          <tr><td>Block personally-owned devices</td><td>Allow only company-owned devices for a platform</td><td>Block personal Windows/iOS/Android from enrolling — corporate only</td></tr>
+          <tr><td>Minimum OS version</td><td>Require minimum OS version to enroll</td><td>Require iOS 16+ or Windows 10 21H2+ — older insecure devices blocked</td></tr>
+          <tr><td>Maximum OS version</td><td>Block devices above a certain OS version</td><td>Rarely used — for regulated environments requiring tested OS versions</td></tr>
+          <tr><td>Require device lock</td><td>Block enrollment if no screen lock configured</td><td>Block Android devices without PIN from enrolling</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">Type 2 — Device Limit Restrictions</div>
+    <p>Controls how many devices a single user can enroll. Default is 15 devices per user. You can lower this.</p>
+    <ul class="bullet-list">
+      <li><strong>Standard employees:</strong> Set limit to 2 (1 laptop + 1 phone)</li>
+      <li><strong>IT admins:</strong> Higher limit (10+) for testing and management</li>
+      <li><strong>Frontline workers:</strong> May need limit of 1 (shared devices, not user-specific)</li>
+    </ul>
+
+    <div class="section-heading">Priority and Assignment</div>
+    <p>Enrollment restrictions have a priority system. When multiple restrictions exist, the <strong>highest-priority restriction assigned to the user's group is applied</strong>. The default restriction (lowest priority) applies to everyone not covered by a specific restriction.</p>
+
+    <div class="realworld">
+      <div class="realworld-header"><div class="realworld-icon">🔐</div><div class="realworld-label">Real-World Enrollment Restriction Scenario</div></div>
+      <p><strong>Company policy:</strong> Only company-owned devices can enroll for most employees. Developers can enroll personal devices for testing. No iOS device below version 16 allowed.<br/>
+      <strong>Setup:</strong><br/>
+      Restriction 1 (Priority 100 — assigned to "Developers" group): Allow personal devices on all platforms. Max 5 devices.<br/>
+      Restriction 2 (Priority 200 — assigned to "All Employees"): Block personally-owned devices on all platforms. Minimum iOS 16.0. Minimum Android 11. Max 2 devices per user.<br/>
+      Default restriction: Block everything except IT Admins group.<br/>
+      <strong>Result:</strong> Developers can enroll personal test devices. Regular employees can only enroll company devices. Personal devices from employees get blocked with a "Device type not allowed" error.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 26</div>
+      <div class="qa-item">
+        <div class="qa-q">How would you prevent personal Android devices from enrolling in Intune while still allowing company-owned Android devices?</div>
+        <div class="qa-a">Create a Device Platform Restriction and for Android, set "Personally-owned devices" to Block. This allows only corporate-owned Android devices (those enrolled via Zero Touch, Knox, or QR code with corporate ownership flag) to enroll. Personal Android devices would be blocked with an error during enrollment.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What happens when a device fails an enrollment restriction?</div>
+        <div class="qa-a">The user receives an error message stating they're not allowed to enroll — such as "This device type is not allowed" or "Your device doesn't meet the minimum OS requirement." The device is not enrolled. Intune logs the failed enrollment attempt in the Device Enrollment failures report under Reports → Devices.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 27 ═══ -->
+  <section class="topic-section" id="t27">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 27</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Device Categories &amp; Dynamic Group Targeting</div>
+        <div class="topic-subtitle">Automatically organize enrolled devices into the right groups</div>
+      </div>
+    </div>
+
+    <div class="section-heading">What Are Device Categories?</div>
+    <p><strong>Device Categories</strong> allow you to classify devices into types when they enroll. During enrollment, the user is asked to select a category (e.g., "Corporate," "Warehouse," "Shared," "Developer"). The device is tagged with this category. You then create dynamic Azure AD groups that automatically include devices with that category tag.</p>
+
+    <div class="section-heading">Setting Up Device Categories</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Go to <strong>Intune → Devices → Device categories → Create device category</strong></div></li>
+      <li><div class="step-num">2</div><div>Create categories like: "Corporate Laptop," "Warehouse Scanner," "Shared Kiosk," "Developer Device"</div></li>
+      <li><div class="step-num">3</div><div>During Company Portal enrollment, the user sees a prompt: "What type of device is this?" They select a category.</div></li>
+      <li><div class="step-num">4</div><div>Create a <strong>dynamic Azure AD group</strong> with rule: <code>device.deviceCategory -eq "Corporate Laptop"</code></div></li>
+      <li><div class="step-num">5</div><div>Assign Intune policies (configuration profiles, apps, compliance policies) to that dynamic group.</div></li>
+      <li><div class="step-num">6</div><div>Any newly enrolled device that selects "Corporate Laptop" category automatically joins the group and gets the right policies. Zero manual work.</div></li>
+    </ol>
+
+    <div class="section-heading">Combining Device Categories with Dynamic Groups</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Device Category</th><th>Dynamic Group Rule</th><th>Policies Assigned</th></tr></thead>
+        <tbody>
+          <tr><td>Corporate Laptop</td><td>device.deviceCategory -eq "Corporate Laptop"</td><td>Full security baseline, BitLocker, corporate VPN, Office 365 apps</td></tr>
+          <tr><td>Warehouse Scanner</td><td>device.deviceCategory -eq "Warehouse Scanner"</td><td>Kiosk profile (only scanner app), simplified Wi-Fi config, no updates during work hours</td></tr>
+          <tr><td>Shared Kiosk</td><td>device.deviceCategory -eq "Shared Kiosk"</td><td>Shared device mode, auto-sign out, limited apps</td></tr>
+          <tr><td>Developer Device</td><td>device.deviceCategory -eq "Developer"</td><td>Relaxed restrictions, Developer tools, sideloading enabled</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip-block">
+      <div class="tip-icon">💡</div>
+      <div><strong>Pro Tip — Dynamic Group Delay:</strong> After a device is enrolled and categorized, it takes up to <strong>24 hours</strong> for Azure AD to evaluate dynamic group membership and add the device to the right group. During this window, the device won't have the category-based policies applied yet. For time-sensitive scenarios (like a kiosk that must work immediately), use a static group or pre-assign based on enrollment profile instead.</div>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 27</div>
+      <div class="qa-item">
+        <div class="qa-q">How do device categories work in Intune and why are they useful?</div>
+        <div class="qa-a">Device categories are labels that classify devices during enrollment. When a user enrolls via Company Portal, they're prompted to select a category. This category value is stored as an attribute on the device in Azure AD. Dynamic groups use this attribute to automatically include devices of a certain type, which then automatically receive the correct set of policies. It automates policy targeting without requiring manual device group management.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">A newly categorized device isn't receiving its category-based policies. What's the likely cause?</div>
+        <div class="qa-a">Azure AD dynamic group membership can take up to 24 hours to evaluate after a device is assigned a category. The device is enrolled but not yet added to the dynamic group. Check the Azure AD group membership tab for the device. If it's not there yet, wait for the evaluation cycle. You can also trigger a manual policy sync from Intune while waiting.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══ TOPIC 28 ═══ -->
+  <section class="topic-section" id="t28">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 28</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Troubleshooting Enrollment Failures</div>
+        <div class="topic-subtitle">The L2 skill — diagnosing and fixing every type of enrollment error</div>
+      </div>
+    </div>
+
+    <div class="section-heading">The Troubleshooting Mindset</div>
+    <p>Enrollment failures are the most common tickets you'll handle as an L1/L2 Intune admin. The key is a <strong>systematic approach</strong> — check each layer in order: License → MDM Scope → Enrollment Restriction → Platform-specific issue → Network/Certificate. Don't jump to complex causes when simple ones haven't been ruled out.</p>
+
+    <div class="section-heading">Enrollment Troubleshooting Checklist (Universal)</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div><strong>Does the user have an Intune license?</strong> → Check Azure AD → User → Licenses. Without Intune license, enrollment fails immediately.</div></li>
+      <li><div class="step-num">2</div><div><strong>Is the user in the MDM User Scope?</strong> → Check Azure AD → Mobility (MDM and MAM) → Microsoft Intune → MDM User Scope. If set to "Some," verify the user is in the included group.</div></li>
+      <li><div class="step-num">3</div><div><strong>Is there an enrollment restriction blocking this device?</strong> → Check Intune → Devices → Enrollment → Device Platform Restrictions. Is the platform blocked? Is it a personal device and personal devices are blocked?</div></li>
+      <li><div class="step-num">4</div><div><strong>Has the device limit been reached?</strong> → In Intune, find the user, check their enrolled device count vs their device limit restriction.</div></li>
+      <li><div class="step-num">5</div><div><strong>Is the enrollment error code documented?</strong> → Note the exact error code and look it up in Microsoft Docs or Intune Troubleshooting blade.</div></li>
+      <li><div class="step-num">6</div><div><strong>Use the Intune Troubleshooting Blade:</strong> → Intune → Troubleshoot &amp; Support → Search user → Review Enrollment failures, Device compliance, Policy issues all in one view.</div></li>
+    </ol>
+
+    <div class="section-heading">Key Log Files for Windows Enrollment Issues</div>
+    <div class="log-item">
+      <div class="log-title">📄 MDMDiagReport.html</div>
+      <div class="log-path">Run: MDMDiagnosticsTool.exe -out C:\Temp\MDMReport (as admin)</div>
+      <div class="log-desc">Comprehensive HTML report of all MDM enrollment state, applied policies, error codes. Your first stop for any Windows MDM issue. Readable in any browser.</div>
+    </div>
+    <div class="log-item">
+      <div class="log-title">📄 Event Viewer — Device Management</div>
+      <div class="log-path">Event Viewer → Applications and Services → Microsoft → Windows → DeviceManagement-Enterprise-Diagnostics-Provider</div>
+      <div class="log-desc">Low-level MDM events. Look for Error level events with enrollment-related event IDs. Event ID 76 = enrollment success. Other IDs indicate specific failure types.</div>
+    </div>
+    <div class="log-item">
+      <div class="log-title">📄 IntuneManagementExtension.log</div>
+      <div class="log-path">C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\</div>
+      <div class="log-desc">IME agent log — covers Win32 app installation, PowerShell script execution, Proactive Remediation. Most app deployment and script failures are diagnosed here.</div>
+    </div>
+    <div class="log-item">
+      <div class="log-title">📄 AADCloudAPPlugin.log</div>
+      <div class="log-path">C:\Windows\System32\config\systemprofile\AppData\Local\Microsoft\Windows\CloudAPPlugin\</div>
+      <div class="log-desc">Azure AD authentication log during Windows sign-in. If Azure AD Join is failing, check here for token or certificate errors.</div>
+    </div>
+
+    <div class="section-heading">Common Error Codes &amp; Fixes</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Error Code / Message</th><th>Platform</th><th>Cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>0x80180026</td><td>Windows</td><td>MDM auto-enrollment failed — MDM scope not set or user not in scope group</td><td>Check MDM User Scope in Azure AD Mobility settings. Add user to scope group.</td></tr>
+          <tr><td>0x800705B4</td><td>Windows</td><td>Self-deploying Autopilot timeout — usually TPM 2.0 missing or not enabled</td><td>Enable TPM 2.0 in BIOS. Verify device has TPM 2.0 chip.</td></tr>
+          <tr><td>0x801c0003</td><td>Windows</td><td>Azure AD Join not allowed — user not permitted to join devices</td><td>Check Azure AD → Devices → Device Settings → Users may join devices to Azure AD. Ensure user is allowed.</td></tr>
+          <tr><td>80180014</td><td>Windows</td><td>User not licensed for Intune</td><td>Assign Intune license to user in admin.microsoft.com</td></tr>
+          <tr><td>Device type not allowed</td><td>All</td><td>Enrollment restriction blocking this device type or personal device</td><td>Review device platform restrictions. Change if intended. If user is on correct platform, check personally-owned restriction.</td></tr>
+          <tr><td>APNs certificate expired</td><td>iOS/macOS</td><td>Annual APNs cert expired</td><td>Renew immediately with SAME Apple ID at identity.apple.com/pushcert. Upload new .pem to Intune.</td></tr>
+          <tr><td>Device limit reached</td><td>All</td><td>User has reached their device enrollment limit</td><td>Remove old/stale devices from Intune for that user, OR increase the device limit restriction for that user's group.</td></tr>
+          <tr><td>Company Portal says not licensed</td><td>iOS/Android</td><td>User account has no Intune license or Intune service plan disabled within their license</td><td>Assign/check license. Expand license in Azure AD to ensure Intune service plan is enabled.</td></tr>
+          <tr><td>Android enrollment fails with "Work profile not created"</td><td>Android</td><td>Android version below minimum for work profile (requires Android 5.0+, recommended 8.0+)</td><td>Update device Android version or check enrollment restriction minimum OS setting</td></tr>
+          <tr><td>Autopilot "Oops, something went wrong" during ESP</td><td>Windows</td><td>A required app failed to install during ESP timeout</td><td>Check ESP configuration — identify blocking apps. Review IME log on device. Increase ESP timeout or remove the blocking app from ESP required list temporarily.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">Intune Troubleshooting Blade — Your Best Friend</div>
+    <p>The single most powerful tool for L1/L2 troubleshooting in Intune is the <strong>Troubleshooting + Support blade</strong>:</p>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Go to <strong>Intune → Troubleshoot &amp; Support</strong></div></li>
+      <li><div class="step-num">2</div><div>Type the affected user's name or email in the search box</div></li>
+      <li><div class="step-num">3</div><div>See instantly: Assigned licenses, enrolled devices, group memberships, app assignment status, policy assignment status, enrollment failures</div></li>
+      <li><div class="step-num">4</div><div>Click any device to see its full details — compliance status, last check-in, applied/failed policies</div></li>
+      <li><div class="step-num">5</div><div>Under "Enrollment Failures" — see recent failed enrollment attempts with exact error codes and timestamps</div></li>
+    </ol>
+
+    <div class="realworld">
+      <div class="realworld-header"><div class="realworld-icon">🔧</div><div class="realworld-label">Real Troubleshooting Scenario</div></div>
+      <p><strong>Ticket:</strong> "I'm trying to enroll my new company iPhone but I get an error saying I'm not authorized."<br/>
+      <strong>Admin investigation:</strong><br/>
+      Step 1: Go to Intune → Troubleshoot &amp; Support → Search user → Check licenses. <em>User has M365 E3 but Intune service plan shows "Disabled."</em> That's the cause.<br/>
+      Step 2: Go to admin.microsoft.com → User → Licenses → Expand M365 E3 → Enable "Microsoft Intune" service plan.<br/>
+      Step 3: Wait 5 minutes for license propagation. Ask user to retry enrollment.<br/>
+      <strong>Resolution:</strong> Enrollment succeeded. Total time: 8 minutes. Root cause: Intune service plan was disabled within the E3 license bundle — a common configuration oversight.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 28</div>
+      <div class="qa-item">
+        <div class="qa-q">Walk me through your troubleshooting process when a device fails to enroll in Intune.</div>
+        <div class="qa-a">I'd start with the basics in order: (1) Check if the user has an Intune license assigned and all service plans are enabled. (2) Verify the user is in the MDM User Scope in Azure AD. (3) Check enrollment restrictions — is the platform or device type blocked? (4) Check device limits. (5) If all of those pass, I'd note the exact error code, check the Intune Troubleshooting blade for that user to see enrollment failure details, and then check device-specific logs like MDMDiagReport or Event Viewer for Windows, or debug logs from the Company Portal app for mobile.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is the MDMDiagnosticsTool and when do you use it?</div>
+        <div class="qa-a">MDMDiagnosticsTool.exe is a Windows built-in tool that generates a comprehensive HTML report (MDMDiagReport.html) containing all MDM enrollment state, applied policies, pending policies, error codes, and management state. I use it when diagnosing Windows device enrollment failures or when policies appear to not be applying correctly on a specific device. You run it as admin and the output file can be shared with Microsoft Support if escalation is needed.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is error 0x80180026 in Intune and how do you fix it?</div>
+        <div class="qa-a">Error 0x80180026 indicates MDM auto-enrollment failed on a Windows device. The most common causes are: the MDM User Scope in Azure AD is not set to "All" or the user isn't in the "Some" scope group, or the user isn't licensed for Intune. Fix by checking Azure AD → Mobility → Microsoft Intune → MDM User Scope and ensuring the user is covered by the scope.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">An iOS device won't enroll and shows a certificate error. What do you check?</div>
+        <div class="qa-a">First check the APNs certificate in Intune → Tenant Administration → Apple MDM Push Certificate — verify it hasn't expired. If expired, renew it immediately with the same Apple ID. If the cert is valid, check that the device can reach Apple's servers (apple.com, push.apple.com must be reachable). Also check if the device's date/time is correct — certificate validation fails if the device clock is significantly off.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Block Complete Banner -->
+  <div style="background:linear-gradient(135deg,rgba(14,165,233,0.07),rgba(34,197,94,0.05));border:1px solid rgba(14,165,233,0.22);border-radius:16px;padding:30px;margin-top:48px;text-align:center;">
+    <div style="font-size:30px;margin-bottom:11px;">🎉</div>
+    <div style="font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--heading);margin-bottom:9px;">Block 3 Complete!</div>
+    <div style="color:var(--text2);font-size:13.5px;max-width:580px;margin:0 auto 18px;line-height:1.7;">You've mastered every device enrollment method across all 4 platforms. From zero-touch Autopilot to iOS ADE, Android Enterprise, and bulk provisioning — plus a complete troubleshooting framework for when things go wrong.</div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap;">
+      <div style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;">✅ Blocks 1–3 Done — 28 Topics</div>
+      <div style="background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--accent2);font-family:'IBM Plex Mono',monospace;">⬡ Block 4 Next: Configuration Profiles</div>
+      <div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--purple);font-family:'IBM Plex Mono',monospace;">📋 101 Topics Remaining</div>
+    </div>
+  </div>
+
+</div><!-- end content -->
+</div><!-- end main -->
+
+<a href="#" class="scroll-top">↑</a>
+
+<script>
+  const sections = document.querySelectorAll('.topic-section');
+  const navItems = document.querySelectorAll('.nav-item[href^="#"]');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.remove('active');
+          if (item.getAttribute('href') === '#' + id) item.classList.add('active');
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>

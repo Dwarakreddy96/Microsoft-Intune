@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 7: Endpoint Security</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#06080e;--bg2:#090b17;--bg3:#0c0f1e;
+    --sb:#050710;--border:#14192e;
+    --acc:#ef4444;--acc2:#f87171;--acc3:#fca5a5;
+    --blue:#60a5fa;--purple:#a78bfa;--green:#34d399;
+    --orange:#fb923c;--yellow:#fbbf24;--teal:#2dd4bf;--pink:#f472b6;
+    --text:#ffe8e8;--text2:#8a8aaa;--text3:#3c3c5a;
+    --h:#fff5f5;--card:#080810;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;font-weight:300;display:flex;min-height:100vh;line-height:1.75;}
+  #sb{width:285px;min-width:285px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+  #sb::-webkit-scrollbar{width:3px;}
+  #sb::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .shd{padding:23px 20px 15px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#050710,#090b17);}
+  .slo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--h);letter-spacing:-.5px;display:flex;align-items:center;gap:10px;}
+  .lic{width:34px;height:34px;background:linear-gradient(135deg,var(--acc),var(--orange));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(239,68,68,.35);}
+  .ssu{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .bbg{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(251,146,60,.1));border:1px solid rgba(239,68,68,.28);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-top:10px;letter-spacing:.5px;}
+  .snv{padding:12px 0;flex:1;}
+  .nlb{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 20px 4px;font-family:'IBM Plex Mono',monospace;}
+  .ni{display:flex;align-items:flex-start;gap:9px;padding:8px 20px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none;color:var(--text2);font-size:12.5px;line-height:1.4;}
+  .ni:hover{background:rgba(239,68,68,.07);color:var(--text);border-left-color:var(--acc);}
+  .ni.active{background:rgba(239,68,68,.11);color:var(--acc2);border-left-color:var(--acc);}
+  .nn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;margin-top:1px;}
+  .ni.active .nn{color:var(--acc);}
+  .plk{display:flex;align-items:center;gap:7px;padding:7px 11px;font-size:11px;color:var(--text3);text-decoration:none;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;margin:0 12px 4px;transition:all .2s;}
+  .plk:hover{color:var(--text2);border-color:rgba(239,68,68,.22);}
+  .sft{padding:13px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .pbar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .pfill{height:100%;width:50%;background:linear-gradient(90deg,var(--acc),var(--orange));border-radius:2px;animation:pg 2s ease-in-out infinite alternate;}
+  @keyframes pg{from{box-shadow:0 0 4px var(--acc);}to{box-shadow:0 0 14px var(--orange);}}
+  #main{margin-left:285px;flex:1;min-height:100vh;}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(6,8,14,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 46px;display:flex;align-items:center;justify-content:space-between;}
+  .bcrumb{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:7px;}
+  .bcrumb span{color:var(--acc2);}
+  .tcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 13px;}
+  .cont{padding:50px 46px 80px;max-width:980px;}
+  /* Hero */
+  .hero{margin-bottom:56px;position:relative;padding:44px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(239,68,68,.13) 0%,transparent 70%);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(251,146,60,.08) 0%,transparent 70%);border-radius:50%;}
+  .htag{display:inline-flex;align-items:center;gap:6px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:20px;padding:5px 14px;font-size:10.5px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;letter-spacing:1px;}
+  .htitle{font-family:'Syne',sans-serif;font-size:39px;font-weight:800;color:var(--h);line-height:1.1;letter-spacing:-1px;margin-bottom:13px;}
+  .htitle span{background:linear-gradient(135deg,var(--acc),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hdesc{font-size:14.5px;color:var(--text2);max-width:620px;line-height:1.8;}
+  .hmeta{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .hmi{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);}
+  .dot.g{background:var(--green);box-shadow:0 0 8px var(--green);}
+  .dot.b{background:var(--blue);box-shadow:0 0 8px var(--blue);}
+  /* Topic */
+  .ts{margin-bottom:68px;scroll-margin-top:66px;opacity:0;animation:fu .5s ease forwards;}
+  .ts:nth-child(1){animation-delay:.05s;}.ts:nth-child(2){animation-delay:.1s;}.ts:nth-child(3){animation-delay:.15s;}.ts:nth-child(4){animation-delay:.2s;}.ts:nth-child(5){animation-delay:.25s;}.ts:nth-child(6){animation-delay:.3s;}.ts:nth-child(7){animation-delay:.35s;}.ts:nth-child(8){animation-delay:.4s;}.ts:nth-child(9){animation-delay:.45s;}.ts:nth-child(10){animation-delay:.5s;}
+  @keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .th{display:flex;align-items:flex-start;gap:15px;margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--border);}
+  .tnum{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--acc);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+  .ttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--h);letter-spacing:-.5px;line-height:1.2;margin-bottom:4px;}
+  .tsub{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .sh{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--h);margin:28px 0 10px;display:flex;align-items:center;gap:10px;}
+  .sh::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,var(--acc),var(--orange));border-radius:2px;flex-shrink:0;}
+  p{color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:12px;}
+  p strong{color:var(--text);font-weight:600;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(239,68,68,.1);color:var(--acc2);padding:2px 6px;border-radius:4px;border:1px solid rgba(239,68,68,.18);}
+  /* Cards */
+  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:17px;transition:border-color .2s,transform .2s;}
+  .card:hover{border-color:rgba(239,68,68,.3);transform:translateY(-2px);}
+  .cico{font-size:21px;margin-bottom:8px;}
+  .ctit{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:var(--h);margin-bottom:6px;}
+  .cbod{font-size:12.5px;color:var(--text2);line-height:1.6;}
+  /* Table */
+  .tw{overflow-x:auto;margin:16px 0;border-radius:11px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+  th{padding:12px 15px;text-align:left;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--h);letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 15px;color:var(--text2);border-bottom:1px solid rgba(20,25,46,.5);vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(239,68,68,.02);}
+  /* Tags */
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+  .tr{background:rgba(239,68,68,.15);color:var(--acc2);border:1px solid rgba(239,68,68,.2);}
+  .to{background:rgba(251,146,60,.15);color:var(--orange);border:1px solid rgba(251,146,60,.2);}
+  .tg{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.2);}
+  .tb{background:rgba(96,165,250,.15);color:var(--blue);border:1px solid rgba(96,165,250,.2);}
+  .tp{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.2);}
+  .ty{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+  /* Info boxes */
+  .ib{border-radius:10px;padding:16px 18px;margin:16px 0;border-left:3px solid;}
+  .ib .bt{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:6px;}
+  .ib p{margin:0;font-size:13.5px;color:var(--text2);}
+  .ibr{background:rgba(239,68,68,.06);border-color:var(--acc);}
+  .ibr .bt{color:var(--acc2);}
+  .ibb{background:rgba(96,165,250,.06);border-color:var(--blue);}
+  .ibb .bt{color:var(--blue);}
+  .ibg{background:rgba(52,211,153,.06);border-color:var(--green);}
+  .ibg .bt{color:var(--green);}
+  .ibo{background:rgba(251,146,60,.06);border-color:var(--orange);}
+  .ibo .bt{color:var(--orange);}
+  .ibp{background:rgba(167,139,250,.06);border-color:var(--purple);}
+  .ibp .bt{color:var(--purple);}
+  .iby{background:rgba(251,191,36,.06);border-color:var(--yellow);}
+  .iby .bt{color:var(--yellow);}
+  /* Steps */
+  .steps{list-style:none;margin:13px 0;display:flex;flex-direction:column;gap:10px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .sn{min-width:25px;height:25px;background:linear-gradient(135deg,var(--acc),var(--orange));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .steps li strong{color:var(--text);}
+  /* Bullets */
+  .bl{list-style:none;margin:10px 0 13px;display:flex;flex-direction:column;gap:7px;}
+  .bl li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .bl li::before{content:'▹';color:var(--acc);font-size:13px;flex-shrink:0;margin-top:2px;}
+  .bl li strong{color:var(--text);}
+  /* Realworld */
+  .rw{background:linear-gradient(135deg,rgba(52,211,153,.04),rgba(96,165,250,.04));border:1px solid rgba(52,211,153,.18);border-radius:12px;padding:19px;margin:20px 0;}
+  .rwh{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .rwi{font-size:18px;}
+  .rwl{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--green);}
+  .rw p{color:var(--text2);font-size:13px;margin:0;line-height:1.7;}
+  .rw p+p{margin-top:8px;}
+  /* Interview */
+  .iq{background:linear-gradient(135deg,rgba(167,139,250,.04),rgba(239,68,68,.04));border:1px solid rgba(167,139,250,.18);border-radius:13px;padding:21px;margin:24px 0;}
+  .iqh{font-family:'Syne',sans-serif;font-weight:700;font-size:14.5px;color:var(--purple);margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+  .qa{margin-bottom:14px;}
+  .qa:last-child{margin-bottom:0;}
+  .qq{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;gap:8px;}
+  .qq::before{content:'Q.';color:var(--purple);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .qans{font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.65;display:flex;gap:8px;}
+  .qans::before{content:'A.';color:var(--acc2);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  /* Tip */
+  .tip{display:flex;gap:12px;align-items:flex-start;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:9px;padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.65;}
+  .tpic{font-size:16px;flex-shrink:0;}
+  /* Code */
+  .code{background:#03040a;border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fca5a5;overflow-x:auto;line-height:1.75;}
+  .cm{color:var(--text3);}
+  .kw{color:#f472b6;}
+  .st{color:#86efac;}
+  .hl{color:var(--blue);}
+  .vl{color:#fcd34d;}
+  /* ASR rule visual */
+  .asr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:16px 0;}
+  .asr-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px;border-left:3px solid var(--acc);}
+  .asr-title{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--h);margin-bottom:5px;}
+  .asr-desc{font-size:12px;color:var(--text2);line-height:1.55;}
+  .asr-attack{font-size:11px;color:var(--acc2);margin-top:5px;font-family:'IBM Plex Mono',monospace;}
+  /* Security node cards */
+  .sec-node-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0;}
+  .sec-node{border-radius:10px;padding:15px;border:1px solid;transition:transform .2s;}
+  .sec-node:hover{transform:translateY(-2px);}
+  .sn-av{background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.22);}
+  .sn-enc{background:rgba(96,165,250,.05);border-color:rgba(96,165,250,.22);}
+  .sn-fw{background:rgba(251,146,60,.05);border-color:rgba(251,146,60,.22);}
+  .sn-edr{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.22);}
+  .sn-asr{background:rgba(167,139,250,.05);border-color:rgba(167,139,250,.22);}
+  .sn-acc{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.22);}
+  .sn-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--h);margin-bottom:5px;}
+  .sn-body{font-size:12px;color:var(--text2);line-height:1.55;}
+  /* BitLocker status */
+  .bl-status{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0;}
+  .bls{border-radius:10px;padding:14px;border:1px solid;}
+  .bls-on{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.22);}
+  .bls-off{background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.22);}
+  .bls-susp{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.22);}
+  .bls-wait{background:rgba(96,165,250,.05);border-color:rgba(96,165,250,.22);}
+  .bls-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--h);margin-bottom:5px;}
+  .bls-body{font-size:12px;color:var(--text2);line-height:1.6;}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0;}
+  .stup{position:fixed;bottom:26px;right:26px;width:40px;height:40px;background:linear-gradient(135deg,var(--acc),var(--orange));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;box-shadow:0 4px 18px rgba(239,68,68,.3);border:none;color:white;z-index:200;text-decoration:none;transition:transform .2s;}
+  .stup:hover{transform:translateY(-3px);}
+  @media(max-width:768px){#sb{transform:translateX(-100%);}#main{margin-left:0;}.cont{padding:26px 16px;}.topbar{padding:11px 16px;}.htitle{font-size:26px;}}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="shd">
+    <div class="slo"><div class="lic">🛡️</div>Intune Mastery</div>
+    <div class="ssu">Complete Learning Series</div>
+    <div class="bbg">⬡ Block 7 of 14 — Endpoint Security</div>
+  </div>
+  <div class="snv">
+    <div class="nlb">Block 7 Topics</div>
+    <a href="#t66" class="ni active"><span class="nn">66</span>Endpoint Security Node Overview</a>
+    <a href="#t67" class="ni"><span class="nn">67</span>Microsoft Defender Antivirus Policy</a>
+    <a href="#t68" class="ni"><span class="nn">68</span>Defender for Endpoint Integration</a>
+    <a href="#t69" class="ni"><span class="nn">69</span>Attack Surface Reduction (ASR) Rules</a>
+    <a href="#t70" class="ni"><span class="nn">70</span>Firewall Policies</a>
+    <a href="#t71" class="ni"><span class="nn">71</span>Disk Encryption — BitLocker</a>
+    <a href="#t72" class="ni"><span class="nn">72</span>Account Protection — LAPS &amp; Credential Guard</a>
+    <a href="#t73" class="ni"><span class="nn">73</span>Security Baselines</a>
+    <a href="#t74" class="ni"><span class="nn">74</span>Microsoft Secure Score</a>
+    <a href="#t75" class="ni"><span class="nn">75</span>Endpoint Detection &amp; Response (EDR) Onboarding</a>
+    <div class="nlb" style="margin-top:12px;">Previous Blocks</div>
+    <a href="intune-block1-foundations.html" class="plk">← Block 1: Foundations</a>
+    <a href="intune-block2-azuread.html" class="plk">← Block 2: Azure AD</a>
+    <a href="intune-block3-enrollment.html" class="plk">← Block 3: Enrollment</a>
+    <a href="intune-block4-configprofiles.html" class="plk">← Block 4: Config Profiles</a>
+    <a href="intune-block5-compliance.html" class="plk">← Block 5: Compliance</a>
+    <a href="intune-block6-appmanagement.html" class="plk">← Block 6: App Management</a>
+    <div class="ni" style="opacity:.4;cursor:default;font-size:11.5px;"><span class="nn">→</span>Block 8: RBAC (Next)</div>
+  </div>
+  <div class="sft">
+    <div>Overall Progress</div>
+    <div style="color:var(--acc2);margin:2px 0;">Block 7 / 14 — 75 Topics Done</div>
+    <div class="pbar"><div class="pfill"></div></div>
+  </div>
+</nav>
+
+<div id="main">
+<div class="topbar">
+  <div class="bcrumb">Intune Mastery <span>›</span> Block 7 <span>›</span> Endpoint Security</div>
+  <div class="tcount">10 Topics · ~3.5 Hours</div>
+</div>
+<div class="cont">
+
+  <div class="hero">
+    <div class="htag">🔴 BLOCK 7 · ENDPOINT SECURITY</div>
+    <h1 class="htitle">Hardening Every<br/><span>Managed Device</span></h1>
+    <p class="hdesc">Endpoint Security is where Intune becomes a serious security tool. Defender AV policies, BitLocker encryption, Windows Firewall management, Attack Surface Reduction rules, EDR onboarding, Security Baselines, LAPS, Credential Guard, and Secure Score — this block covers every security-hardening tool Intune provides and shows you how to use them to build a real Zero Trust endpoint posture.</p>
+    <div class="hmeta">
+      <div class="hmi"><div class="dot"></div>10 Topics</div>
+      <div class="hmi"><div class="dot g"></div>Full Security Stack</div>
+      <div class="hmi"><div class="dot b"></div>MDE Integration Deep Dive</div>
+    </div>
+  </div>
+
+  <!-- T66 -->
+  <section class="ts" id="t66">
+    <div class="th"><div class="tnum">TOPIC 66</div>
+      <div><div class="ttl">Endpoint Security Node — Overview of All Blades</div>
+      <div class="tsub">Your security command center inside Intune</div></div>
+    </div>
+    <div class="sh">What Is the Endpoint Security Node?</div>
+    <p>The <strong>Endpoint Security</strong> node in Intune is a dedicated security management area — separate from Configuration Profiles — specifically built for hardening devices against cyber threats. It gives security teams a focused workspace with pre-tuned security policies, deep Microsoft Defender for Endpoint integration, and a unified view of the security posture across your managed fleet.</p>
+    <p>Navigate to it via: <strong>Intune portal → Endpoint Security</strong></p>
+
+    <div class="sh">The Six Security Blades</div>
+    <div class="sec-node-grid">
+      <div class="sec-node sn-av">
+        <div class="sn-title">🦠 Antivirus</div>
+        <div class="sn-body">Configure Microsoft Defender Antivirus settings — real-time protection, cloud protection, scan schedules, exclusions, PUA protection. The AV engine configuration blade.</div>
+      </div>
+      <div class="sec-node sn-enc">
+        <div class="sn-title">🔒 Disk Encryption</div>
+        <div class="sn-body">Configure BitLocker (Windows) and FileVault (macOS). Silent enablement, TPM settings, startup PIN, recovery key escrow to Azure AD. Your encryption management center.</div>
+      </div>
+      <div class="sec-node sn-fw">
+        <div class="sn-title">🔥 Firewall</div>
+        <div class="sn-body">Windows Defender Firewall configuration per network profile (Domain, Private, Public). Enable/disable, default inbound/outbound behavior, firewall rules for specific apps and ports.</div>
+      </div>
+      <div class="sec-node sn-edr">
+        <div class="sn-title">🛡️ Endpoint Detection &amp; Response</div>
+        <div class="sn-body">Onboard Windows, macOS, iOS, Android devices to Microsoft Defender for Endpoint. Configure EDR telemetry. The gateway to MDE's detection and investigation capabilities.</div>
+      </div>
+      <div class="sec-node sn-asr">
+        <div class="sn-title">⚔️ Attack Surface Reduction</div>
+        <div class="sn-body">ASR rules block common attack techniques used by malware and ransomware. Also contains exploit protection, application control (WDAC), device control (USB block), and web protection.</div>
+      </div>
+      <div class="sec-node sn-acc">
+        <div class="sn-title">👤 Account Protection</div>
+        <div class="sn-body">Windows Hello for Business, LAPS (Local Administrator Password Solution), Credential Guard. Protects credentials and local accounts from theft and lateral movement attacks.</div>
+      </div>
+    </div>
+
+    <div class="sh">Security Overview Dashboard</div>
+    <p>At the top of Endpoint Security is the <strong>Security overview</strong> dashboard — a single-pane view of your organization's security posture. It shows:</p>
+    <ul class="bl">
+      <li><strong>Unhealthy endpoints count</strong> — devices with active security issues</li>
+      <li><strong>Security task status</strong> — remediation items from MDE threat &amp; vulnerability management</li>
+      <li><strong>Microsoft Secure Score</strong> — your overall security score vs industry benchmark</li>
+      <li><strong>Defender for Endpoint onboarding status</strong> — how many devices are reporting to MDE</li>
+      <li><strong>Quick access to all six blades</strong> — one click to any security policy area</li>
+    </ul>
+
+    <div class="sh">Security Tasks — MDE to Intune Workflow</div>
+    <p>One of the most powerful integrations: when <strong>Microsoft Defender for Endpoint</strong> discovers a vulnerability or misconfiguration on managed devices (via its Threat &amp; Vulnerability Management engine), it can automatically push a <strong>Security Task</strong> to Intune. The IT admin sees the task in Intune's Endpoint Security node — clicks Accept — and Intune deploys the remediation policy automatically. The vulnerability is patched without ever leaving the Intune portal.</p>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 66</div>
+      <div class="qa"><div class="qq">What is the Endpoint Security node in Intune and how does it differ from Configuration Profiles?</div>
+      <div class="qans">The Endpoint Security node is a dedicated security-focused management area in Intune with six specialized blades: Antivirus, Disk Encryption, Firewall, EDR, ASR, and Account Protection. It differs from Configuration Profiles in depth and focus — Endpoint Security provides more granular, security-specific settings with deep MDE integration, Security Baselines, and a unified security posture dashboard. Configuration Profiles are general-purpose for any device setting; Endpoint Security is purpose-built for hardening.</div></div>
+      <div class="qa"><div class="qq">What are Security Tasks in the Endpoint Security node?</div>
+      <div class="qans">Security Tasks are remediation items automatically generated by Microsoft Defender for Endpoint's Threat and Vulnerability Management engine when it discovers vulnerabilities or misconfigurations on managed devices. These tasks appear in Intune's Endpoint Security overview. When an admin accepts a task, Intune deploys the remediation policy automatically — bridging the gap between threat detection (MDE) and policy enforcement (Intune) without requiring manual configuration.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T67 -->
+  <section class="ts" id="t67">
+    <div class="th"><div class="tnum">TOPIC 67</div>
+      <div><div class="ttl">Microsoft Defender Antivirus Policy via Intune</div>
+      <div class="tsub">Configuring AV protection across your Windows fleet from the cloud</div></div>
+    </div>
+    <div class="sh">Why Configure Defender via Intune?</div>
+    <p>Microsoft Defender Antivirus is built into every Windows 10/11 device — but its default settings aren't always optimal for enterprise security. Via Intune, you can enforce specific AV configurations across thousands of devices, prevent users from disabling protection, configure cloud-delivered protection strength, manage exclusions centrally, and ensure consistent AV behavior fleet-wide.</p>
+
+    <div class="sh">Key Defender AV Settings to Configure</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Setting Category</th><th>Key Settings</th><th>Recommended Value</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Cloud Protection</strong></td><td>Turn on cloud-delivered protection</td><td>Enabled</td><td>Cloud protection provides near-real-time threat intelligence — catches zero-day threats before signatures are updated. ~50x faster than signature-only detection.</td></tr>
+          <tr><td><strong>Cloud Protection</strong></td><td>Cloud-delivered protection level</td><td>High or Not Configured (let Microsoft decide)</td><td>Higher levels block more aggressively. "High" adds zero-tolerance blocking for unknown files. Use with caution — can cause false positives in some environments.</td></tr>
+          <tr><td><strong>Cloud Protection</strong></td><td>Automatic sample submission</td><td>Send safe samples automatically</td><td>Sends suspicious files to Microsoft for analysis — improves detection for everyone. "Safe samples" sends non-sensitive files automatically.</td></tr>
+          <tr><td><strong>Real-time Protection</strong></td><td>Turn on real-time protection</td><td>Enabled</td><td>Real-time scanning catches threats as they execute. Should never be disabled in enterprise.</td></tr>
+          <tr><td><strong>Real-time Protection</strong></td><td>Monitor file and program activity</td><td>Enabled</td><td>Monitors both read and write file activity for malicious behavior.</td></tr>
+          <tr><td><strong>Scan</strong></td><td>Schedule scan type</td><td>Quick scan daily or Full scan weekly</td><td>Quick scans check the most common malware locations. Full scans are more thorough but impact performance.</td></tr>
+          <tr><td><strong>Scan</strong></td><td>Run scheduled scan only when computer is on but not in use</td><td>Enabled</td><td>Prevents scans from interrupting user work — runs when PC is idle.</td></tr>
+          <tr><td><strong>PUA Protection</strong></td><td>Detect potentially unwanted applications</td><td>Block</td><td>Blocks adware, toolbars, cryptominers, and PUPs that aren't malware but degrade performance/security.</td></tr>
+          <tr><td><strong>Exclusions</strong></td><td>File path/extension/process exclusions</td><td>Minimum — only what's verified necessary</td><td>Exclusions are a common attack vector. Attackers place malware in excluded paths. Audit exclusions regularly.</td></tr>
+          <tr><td><strong>Tamper Protection</strong></td><td>Enable Tamper Protection</td><td>Enabled</td><td>Prevents local users and malware from disabling Defender AV settings. Requires MDE integration.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Creating a Defender AV Policy</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>Intune → Endpoint Security → Antivirus → Create Policy</div></li>
+      <li><div class="sn">2</div><div>Platform: <strong>Windows 10, Windows 11, and Windows Server</strong> → Profile: <strong>Microsoft Defender Antivirus</strong></div></li>
+      <li><div class="sn">3</div><div>Configure the settings above according to your organization's security requirements</div></li>
+      <li><div class="sn">4</div><div>Assign to <strong>All Devices</strong> (every Windows device should have consistent AV policy)</div></li>
+      <li><div class="sn">5</div><div>Monitor: Endpoint Security → Antivirus → view "Unhealthy endpoints" — devices where AV is not running correctly</div></li>
+    </ol>
+
+    <div class="sh">Defender AV Exclusions — Handle with Extreme Caution</div>
+    <p>Exclusions tell Defender not to scan certain files, folders, extensions, or processes. They're necessary for some legitimate business scenarios (antivirus scanning databases can corrupt them; certain backup software conflicts with AV scanning) but are also the #1 way attackers bypass AV protection.</p>
+    <ul class="bl">
+      <li><strong>Only add exclusions that are verified necessary</strong> by the app vendor's documentation.</li>
+      <li><strong>Use process exclusions</strong> instead of folder exclusions when possible — scope is narrower.</li>
+      <li><strong>Never exclude entire system paths</strong> like <code>C:\Windows\System32</code> — this disables protection for the most critical area.</li>
+      <li><strong>Audit exclusions quarterly</strong> — remove any that are no longer needed.</li>
+      <li><strong>MDE alert:</strong> Defender for Endpoint will generate alerts if exclusions are overly broad — use this as a guide.</li>
+    </ul>
+
+    <div class="ib ibr">
+      <div class="bt">🚨 Tamper Protection — Critical Setting</div>
+      <p><strong>Tamper Protection</strong> prevents local users (even local admins) and malware from modifying Defender AV settings through local registry edits, PowerShell, or WMI. Without it, ransomware's first step is often disabling AV before launching the attack. With Tamper Protection enabled via Intune + MDE, any attempt to modify Defender settings is blocked and logged. This is one of the highest-value single security settings you can enable.</p>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🦠</div><div class="rwl">Real-World Defender AV Policy Incident</div></div>
+      <p><strong>Incident:</strong> A manufacturing company had Defender AV deployed but not configured via Intune. Employees disabled real-time protection "because it slowed their PCs." A ransomware infection encrypted 200 workstations overnight — the attacker's first step had been disabling AV.<br/>
+      <strong>Remediation:</strong> Deploy Intune Endpoint Security AV policy → Enable Tamper Protection → Require real-time protection → Enable cloud protection. Also create a Compliance Policy requiring Defender AV to be running — non-compliant devices blocked from network resources via Conditional Access.<br/>
+      <strong>Result:</strong> AV can no longer be disabled by users or malware. Any attempt generates an alert in MDE. The company hasn't had an AV-bypass incident since.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 67</div>
+      <div class="qa"><div class="qq">What is Tamper Protection in Defender AV and why is it important?</div>
+      <div class="qans">Tamper Protection prevents local users, local admins, and malware from modifying Microsoft Defender Antivirus settings locally — through registry edits, PowerShell commands, WMI calls, or Group Policy. Without it, ransomware routinely disables AV as its first step before launching the main attack. With Tamper Protection enabled via Intune and MDE, any modification attempt is blocked at the OS level and generates an alert in Defender for Endpoint. It's one of the most impactful single security settings available.</div></div>
+      <div class="qa"><div class="qq">Why should AV exclusions be kept to a minimum and reviewed regularly?</div>
+      <div class="qans">AV exclusions are a major attack vector. Attackers who gain initial access to a system will often place malware in folders or under processes that are excluded from scanning — knowing AV won't inspect those locations. Broad exclusions like entire system directories effectively disable protection for large swaths of the system. Exclusions should only be added based on verified vendor documentation, should be as narrow as possible (process-level rather than folder-level), and should be audited quarterly to remove any that are no longer needed.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T68 -->
+  <section class="ts" id="t68">
+    <div class="th"><div class="tnum">TOPIC 68</div>
+      <div><div class="ttl">Defender for Endpoint Integration with Intune</div>
+      <div class="tsub">Connecting Microsoft's EDR platform to Intune for unified threat response</div></div>
+    </div>
+    <div class="sh">Defender for Endpoint (MDE) — What Is It?</div>
+    <p><strong>Microsoft Defender for Endpoint (MDE)</strong> is Microsoft's enterprise Endpoint Detection and Response (EDR) platform — a separate product from Defender AV. While Defender AV protects against known threats in real-time, MDE provides deep behavioral analysis, threat hunting, automated investigation, and response for sophisticated attacks that AV might miss.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Feature</th><th>Defender AV</th><th>Defender for Endpoint (MDE)</th></tr></thead>
+        <tbody>
+          <tr><td>Primary function</td><td>Antivirus — prevent known threats</td><td>EDR — detect, investigate, respond to breaches</td></tr>
+          <tr><td>Detection approach</td><td>Signature + heuristics + cloud lookup</td><td>Behavioral analysis, timeline, threat hunting</td></tr>
+          <tr><td>Visibility</td><td>Per-device AV status</td><td>Full attack timeline, process tree, network connections, file activity</td></tr>
+          <tr><td>License</td><td>Built into Windows 10/11 — free</td><td>Requires MDE P1 (M365 E3/Business Premium) or P2 (M365 E5)</td></tr>
+          <tr><td>Management portal</td><td>Windows Security app / Intune</td><td>security.microsoft.com (Microsoft 365 Defender)</td></tr>
+          <tr><td>Onboarding needed?</td><td>✅ Works out of box</td><td>✅ Devices must be onboarded (via Intune or config package)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Connecting MDE to Intune — Setup Steps</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Open the MDE portal:</strong> Go to <code>security.microsoft.com</code> → Settings → Endpoints → Advanced features → Microsoft Intune connection → Toggle ON.</div></li>
+      <li><div class="sn">2</div><div><strong>Confirm in Intune:</strong> Intune → Endpoint Security → Microsoft Defender for Endpoint → The connection status should show "Available" or "Connected."</div></li>
+      <li><div class="sn">3</div><div><strong>Enable MDM Compliance Policy evaluation:</strong> In Intune's MDE settings, enable "Connect Android/iOS/Windows devices to Microsoft Defender for Endpoint." This allows MDE risk scores to flow into Intune compliance.</div></li>
+      <li><div class="sn">4</div><div><strong>Onboard devices:</strong> Create an EDR Onboarding profile in Intune (Endpoint Security → EDR → Create Policy) → Assign to devices. This deploys the MDE sensor to Windows devices silently.</div></li>
+      <li><div class="sn">5</div><div><strong>Verify onboarding:</strong> In MDE portal → Device inventory — devices should appear within 30–60 minutes of onboarding.</div></li>
+    </ol>
+
+    <div class="sh">What Integration Enables</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🎯</div>
+        <div class="ctit">Risk-Based Compliance</div>
+        <div class="cbod">Intune compliance policies can require "MDE risk score ≤ Medium." If MDE detects active malware, device becomes High risk → Non-Compliant → Conditional Access blocks corporate resources until threat is remediated.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📋</div>
+        <div class="ctit">Security Tasks</div>
+        <div class="cbod">MDE's Threat &amp; Vulnerability Management pushes remediation tasks to Intune automatically. Admin accepts the task → Intune deploys a policy to fix the vulnerability. No manual policy creation needed.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔧</div>
+        <div class="ctit">Security Configuration Management</div>
+        <div class="cbod">MDE can manage Endpoint Security policies for devices that aren't fully MDM-enrolled — like unmanaged workstations. A lightweight alternative to full Intune enrollment for security-only use cases.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔍</div>
+        <div class="ctit">Unified Investigation</div>
+        <div class="cbod">When MDE alerts fire, the security analyst can see which Intune policies are applied to the affected device — right from the MDE portal. Context-rich investigation without switching tools.</div>
+      </div>
+    </div>
+
+    <div class="sh">MDE Plans — P1 vs P2</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Feature</th><th>MDE Plan 1 (M365 E3 / Business Premium)</th><th>MDE Plan 2 (M365 E5)</th></tr></thead>
+        <tbody>
+          <tr><td>Next-gen protection (AV)</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Attack Surface Reduction</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Device control (USB)</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Endpoint detection &amp; response (EDR)</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Automated investigation &amp; response</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Threat hunting (advanced queries)</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Threat &amp; vulnerability management</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Deception techniques</td><td>❌</td><td>✅</td></tr>
+          <tr><td>Risk-based Conditional Access (via compliance)</td><td>⚠️ Basic</td><td>✅ Full</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 68</div>
+      <div class="qa"><div class="qq">What is the difference between Microsoft Defender Antivirus and Microsoft Defender for Endpoint?</div>
+      <div class="qans">Defender AV is the built-in antivirus that prevents known threats using signatures, heuristics, and cloud lookup — it's free with Windows 10/11. Defender for Endpoint (MDE) is a separate licensed EDR platform that detects sophisticated attacks through behavioral analysis, provides full attack timelines, enables threat hunting, and performs automated investigation and response. AV prevents; MDE detects and responds to breaches that get past prevention layers.</div></div>
+      <div class="qa"><div class="qq">How does MDE integration enhance Intune compliance policies?</div>
+      <div class="qans">Once MDE is connected to Intune, compliance policies can include a "maximum device threat level" condition — Low, Medium, or High. MDE evaluates each device's risk level based on active threats, vulnerabilities, and suspicious behaviors. If a device has active malware and MDE classifies it as High risk, the Intune compliance policy marks it Non-Compliant → Conditional Access blocks access to Exchange, SharePoint, and Teams until the threat is remediated and MDE downgrades the risk level.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T69 -->
+  <section class="ts" id="t69">
+    <div class="th"><div class="tnum">TOPIC 69</div>
+      <div><div class="ttl">Attack Surface Reduction (ASR) Rules</div>
+      <div class="tsub">Blocking the techniques attackers use — before malware even runs</div></div>
+    </div>
+    <div class="sh">What Are ASR Rules?</div>
+    <p><strong>Attack Surface Reduction rules</strong> are security policies that block specific behaviors commonly used in malware and ransomware attacks — <em>regardless of whether the attacking file is recognized as malware</em>. They work at the behavior level: instead of asking "is this file malicious?", ASR asks "is this action something legitimate software does?"</p>
+    <p>For example: legitimate Word documents don't create child processes. If a Word document tries to spawn cmd.exe or PowerShell, that's a classic macro-based attack technique. The ASR rule "Block Office applications from creating child processes" stops this — even for a brand new zero-day exploit with no signature.</p>
+
+    <div class="sh">The Three ASR Modes</div>
+    <div class="cg">
+      <div class="card" style="border-color:rgba(251,191,36,.3);">
+        <div class="cico">👁️</div>
+        <div class="ctit">Audit Mode</div>
+        <div class="cbod">The rule LOGS what would have been blocked without actually blocking anything. Safe to enable immediately — zero production impact. Review logs for 2-4 weeks to identify false positives before switching to Block. Start here ALWAYS.</div>
+      </div>
+      <div class="card" style="border-color:rgba(239,68,68,.3);">
+        <div class="cico">🚫</div>
+        <div class="ctit">Block Mode</div>
+        <div class="cbod">The rule actively BLOCKS the behavior and logs it. A notification pops up to the user. The blocked action is recorded in MDE for investigation. Switch to this after validating no false positives in Audit mode.</div>
+      </div>
+      <div class="card" style="border-color:rgba(52,211,153,.3);">
+        <div class="cico">⚠️</div>
+        <div class="ctit">Warn Mode</div>
+        <div class="cbod">Shows a warning to the user that the action was blocked, but allows them to bypass it with a justification. A middle ground — blocks by default but allows exceptions. Good for rules that occasionally have legitimate uses.</div>
+      </div>
+    </div>
+
+    <div class="sh">The Essential ASR Rules — Know These Cold</div>
+    <div class="asr-grid">
+      <div class="asr-card">
+        <div class="asr-title">Block Office apps from creating child processes</div>
+        <div class="asr-desc">Prevents Word, Excel, PowerPoint from launching other processes (cmd.exe, PowerShell, wscript.exe). Blocks macro-based malware delivery — one of the most common attack vectors.</div>
+        <div class="asr-attack">Blocks: Macro malware, phishing attachments with embedded code</div>
+      </div>
+      <div class="asr-card">
+        <div class="asr-title">Block credential stealing from LSASS</div>
+        <div class="asr-desc">Prevents tools like Mimikatz from reading credential hashes from the LSASS process memory. Without this, any local admin can dump all credentials from memory instantly.</div>
+        <div class="asr-attack">Blocks: Mimikatz, credential dumping, lateral movement</div>
+      </div>
+      <div class="asr-card">
+        <div class="asr-title">Block untrusted/unsigned processes from USB</div>
+        <div class="asr-desc">Prevents unsigned executables from running directly off USB drives. Blocks USB-delivered malware — a common insider threat and physical access attack vector.</div>
+        <div class="asr-attack">Blocks: USB-borne malware, BadUSB attacks, physical access attacks</div>
+      </div>
+      <div class="asr-card">
+        <div class="asr-title">Block executable content in email/webmail</div>
+        <div class="asr-desc">Prevents .exe, .dll, .js, .vbs files delivered via email from executing. Kills the initial access phase of phishing attacks delivered as email attachments.</div>
+        <div class="asr-attack">Blocks: Phishing attachments, malicious email links, drive-by downloads</div>
+      </div>
+      <div class="asr-card">
+        <div class="asr-title">Block Office apps from injecting code into other processes</div>
+        <div class="asr-desc">Prevents Office apps from injecting malicious code into other running processes (process injection). Blocks a common technique for escalating privileges and evading detection.</div>
+        <div class="asr-attack">Blocks: Process injection attacks, DLL injection via Office</div>
+      </div>
+      <div class="asr-card">
+        <div class="asr-title">Block JavaScript/VBScript from launching executables</div>
+        <div class="asr-desc">Prevents script interpreters (wscript.exe, cscript.exe) from launching downloaded executables. Blocks script-based malware delivery — extremely common in enterprise attacks.</div>
+        <div class="asr-attack">Blocks: Script-based malware loaders, ransomware delivery scripts</div>
+      </div>
+      <div class="asr-card">
+        <div class="asr-title">Block persistence through WMI event subscription</div>
+        <div class="asr-desc">Prevents malware from using WMI (Windows Management Instrumentation) to create persistent event subscriptions that survive reboots. A stealthy persistence mechanism used by APTs.</div>
+        <div class="asr-attack">Blocks: APT persistence, fileless malware, stealthy backdoors</div>
+      </div>
+      <div class="asr-card">
+        <div class="asr-title">Block Win32 API calls from Office macros</div>
+        <div class="asr-desc">Prevents VBA macros in Office from making Windows API calls (CreateProcess, WriteProcessMemory). Cripples advanced macro-based malware that goes beyond simple child process creation.</div>
+        <div class="asr-attack">Blocks: Advanced macro malware, VBA-based shellcode execution</div>
+      </div>
+    </div>
+
+    <div class="sh">Configuring ASR Rules via Intune</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>Intune → Endpoint Security → Attack Surface Reduction → Create Policy → Platform: Windows → Profile: <strong>Attack Surface Reduction Rules</strong></div></li>
+      <li><div class="sn">2</div><div><strong>Phase 1:</strong> Set ALL rules to <strong>Audit mode</strong>. Assign to All Devices. Deploy.</div></li>
+      <li><div class="sn">3</div><div><strong>Review Audit logs for 2-4 weeks:</strong> In MDE portal → Events → Filter by ASR. Check which rules triggered and whether the triggers were legitimate activities or actual attack behaviors. Note any false positives (legitimate apps triggering rules).</div></li>
+      <li><div class="sn">4</div><div><strong>Configure exclusions:</strong> For any legitimate apps that trigger ASR rules, add them as exclusions in the ASR policy (specific file path or process exclusion).</div></li>
+      <li><div class="sn">5</div><div><strong>Phase 2:</strong> Switch high-confidence rules to <strong>Block mode</strong>. Start with the highest-impact rules (credential stealing, Office child processes). Keep complex rules in Audit longer.</div></li>
+    </ol>
+
+    <div class="tip">
+      <div class="tpic">💡</div>
+      <div><strong>Never Jump Straight to Block:</strong> ASR rules can break legitimate applications if not tested in Audit mode first. For example, the "Block Office from creating child processes" rule can break some email add-ins and PDF printers that use Word to create files. Always Audit first for at least 2 weeks in your real production environment before switching to Block. False positives found in Audit mode can be excluded before enforcement.</div>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 69</div>
+      <div class="qa"><div class="qq">What are ASR rules and how do they differ from traditional antivirus?</div>
+      <div class="qans">Attack Surface Reduction rules block specific behaviors commonly used in cyberattacks — regardless of whether the file is recognized as malware. Traditional AV matches files against known malware signatures. ASR works at the behavior level — blocking actions like Office spawning child processes or credential dumping from LSASS even for zero-day unknown threats. ASR prevents the techniques attackers use; AV identifies known malicious files. They complement each other — ASR reduces the attack surface, AV catches known threats.</div></div>
+      <div class="qa"><div class="qq">Why must ASR rules be tested in Audit mode before enabling Block mode?</div>
+      <div class="qans">Audit mode logs what would be blocked without actually blocking — allowing you to see false positives before they impact production. Some ASR rules can break legitimate applications — for example, "Block Office from creating child processes" can interfere with email add-ins or PDF printers that use Office APIs. Switching to Block without Audit testing first can break business-critical workflows, causing urgent rollback scenarios. Always Audit for 2-4 weeks in the real production environment, configure exclusions for legitimate triggers, then switch to Block confidently.</div></div>
+      <div class="qa"><div class="qq">Which ASR rule would block Mimikatz credential dumping?</div>
+      <div class="qans">The "Block credential stealing from LSASS process" ASR rule (GUID: 9e6c4e1f-7d60-472f-ba1a-a39ef669e4b0). Mimikatz reads credential hashes from the LSASS process memory by opening it with special access rights. This ASR rule blocks any process from opening LSASS with the access flags that credential dumping tools require — effectively preventing Mimikatz and similar tools from extracting credentials, even when run by a local administrator.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T70 -->
+  <section class="ts" id="t70">
+    <div class="th"><div class="tnum">TOPIC 70</div>
+      <div><div class="ttl">Firewall Policies via Intune</div>
+      <div class="tsub">Managing Windows Defender Firewall centrally across the enterprise</div></div>
+    </div>
+    <div class="sh">Why Manage Firewall via Intune?</div>
+    <p>Windows Defender Firewall is enabled by default — but its default configuration may not match your organization's security requirements. Via Intune, you can ensure the firewall is enabled on all network profiles, configure inbound/outbound defaults, push specific firewall rules for corporate apps, and prevent users from disabling the firewall — all without Group Policy or on-prem infrastructure.</p>
+
+    <div class="sh">Three Firewall Profiles</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🏢</div>
+        <div class="ctit">Domain Profile</div>
+        <div class="cbod">Active when the device is connected to a corporate domain network. Usually the most permissive — domain controllers and internal resources need to communicate. For Hybrid AADJ devices connected to on-prem network.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🏠</div>
+        <div class="ctit">Private Profile</div>
+        <div class="cbod">Active when the user manually marks a network as Private (home network). More permissive than Public but less than Domain. Most employees on home Wi-Fi will use this profile.</div>
+      </div>
+      <div class="card">
+        <div class="cico">☕</div>
+        <div class="ctit">Public Profile</div>
+        <div class="cbod">Active on any network not marked as Private or Domain — coffee shops, airports, hotels. Should be the MOST restrictive profile. Block all inbound connections that aren't explicitly allowed.</div>
+      </div>
+    </div>
+
+    <div class="sh">Key Firewall Settings to Configure</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Setting</th><th>Recommended</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Firewall enabled (all profiles)</td><td>✅ Enabled</td><td>Never let the firewall be disabled — fundamental host-based protection.</td></tr>
+          <tr><td>Block all inbound connections (Public profile)</td><td>✅ Enabled</td><td>On public Wi-Fi, there should be no unsolicited inbound connections to a corporate laptop.</td></tr>
+          <tr><td>Default inbound action (Private profile)</td><td>Block</td><td>Block all inbound unless explicitly allowed by a rule.</td></tr>
+          <tr><td>Default outbound action (all profiles)</td><td>Allow</td><td>Most organizations allow all outbound by default. If restricting outbound, use explicit allow rules.</td></tr>
+          <tr><td>Allow unicast responses to multicast/broadcast</td><td>Yes</td><td>Required for some network discovery and print functionality.</td></tr>
+          <tr><td>Notification to user when blocked</td><td>Yes</td><td>Helps users report legitimate apps being blocked.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Deploying Firewall Rules for Specific Apps</div>
+    <p>Beyond the base firewall profile settings, you can deploy specific rules — "Allow TCP port 8443 inbound for Corporate VPN app." Create these under: Endpoint Security → Firewall → Create Policy → Profile: <strong>Windows Firewall Rules</strong></p>
+
+    <div class="code">
+<span class="cm"># Example: Allow a specific corporate app through firewall</span>
+<span class="cm"># Rule Name: Allow Corporate App TCP 8080</span>
+<span class="cm"># Direction: Inbound</span>
+<span class="cm"># Action: Allow</span>
+<span class="cm"># Protocol: TCP</span>
+<span class="cm"># Local Port: 8080</span>
+<span class="cm"># App: C:\Program Files\CorporateApp\app.exe</span>
+<span class="cm"># Profiles: Domain, Private (not Public)</span>
+
+<span class="cm"># This deploys the rule silently to all targeted devices</span>
+<span class="cm"># No need for local admin rights to add firewall rules</span>
+    </div>
+
+    <div class="ib ibb">
+      <div class="bt">💡 Firewall Policy vs Group Policy Firewall</div>
+      <p>On-prem environments historically used Group Policy to manage Windows Firewall. Via Intune, cloud-native and remote devices get the same firewall configuration without needing domain connectivity. For Hybrid AADJ devices, both Group Policy and Intune firewall policies can apply — ensure they don't conflict. Intune Endpoint Security Firewall policies generally win when there's a conflict with Group Policy firewall settings on Intune-enrolled devices.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 70</div>
+      <div class="qa"><div class="qq">What are the three Windows Firewall profiles and which is the most restrictive?</div>
+      <div class="qans">Domain profile — active on corporate domain networks (most permissive, needed for internal communication). Private profile — active on home or trusted networks (moderately restrictive). Public profile — active on untrusted public networks like coffee shops and airports (most restrictive). The Public profile should block all inbound connections by default — a corporate laptop on a public Wi-Fi network should accept no unsolicited inbound traffic whatsoever.</div></div>
+      <div class="qa"><div class="qq">How do you deploy a specific firewall rule to all managed Windows devices via Intune?</div>
+      <div class="qans">In Intune, Endpoint Security → Firewall → Create Policy → Platform: Windows → Profile: Windows Firewall Rules. Create a rule specifying: name, direction (inbound/outbound), action (allow/block), protocol (TCP/UDP/Any), local port or remote port, and optionally a specific application path. Assign to the target device group. Devices receive the firewall rule silently on next check-in — no local admin rights required, no Group Policy needed.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T71 -->
+  <section class="ts" id="t71">
+    <div class="th"><div class="tnum">TOPIC 71</div>
+      <div><div class="ttl">Disk Encryption — BitLocker Policy, Silent Enablement &amp; Recovery Keys</div>
+      <div class="tsub">Protecting data at rest on every Windows and macOS device in your fleet</div></div>
+    </div>
+    <div class="sh">Why BitLocker Is Non-Negotiable</div>
+    <p>Laptops get stolen. Hard drives get lost. Without disk encryption, anyone who physically obtains a drive can read every file on it — including HR records, source code, client data, financial documents — by simply booting from a USB drive and mounting the unencrypted drive. BitLocker makes stolen data inaccessible without the encryption key. For any organization with a laptop fleet, mandatory BitLocker is table stakes.</p>
+
+    <div class="sh">BitLocker States — Know These for Troubleshooting</div>
+    <div class="bl-status">
+      <div class="bls bls-on">
+        <div class="bls-title">✅ Protection On</div>
+        <div class="bls-body">BitLocker is fully enabled and protecting the drive. The drive is encrypted and Intune has the recovery key escrowed. This is the target state.</div>
+      </div>
+      <div class="bls bls-off">
+        <div class="bls-title">❌ Protection Off</div>
+        <div class="bls-body">BitLocker is not enabled. Drive is unencrypted. Compliance policy should flag this as Non-Compliant immediately.</div>
+      </div>
+      <div class="bls bls-susp">
+        <div class="bls-title">⚠️ Suspended</div>
+        <div class="bls-body">BitLocker is enabled but temporarily suspended — usually during OS updates or BIOS changes. Should auto-resume. If stuck suspended, Intune reports device as non-compliant depending on policy.</div>
+      </div>
+      <div class="bls bls-wait">
+        <div class="bls-title">🔵 Waiting for Activation</div>
+        <div class="bls-body">BitLocker is being configured but waiting for user to set a PIN or waiting for device restart. Policy received but activation not yet complete.</div>
+      </div>
+    </div>
+
+    <div class="sh">Configuring BitLocker — Silent Enablement</div>
+    <p><strong>Silent enablement</strong> is the enterprise gold standard — BitLocker activates automatically in the background without any user prompts, PINs, or interaction. It requires a <strong>TPM 2.0 chip</strong> and Azure AD Joined or Hybrid Azure AD Joined devices.</p>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>Intune → Endpoint Security → Disk Encryption → Create Policy → Platform: Windows → Profile: <strong>BitLocker</strong></div></li>
+      <li><div class="sn">2</div><div><strong>BitLocker base settings:</strong><br/>
+        Enable full disk encryption: ✅<br/>
+        Hide BitLocker prompt during Azure AD/Intune join: ✅ (key for silent enablement)<br/>
+        Allow standard users to enable during Autopilot: ✅</div></li>
+      <li><div class="sn">3</div><div><strong>OS drive settings:</strong><br/>
+        OS drive encryption: Require<br/>
+        Compatible TPM startup: Allow TPM (no additional PIN for silent)<br/>
+        Recovery key: Enable — store in Azure AD automatically</div></li>
+      <li><div class="sn">4</div><div><strong>Recovery options:</strong><br/>
+        Save BitLocker recovery info to Azure AD: ✅ Required<br/>
+        Recovery key rotation: Enable — after each use, a new key is generated</div></li>
+      <li><div class="sn">5</div><div>Assign to All Devices → Deploy. On next check-in, TPM-equipped devices silently enable BitLocker and escrow the recovery key to Azure AD. User sees nothing.</div></li>
+    </ol>
+
+    <div class="sh">Recovery Key Escrow — Critical Configuration</div>
+    <p>When BitLocker is enabled via Intune, the recovery key is automatically stored in <strong>Azure AD</strong>. This is critical — when a user forgets their BitLocker PIN or a device prompts for a recovery key (after a BIOS change or failed TPM boot), IT can retrieve the key from:</p>
+    <ul class="bl">
+      <li><strong>Intune portal:</strong> Devices → find device → Recovery keys tab → View BitLocker recovery key</li>
+      <li><strong>Azure AD portal:</strong> Azure AD → Devices → find device → BitLocker keys</li>
+      <li><strong>Helpdesk delegation:</strong> You can give helpdesk staff permission to view recovery keys without giving them full Intune admin — via Intune RBAC scope and custom roles.</li>
+    </ul>
+
+    <div class="sh">BitLocker Requirements — Checklist</div>
+    <ul class="bl">
+      <li><strong>TPM 2.0 chip:</strong> Required for silent enablement. Verify in Device Manager → Security Devices → TPM 2.0.</li>
+      <li><strong>UEFI boot mode:</strong> Required (not Legacy BIOS). Check in msinfo32 → BIOS Mode: UEFI.</li>
+      <li><strong>Secure Boot enabled:</strong> Strongly recommended — BitLocker + Secure Boot prevents bootkit attacks.</li>
+      <li><strong>Azure AD or Hybrid AADJ:</strong> Required for recovery key escrow to Azure AD.</li>
+      <li><strong>Windows 10/11 Pro or Enterprise:</strong> BitLocker not available on Windows Home editions.</li>
+    </ul>
+
+    <div class="ib ibr">
+      <div class="bt">🚨 BitLocker Compliance vs Config Profile — Common Confusion</div>
+      <p>A <strong>Compliance Policy</strong> with "Require BitLocker" checks IF BitLocker is on — and marks the device Non-Compliant if it's off. But it does NOT turn BitLocker on.<br/>
+      An <strong>Endpoint Security BitLocker policy</strong> actually ENABLES BitLocker on the device.<br/>
+      You need BOTH: the Endpoint Security policy to turn BitLocker on, and the Compliance policy to verify it stays on and enforce Conditional Access consequences if it's disabled. Common mistake: deploying only the Compliance Policy and wondering why BitLocker isn't enabling — the Compliance Policy can't enable it, only evaluate it.</p>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">💻</div><div class="rwl">Real-World BitLocker Deployment</div></div>
+      <p><strong>Scenario:</strong> 300-device laptop fleet. Company needs 100% BitLocker coverage for GDPR compliance and cyber insurance requirements. Currently at 40% — some users dismissed the BitLocker setup wizard.<br/>
+      <strong>Solution:</strong><br/>
+      1. Deploy Endpoint Security BitLocker policy → Silent enablement → Assign to All Devices<br/>
+      2. Deploy Compliance Policy → Require BitLocker → Actions: Day 1 mark non-compliant → Conditional Access blocks SharePoint for non-compliant devices<br/>
+      3. Monitor: Within 3 days, Intune silently enables BitLocker on all remaining 180 devices during next check-in. Recovery keys escrowed to Azure AD automatically.<br/>
+      4. Compliance dashboard shows 98% compliant (2 devices had hardware issues — legacy without TPM).<br/>
+      <strong>Result:</strong> GDPR BitLocker requirement met. Cyber insurance audit passed. Zero user calls about BitLocker setup.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 71</div>
+      <div class="qa"><div class="qq">What is BitLocker silent enablement and what are its requirements?</div>
+      <div class="qans">Silent enablement means BitLocker activates automatically in the background without any user prompts or PIN setup. Requirements: TPM 2.0 chip (verifies the boot environment), UEFI boot mode (not Legacy BIOS), the device must be Azure AD Joined or Hybrid Azure AD Joined (for recovery key escrow), and the Intune BitLocker policy must have "Hide BitLocker prompt" set. Without TPM 2.0, Intune must prompt the user to set a password or startup PIN — silent enablement is not possible.</div></div>
+      <div class="qa"><div class="qq">Where does Intune store BitLocker recovery keys and how does a helpdesk admin retrieve one?</div>
+      <div class="qans">Intune automatically stores BitLocker recovery keys in Azure AD when the BitLocker policy is configured to save recovery info to Azure AD. To retrieve: in Intune portal, find the device, click the Recovery keys tab, and view the BitLocker recovery key. Alternatively in the Azure AD portal, find the device and view BitLocker keys. RBAC roles can be scoped to allow helpdesk staff to view recovery keys without full Intune admin access — principle of least privilege applied to recovery key access.</div></div>
+      <div class="qa"><div class="qq">A device shows BitLocker status as "Suspended" — should you be concerned?</div>
+      <div class="qans">A temporary suspension is normal and expected during Windows OS updates, BIOS/UEFI firmware updates, or hardware configuration changes — these require suspending BitLocker to allow the boot environment to change without triggering a recovery key prompt. BitLocker should automatically resume after the next reboot. If a device shows Suspended for more than 1-2 days with no pending updates, investigate — run manage-bde -status to see the suspension reason and manually resume with manage-bde -protectors -enable C: if needed.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T72 -->
+  <section class="ts" id="t72">
+    <div class="th"><div class="tnum">TOPIC 72</div>
+      <div><div class="ttl">Account Protection — LAPS &amp; Credential Guard</div>
+      <div class="tsub">Protecting local accounts and credential theft — stopping lateral movement</div></div>
+    </div>
+    <div class="sh">The Account Protection Threat</div>
+    <p>One of the most common lateral movement techniques in enterprise attacks: an attacker gains access to one workstation, extracts the local administrator password, and finds that the same password is set on every other workstation in the company (because IT set them all to the same password for convenience years ago). They now own the entire fleet. <strong>LAPS</strong> and <strong>Credential Guard</strong> are the two primary defenses against this.</p>
+
+    <div class="sh">LAPS — Local Administrator Password Solution</div>
+    <p><strong>Windows LAPS</strong> (built into Windows since April 2023, replacing the old standalone LAPS tool) automatically generates a <strong>unique, random password for the local Administrator account</strong> on each device and stores it in Azure AD (or on-prem AD). The password rotates on a schedule. IT can retrieve it per-device when needed.</p>
+
+    <div class="sh">How LAPS Works</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>LAPS is configured via Intune Endpoint Security → Account Protection → Create Policy → Windows LAPS</div></li>
+      <li><div class="sn">2</div><div>Key settings:<br/>
+        <ul class="bl" style="margin-top:6px;">
+          <li><strong>Backup directory:</strong> Azure AD (for cloud-only/AADJ devices) or Active Directory (for Hybrid AADJ)</li>
+          <li><strong>Password age (days):</strong> 30 days recommended — rotating monthly</li>
+          <li><strong>Password complexity:</strong> Large letters + small letters + numbers + specials</li>
+          <li><strong>Password length:</strong> 14–20 characters recommended</li>
+          <li><strong>Post-auth action:</strong> Reset password after local admin account is used (prevents reuse after IT access)</li>
+        </ul>
+      </div></li>
+      <li><div class="sn">3</div><div>LAPS generates a unique random password per device → stores in Azure AD. Every device has a different local admin password.</div></li>
+      <li><div class="sn">4</div><div>When IT needs local admin access: Intune → Device → Local admin password → View password → Use it → Password is automatically rotated after use (if configured).</div></li>
+    </ol>
+
+    <div class="sh">Why LAPS Is Critical for Security</div>
+    <ul class="bl">
+      <li><strong>Stops Pass-the-Hash attacks:</strong> Even if an attacker extracts one device's local admin hash, it only works on that one device — not the entire fleet.</li>
+      <li><strong>Eliminates shared credentials:</strong> No more "the IT password is Password1!" across all workstations.</li>
+      <li><strong>Audit trail:</strong> Every LAPS password retrieval is logged — who viewed which device's password and when.</li>
+      <li><strong>Emergency access:</strong> If a device is locked out (user forgot password, BitLocker boot issues), LAPS provides a tested recovery path without reimage.</li>
+    </ul>
+
+    <div class="sh">Credential Guard</div>
+    <p><strong>Windows Defender Credential Guard</strong> uses hardware virtualization (Hyper-V) to isolate credential hashes in a protected virtual container (VSM — Virtual Secure Mode). Even if an attacker has SYSTEM-level access or runs Mimikatz on the machine, they cannot access the credential hashes because they're isolated in a hardware-protected environment unreachable from the normal OS.</p>
+
+    <div class="tw">
+      <table>
+        <thead><tr><th>Aspect</th><th>Without Credential Guard</th><th>With Credential Guard</th></tr></thead>
+        <tbody>
+          <tr><td>Credential storage</td><td>LSASS process in normal OS memory</td><td>Isolated in hardware-protected VSM container</td></tr>
+          <tr><td>Mimikatz can dump hashes?</td><td>✅ Yes — easily</td><td>❌ No — VSM is inaccessible from normal OS</td></tr>
+          <tr><td>Required hardware</td><td>None</td><td>CPU with virtualization extensions (modern Intel/AMD), UEFI, Secure Boot, TPM 2.0</td></tr>
+          <tr><td>Impact on performance</td><td>N/A</td><td>Minimal — VSM runs alongside main OS</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Enabling Credential Guard via Intune</div>
+    <p>Intune → Endpoint Security → Account Protection → Create Policy → Profile: <strong>Windows Hello for Business</strong> (or Settings Catalog → Device Guard → Enable Virtualization Based Security, Configure Secure Launch, etc.)</p>
+    <div class="code">
+<span class="cm"># Via Settings Catalog (alternative to Endpoint Security):</span>
+<span class="cm"># Search "Credential Guard" → Enable</span>
+<span class="cm"># Turn On Virtualization Based Security: Enable</span>
+<span class="cm"># Select Platform Security Level: Secure Boot and DMA Protection</span>
+<span class="cm"># Credential Guard Configuration: Enable with UEFI lock</span>
+<span class="cm"># (UEFI lock prevents disabling via registry — most secure option)</span>
+
+<span class="cm"># Requirements: TPM 2.0, UEFI, Secure Boot, 64-bit Windows</span>
+<span class="cm"># Verify via: msinfo32 → Virtualization-based security: Running</span>
+    </div>
+
+    <div class="sh">Windows Hello for Business</div>
+    <p>Also under Account Protection: <strong>Windows Hello for Business</strong> replaces passwords for Windows sign-in with biometrics (face, fingerprint) or a device-bound PIN that is cryptographically linked to the TPM — making it phishing-resistant (unlike passwords which can be stolen via phishing).</p>
+    <ul class="bl">
+      <li><strong>PIN ≠ Password:</strong> WHfB PIN is tied to the specific device's TPM. Even if someone knows your PIN, they can't use it on another device.</li>
+      <li><strong>Phishing-resistant:</strong> No password to steal via phishing — the credential is hardware-bound.</li>
+      <li><strong>Configure via Intune:</strong> Endpoint Security → Account Protection → Windows Hello for Business profile</li>
+      <li><strong>Key settings:</strong> Require Hello (not optional), minimum PIN length (8+), allow biometrics, require anti-spoofing for face recognition</li>
+    </ul>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 72</div>
+      <div class="qa"><div class="qq">What is LAPS and what security problem does it solve?</div>
+      <div class="qans">LAPS (Local Administrator Password Solution) automatically generates a unique random password for the local Administrator account on each device and stores it in Azure AD (or on-prem AD), rotating it on a schedule. It solves the lateral movement problem caused by shared local admin passwords — in many environments, all workstations have the same local admin password, meaning one compromised device gives an attacker admin access to the entire fleet. With LAPS, each device has a unique password — compromising one device's local admin credential doesn't help the attacker on any other device.</div></div>
+      <div class="qa"><div class="qq">How does Credential Guard protect against Mimikatz?</div>
+      <div class="qans">Credential Guard uses hardware virtualization to move credential hashes (NTLM hashes, Kerberos tickets) from the normal LSASS process into an isolated Virtual Secure Mode container protected by the CPU's virtualization extensions. Mimikatz works by reading from the LSASS process memory, but with Credential Guard, the actual credential material is in the VSM container which is completely inaccessible from the normal OS — even from SYSTEM context or kernel level. Mimikatz can still run but gets empty or unusable data instead of real credential hashes.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T73 -->
+  <section class="ts" id="t73">
+    <div class="th"><div class="tnum">TOPIC 73</div>
+      <div><div class="ttl">Security Baselines</div>
+      <div class="tsub">Microsoft's pre-configured security settings — enterprise hardening in one click</div></div>
+    </div>
+    <div class="sh">What Are Security Baselines?</div>
+    <p><strong>Security Baselines</strong> are pre-configured groups of Windows settings that Microsoft recommends based on feedback from the Microsoft security teams, product groups, NIST, CIS, and real-world enterprise deployments. Instead of manually researching and configuring hundreds of individual security settings, you deploy a Security Baseline — which provides a tested, comprehensive security configuration covering Defender AV, BitLocker, Firewall, Windows Hello, Edge, account policies, and more.</p>
+
+    <div class="sh">Available Security Baselines in Intune</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Baseline</th><th>Covers</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Windows Security Baseline</strong></td><td>~350 Windows settings — AV, Firewall, BitLocker, Account policies, Windows Hello, User Account Control, Edge, IE, SMB signing, etc.</td><td>Any organization managing Windows 10/11 devices — should be the starting point for all enterprise Intune deployments.</td></tr>
+          <tr><td><strong>Defender for Endpoint Security Baseline</strong></td><td>MDE-specific settings — EDR telemetry, Tamper Protection, sample submission, enhanced detection features.</td><td>Organizations with MDE P1/P2 license — layered on top of the Windows Security Baseline.</td></tr>
+          <tr><td><strong>Microsoft Edge Security Baseline</strong></td><td>~75 Edge browser settings — SmartScreen, password manager, click-to-play, pop-up blocker, site isolation, etc.</td><td>Organizations standardizing on Edge — deploy alongside the Windows Baseline.</td></tr>
+          <tr><td><strong>Microsoft 365 Apps Baseline</strong></td><td>Office app security — macro settings, add-in restrictions, Protected View, file type blocking, telemetry settings.</td><td>Organizations deploying M365 Apps — hardens Office against macro-based attacks.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Security Baseline vs Manual Configuration</div>
+    <div class="cg">
+      <div class="card" style="border-color:rgba(239,68,68,.3);">
+        <div class="cico">⚙️</div>
+        <div class="ctit">Manual Configuration</div>
+        <div class="cbod">Research each security setting individually. Configure 300+ settings across multiple Intune profiles. Requires deep expertise. Time-consuming. Easy to miss something. You own the configuration design entirely.</div>
+      </div>
+      <div class="card" style="border-color:rgba(52,211,153,.3);">
+        <div class="cico">🎯</div>
+        <div class="ctit">Security Baseline</div>
+        <div class="cbod">Deploy in minutes. Microsoft-tested and updated with each Windows version. Covers the settings most organizations need. Reduces configuration error. Updatable — when Microsoft releases new baseline versions, you can migrate.</div>
+      </div>
+    </div>
+
+    <div class="sh">Deploying a Security Baseline</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>Intune → Endpoint Security → Security baselines → Select "Security Baseline for Windows 10 and later" → Click the latest version</div></li>
+      <li><div class="sn">2</div><div>Review the settings — each setting shows: the recommended value, the current Intune default, and a description of what it does. Customize any settings that don't fit your environment.</div></li>
+      <li><div class="sn">3</div><div><strong>Critical: Pilot first.</strong> Assign to a pilot group of 20-50 devices. Monitor for 1-2 weeks. Some baseline settings can break specific applications or workflows.</div></li>
+      <li><div class="sn">4</div><div>Once validated, expand assignment to All Devices (or targeted device groups).</div></li>
+      <li><div class="sn">5</div><div>Monitor: Devices that receive the baseline show compliance status per setting. Any device not meeting baseline settings shows as non-compliant in the baseline report.</div></li>
+    </ol>
+
+    <div class="sh">Security Baseline Updates</div>
+    <p>Microsoft periodically releases new Security Baseline versions as Windows evolves. When a new version is available, Intune shows it in the baseline blade. You can create a new baseline instance with the new version and migrate devices over — or use the Update Baseline feature to migrate existing assignments.</p>
+
+    <div class="ib ibo">
+      <div class="bt">⚠️ Security Baseline Conflicts with Other Policies</div>
+      <p>Security Baselines and other Configuration Profiles/Endpoint Security policies can set the same settings to different values — causing conflicts. When a conflict occurs on a specific setting, the baseline value is NOT applied for that setting (the conflict resolution rules apply — see Block 4). <strong>Best practice:</strong> If you use Security Baselines, avoid configuring the same settings in separate Endpoint Security profiles or Config Profiles. The Baseline should own its settings exclusively to avoid conflicts.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 73</div>
+      <div class="qa"><div class="qq">What are Intune Security Baselines and why should most organizations use them?</div>
+      <div class="qans">Security Baselines are pre-configured groups of Windows security settings recommended by Microsoft based on security research, enterprise feedback, and standards like NIST and CIS. They save enormous time — instead of researching and configuring hundreds of individual settings, you deploy a single baseline covering Defender AV, BitLocker, Firewall, account policies, Edge security, and more. They're tested against real enterprise environments, regularly updated with Windows versions, and represent the security posture Microsoft recommends as a starting point for any Windows deployment.</div></div>
+      <div class="qa"><div class="qq">What happens if a Security Baseline setting conflicts with another Endpoint Security profile?</div>
+      <div class="qans">When the same setting is configured by both a Security Baseline and another profile with different values, Intune registers a conflict for that specific setting and neither value is reliably applied. Best practice is to avoid this by ensuring Security Baselines own their settings exclusively — don't configure the same settings in separate Endpoint Security profiles or Configuration Profiles. If you need to override a specific baseline setting, change it within the baseline profile itself rather than creating a competing policy.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T74 -->
+  <section class="ts" id="t74">
+    <div class="th"><div class="tnum">TOPIC 74</div>
+      <div><div class="ttl">Microsoft Secure Score</div>
+      <div class="tsub">Measuring and improving your security posture — the security KPI for Intune admins</div></div>
+    </div>
+    <div class="sh">What Is Microsoft Secure Score?</div>
+    <p><strong>Microsoft Secure Score</strong> is a measurement of your organization's security posture — scored from 0 to 100 — based on how many Microsoft-recommended security controls you've implemented across Microsoft 365, Azure AD, Defender, and Intune. Each implemented control earns points. The higher your score, the more hardened your environment is against common attacks.</p>
+    <p>Access it at: <strong>security.microsoft.com → Secure Score</strong></p>
+
+    <div class="sh">How Secure Score Is Calculated</div>
+    <ul class="bl">
+      <li><strong>Your Score:</strong> Points earned for implemented security controls ÷ Total possible points × 100</li>
+      <li><strong>Each recommended action</strong> has a point value based on its security impact</li>
+      <li><strong>Score is dynamic</strong> — changes automatically as you implement or lose configurations</li>
+      <li><strong>Comparison:</strong> See your score vs industry average and similar-sized organizations</li>
+    </ul>
+
+    <div class="sh">Secure Score Categories (Intune-Related)</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Category</th><th>Example Intune Actions That Earn Points</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Devices</strong></td><td>Enable Intune MDM for all users, require compliant devices, deploy Security Baseline, enable BitLocker, deploy Defender AV policy with cloud protection, enable Tamper Protection</td></tr>
+          <tr><td><strong>Apps</strong></td><td>Require MFA for all users (via CA), enable App Protection Policies for mobile devices</td></tr>
+          <tr><td><strong>Identity</strong></td><td>Enable MFA, block legacy authentication, configure password protection, enable SSPR with 2 auth methods</td></tr>
+          <tr><td><strong>Data</strong></td><td>Apply information protection policies, configure DLP policies in M365</td></tr>
+          <tr><td><strong>Infrastructure</strong></td><td>Onboard devices to MDE, enable EDR, configure threat protection</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Using Secure Score as a Work Prioritization Tool</div>
+    <p>Secure Score isn't just a vanity metric — it's a <strong>prioritized to-do list</strong> of security improvements. Each recommended action shows:</p>
+    <ul class="bl">
+      <li><strong>Point value</strong> — how many points implementing this earns</li>
+      <li><strong>Implementation impact</strong> — how many users/devices it affects</li>
+      <li><strong>User impact</strong> — Low/Medium/High friction for end users</li>
+      <li><strong>Implementation instructions</strong> — step-by-step guide to implement the control</li>
+      <li><strong>Status options:</strong> To Address, Planned, Risk Accepted (with justification), Third Party (if you use a non-Microsoft tool for the same control)</li>
+    </ul>
+
+    <div class="sh">Secure Score in Management Reporting</div>
+    <p>Secure Score is excellent for executive and board-level security reporting. Track it monthly and show an improving trend. Most security frameworks (ISO 27001, SOC2, cyber insurance assessments) value a demonstrably improving security posture — Secure Score provides that evidence in a clear, quantifiable format.</p>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">📊</div><div class="rwl">Real-World Secure Score Improvement Plan</div></div>
+      <p><strong>Starting score:</strong> 42/100 at a 150-person company.<br/>
+      <strong>Quick wins implemented in Month 1 (added ~15 points):</strong><br/>
+      • Enable MFA for all admins (+8 points) — easiest and highest impact<br/>
+      • Deploy Windows Security Baseline to all devices (+4 points)<br/>
+      • Require compliant device via CA for Exchange Online (+3 points)<br/>
+      <strong>Medium-effort Month 2 (added ~12 points):</strong><br/>
+      • Enable BitLocker on all laptops (+5 points)<br/>
+      • Enable Tamper Protection for Defender (+3 points)<br/>
+      • Deploy App Protection Policies for mobile BYOD (+4 points)<br/>
+      <strong>Score after 2 months:</strong> 69/100. Improvements presented to CISO. Used as evidence for cyber insurance premium reduction.<br/>
+      <strong>Key insight:</strong> The highest-value improvements are almost always MFA, BitLocker, and Security Baselines — and they're all achievable via Intune in days.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 74</div>
+      <div class="qa"><div class="qq">What is Microsoft Secure Score and how does Intune affect it?</div>
+      <div class="qans">Microsoft Secure Score is a 0-100 measurement of an organization's security posture based on implemented Microsoft-recommended security controls. Intune directly contributes to the score through device security actions — deploying Security Baselines, enabling BitLocker, requiring compliant devices via Conditional Access, enabling Tamper Protection, deploying App Protection Policies, onboarding to MDE, and enabling ASR rules all earn Secure Score points. It's both a security measurement tool and a prioritized action list showing which controls to implement next for maximum score improvement.</div></div>
+      <div class="qa"><div class="qq">How would you use Secure Score to prioritize your Intune security work?</div>
+      <div class="qans">In the Secure Score portal, sort recommended actions by point value descending to see the highest-impact items. For each, review the implementation instructions and user impact. Start with high-point, low-user-impact actions first — like enabling MFA for admins, deploying Security Baselines, and enabling BitLocker. Mark actions as "Planned" with a target date to track progress. Use the monthly score trend to demonstrate improving security posture to management. Actions with high user impact should be paired with communication plans before implementation.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T75 -->
+  <section class="ts" id="t75">
+    <div class="th"><div class="tnum">TOPIC 75</div>
+      <div><div class="ttl">Endpoint Detection &amp; Response (EDR) Onboarding</div>
+      <div class="tsub">Getting devices to report to Microsoft Defender for Endpoint via Intune</div></div>
+    </div>
+    <div class="sh">What Is EDR Onboarding?</div>
+    <p>EDR onboarding is the process of installing the <strong>MDE sensor</strong> on devices so they report security events, alerts, and telemetry to the Microsoft Defender for Endpoint portal. Without onboarding, a device has Defender AV running but MDE's detection and response capabilities are blind to that device. Onboarding is the bridge from basic AV to full EDR visibility.</p>
+
+    <div class="sh">Onboarding Methods</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Method</th><th>Best For</th><th>How</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Intune (MDM) — Recommended</strong></td><td>All Intune-enrolled Windows devices</td><td>Endpoint Security → EDR → Create Policy. Deploy automatically to enrolled devices. Seamless, scalable, zero touch.</td></tr>
+          <tr><td><strong>Configuration Manager (SCCM)</strong></td><td>SCCM-managed devices not yet in Intune</td><td>Deploy onboarding package via SCCM application/script deployment.</td></tr>
+          <tr><td><strong>Group Policy</strong></td><td>Domain-joined non-Intune devices</td><td>Download onboarding package from MDE portal. Deploy via GPO computer startup script.</td></tr>
+          <tr><td><strong>Local script</strong></td><td>Individual devices or testing</td><td>Download onboarding package. Run as admin on the device. Not scalable for large fleets.</td></tr>
+          <tr><td><strong>VDI onboarding</strong></td><td>Virtual desktop infrastructure</td><td>Special VDI onboarding script — handles ephemeral VMs that spawn and terminate frequently.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Onboarding Windows Devices via Intune — Step by Step</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Ensure MDE-Intune connector is set up</strong> (covered in Topic 68 — connect in MDE portal settings).</div></li>
+      <li><div class="sn">2</div><div>Intune → Endpoint Security → <strong>Endpoint detection and response</strong> → Create Policy</div></li>
+      <li><div class="sn">3</div><div>Platform: <strong>Windows 10, Windows 11, and Windows Server</strong> → Profile: <strong>Endpoint detection and response</strong></div></li>
+      <li><div class="sn">4</div><div>Key setting: <strong>Microsoft Defender for Endpoint client configuration package type</strong> → Select "Onboard" (or "Auto from connector" — recommended when MDE-Intune connector is active, Intune auto-obtains the onboarding blob).</div></li>
+      <li><div class="sn">5</div><div>Sample sharing: <strong>All</strong> or <strong>None</strong> (based on privacy requirements). Sample sharing allows MDE to send suspicious file samples to Microsoft for deeper analysis.</div></li>
+      <li><div class="sn">6</div><div>Telemetry reporting frequency: <strong>Normal</strong> (default) or <strong>Expedited</strong> (more frequent check-ins — use during active incident response).</div></li>
+      <li><div class="sn">7</div><div>Assign to <strong>All Devices</strong> → Deploy. On next check-in, MDE sensor installs silently. Devices appear in MDE portal within 30–60 minutes.</div></li>
+    </ol>
+
+    <div class="sh">Platform Coverage — Beyond Windows</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Platform</th><th>MDE Capabilities</th><th>Intune Onboarding Method</th></tr></thead>
+        <tbody>
+          <tr><td>Windows 10/11</td><td>Full EDR — AV, ASR, device control, threat hunting, live response</td><td>Intune EDR policy (automatic with connector)</td></tr>
+          <tr><td>macOS</td><td>AV, EDR, network protection, device control</td><td>Deploy MDE app via Intune + configuration profile for MDE settings</td></tr>
+          <tr><td>iOS/iPadOS</td><td>Web protection, network protection, jailbreak detection, vulnerability assessment</td><td>Deploy Microsoft Defender app from App Store via Intune VPP</td></tr>
+          <tr><td>Android</td><td>Web protection, network protection, anti-phishing, vulnerability assessment, rooted device detection</td><td>Deploy Microsoft Defender app from Managed Google Play via Intune</td></tr>
+          <tr><td>Linux</td><td>AV, EDR, behavior monitoring</td><td>Script-based or Ansible/Puppet — not via Intune MDM (Intune Linux MDM is limited)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Verifying Successful Onboarding</div>
+    <ul class="bl">
+      <li><strong>MDE portal:</strong> security.microsoft.com → Device inventory — device should appear within 30–60 minutes of onboarding policy applying.</li>
+      <li><strong>Intune status:</strong> Endpoint Security → EDR policy → Device status → Should show "Succeeded" for onboarded devices.</li>
+      <li><strong>On the device:</strong> Check Services → "Microsoft Defender Advanced Threat Protection Service" should be Running. Also check Event Viewer → Applications and Services → Microsoft → Windows → SENSE.</li>
+      <li><strong>Run MDATP health check:</strong> <code>"%ProgramFiles%\Windows Defender Advanced Threat Protection\MsSense.exe" --health</code></li>
+    </ul>
+
+    <div class="sh">Offboarding — Removing MDE Sensor</div>
+    <p>When decommissioning a device, remove it from MDE to stop telemetry and free the MDE license seat. In Intune: change the EDR policy to use an <strong>Offboard</strong> configuration package instead of Onboard. Alternatively, in MDE portal: find the device → Actions → Offboard device. The device stops sending telemetry but historical data is retained for the data retention period (30–180 days depending on MDE settings).</p>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🛡️</div><div class="rwl">Real-World EDR Onboarding Rollout</div></div>
+      <p><strong>Scenario:</strong> 500-device fleet. Management has purchased MDE P2 licenses but only 100 devices are currently onboarded (done manually via scripts). 400 remain unmonitored.<br/>
+      <strong>Intune-based rollout:</strong><br/>
+      Week 1: Deploy EDR onboarding policy to "Pilot" group (50 devices). Verify they appear in MDE portal. Check no issues.<br/>
+      Week 2: Expand to All Devices. 400 devices automatically onboard during next check-in cycle (within 48 hours for all devices). Zero manual work.<br/>
+      <strong>Result:</strong> All 500 devices reporting to MDE portal. Security team now has visibility into all endpoints. Any threat on any device generates an alert. Before this, 80% of the fleet was invisible to the security team.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 75</div>
+      <div class="qa"><div class="qq">What is EDR onboarding and why is it necessary if Defender AV is already running?</div>
+      <div class="qans">EDR onboarding installs the Microsoft Defender for Endpoint sensor on a device, enabling it to send detailed security telemetry (process activity, network connections, file events, registry changes) to the MDE cloud portal. Defender AV running locally prevents known threats but provides no visibility into the MDE portal — the security team can't investigate attacks, see device timelines, or run threat hunting queries. Onboarding is what transforms a device from "AV-protected" to "EDR-monitored" — giving the security team full investigation and response capabilities.</div></div>
+      <div class="qa"><div class="qq">What is the recommended method for onboarding Intune-enrolled Windows devices to MDE at scale?</div>
+      <div class="qans">The recommended method is using the Intune EDR policy (Endpoint Security → Endpoint detection and response → Create Policy). With the MDE-Intune connector configured, select "Auto from connector" as the configuration package type — Intune automatically obtains the onboarding blob from MDE and deploys it to all targeted devices silently. This is fully automated and scales to thousands of devices with zero manual effort. Devices appear in the MDE portal within 30-60 minutes of the policy applying.</div></div>
+      <div class="qa"><div class="qq">How do you verify that a Windows device has been successfully onboarded to MDE?</div>
+      <div class="qans">Three verification methods: (1) MDE portal — device inventory at security.microsoft.com should show the device within 30-60 minutes of onboarding. (2) Intune portal — the EDR policy's device status should show "Succeeded" for that device. (3) On the device itself — check Services for "Microsoft Defender Advanced Threat Protection Service" (should be Running), or check Event Viewer → SENSE logs for onboarding success events, or run the MsSense.exe health check command which reports the sensor's operational status.</div></div>
+    </div>
+  </section>
+
+  <!-- Block Complete -->
+  <div style="background:linear-gradient(135deg,rgba(239,68,68,.07),rgba(251,146,60,.05));border:1px solid rgba(239,68,68,.22);border-radius:16px;padding:30px;margin-top:48px;text-align:center;">
+    <div style="font-size:30px;margin-bottom:11px;">🎉</div>
+    <div style="font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--h);margin-bottom:9px;">Block 7 Complete!</div>
+    <div style="color:var(--text2);font-size:13.5px;max-width:600px;margin:0 auto 18px;line-height:1.7;">You've mastered the entire Intune Endpoint Security stack — Defender AV with Tamper Protection, MDE integration, ASR rules (including Audit → Block process), BitLocker silent enablement and recovery, LAPS, Credential Guard, Security Baselines, Secure Score, and EDR onboarding across all platforms.</div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap;">
+      <div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;">✅ Blocks 1–7 Done — 75 Topics</div>
+      <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;">⬡ Block 8 Next: RBAC &amp; Scope Tags</div>
+      <div style="background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;">📋 54 Topics Remaining</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<a href="#" class="stup">↑</a>
+<script>
+  const secs=document.querySelectorAll('.ts');
+  const navs=document.querySelectorAll('.ni[href^="#"]');
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;navs.forEach(n=>{n.classList.remove('active');if(n.getAttribute('href')==='#'+id)n.classList.add('active');});}});},{rootMargin:'-20% 0px -60% 0px'});
+  secs.forEach(s=>obs.observe(s));
+  navs.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(n.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});}));
+</script>
+</body>
+</html>

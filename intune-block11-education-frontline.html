@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 11: Education, Frontline &amp; Managed Desktop</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#070a06;--bg2:#0b0e09;--bg3:#0f1310;
+    --sb:#060908;--border:#162014;
+    --acc:#65a30d;--acc2:#84cc16;--acc3:#bef264;
+    --blue:#38bdf8;--purple:#a78bfa;--orange:#fb923c;
+    --red:#f87171;--yellow:#fbbf24;--teal:#2dd4bf;--pink:#f472b6;
+    --text:#ecfccb;--text2:#6b7a5a;--text3:#374530;
+    --h:#f7ffe0;--card:#070a06;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-weight:300;display:flex;min-height:100vh;line-height:1.75;}
+  #sb{width:285px;min-width:285px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+  #sb::-webkit-scrollbar{width:3px;}
+  #sb::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .shd{padding:23px 20px 15px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#060908,#090d08);}
+  .slo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--h);letter-spacing:-.5px;display:flex;align-items:center;gap:10px;}
+  .lic{width:34px;height:34px;background:linear-gradient(135deg,var(--acc),var(--teal));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(101,163,13,.35);}
+  .ssu{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .bbg{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(101,163,13,.15),rgba(45,212,191,.1));border:1px solid rgba(101,163,13,.28);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-top:10px;letter-spacing:.5px;}
+  .snv{padding:12px 0;flex:1;}
+  .nlb{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 20px 4px;font-family:'IBM Plex Mono',monospace;}
+  .ni{display:flex;align-items:flex-start;gap:9px;padding:8px 20px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none;color:var(--text2);font-size:12.5px;line-height:1.4;}
+  .ni:hover{background:rgba(101,163,13,.07);color:var(--text);border-left-color:var(--acc);}
+  .ni.active{background:rgba(101,163,13,.11);color:var(--acc2);border-left-color:var(--acc);}
+  .nn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;margin-top:1px;}
+  .ni.active .nn{color:var(--acc);}
+  .plk{display:flex;align-items:center;gap:7px;padding:7px 11px;font-size:11px;color:var(--text3);text-decoration:none;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;margin:0 12px 4px;transition:all .2s;}
+  .plk:hover{color:var(--text2);border-color:rgba(101,163,13,.22);}
+  .sft{padding:13px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .pbar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .pfill{height:100%;width:78%;background:linear-gradient(90deg,var(--acc),var(--teal));border-radius:2px;animation:pg 2s ease-in-out infinite alternate;}
+  @keyframes pg{from{box-shadow:0 0 4px var(--acc);}to{box-shadow:0 0 14px var(--teal);}}
+  #main{margin-left:285px;flex:1;min-height:100vh;}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(7,10,6,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 46px;display:flex;align-items:center;justify-content:space-between;}
+  .bcrumb{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:7px;}
+  .bcrumb span{color:var(--acc2);}
+  .tcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 13px;}
+  .cont{padding:50px 46px 80px;max-width:980px;}
+  /* Hero */
+  .hero{margin-bottom:56px;position:relative;padding:44px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(101,163,13,.12) 0%,transparent 70%);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(45,212,191,.08) 0%,transparent 70%);border-radius:50%;}
+  .htag{display:inline-flex;align-items:center;gap:6px;background:rgba(101,163,13,.1);border:1px solid rgba(101,163,13,.25);border-radius:20px;padding:5px 14px;font-size:10.5px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;letter-spacing:1px;}
+  .htitle{font-family:'Syne',sans-serif;font-size:39px;font-weight:800;color:var(--h);line-height:1.1;letter-spacing:-1px;margin-bottom:13px;}
+  .htitle span{background:linear-gradient(135deg,var(--acc),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hdesc{font-size:14.5px;color:var(--text2);max-width:620px;line-height:1.8;}
+  .hmeta{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .hmi{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);}
+  .dot.b{background:var(--blue);box-shadow:0 0 8px var(--blue);}
+  .dot.p{background:var(--purple);box-shadow:0 0 8px var(--purple);}
+  /* Topic */
+  .ts{margin-bottom:68px;scroll-margin-top:66px;opacity:0;animation:fu .5s ease forwards;}
+  .ts:nth-child(1){animation-delay:.05s;}.ts:nth-child(2){animation-delay:.12s;}.ts:nth-child(3){animation-delay:.19s;}.ts:nth-child(4){animation-delay:.26s;}
+  @keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .th{display:flex;align-items:flex-start;gap:15px;margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--border);}
+  .tnum{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--acc);background:rgba(101,163,13,.1);border:1px solid rgba(101,163,13,.2);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+  .ttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--h);letter-spacing:-.5px;line-height:1.2;margin-bottom:4px;}
+  .tsub{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .sh{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--h);margin:28px 0 10px;display:flex;align-items:center;gap:10px;}
+  .sh::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,var(--acc),var(--teal));border-radius:2px;flex-shrink:0;}
+  p{color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:12px;}
+  p strong{color:var(--text);font-weight:500;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(101,163,13,.1);color:var(--acc2);padding:2px 6px;border-radius:4px;border:1px solid rgba(101,163,13,.18);}
+  /* Cards */
+  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:17px;transition:border-color .2s,transform .2s;}
+  .card:hover{border-color:rgba(101,163,13,.3);transform:translateY(-2px);}
+  .cico{font-size:21px;margin-bottom:8px;}
+  .ctit{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:var(--h);margin-bottom:6px;}
+  .cbod{font-size:12.5px;color:var(--text2);line-height:1.6;}
+  /* Table */
+  .tw{overflow-x:auto;margin:16px 0;border-radius:11px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+  th{padding:12px 15px;text-align:left;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--h);letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 15px;color:var(--text2);border-bottom:1px solid rgba(22,32,20,.5);vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(101,163,13,.02);}
+  /* Tags */
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+  .tg{background:rgba(101,163,13,.15);color:var(--acc2);border:1px solid rgba(101,163,13,.2);}
+  .tb{background:rgba(56,189,248,.15);color:var(--blue);border:1px solid rgba(56,189,248,.2);}
+  .tp{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.2);}
+  .to{background:rgba(251,146,60,.15);color:var(--orange);border:1px solid rgba(251,146,60,.2);}
+  .tr{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.2);}
+  .ty{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+  .tt{background:rgba(45,212,191,.15);color:var(--teal);border:1px solid rgba(45,212,191,.2);}
+  /* Info boxes */
+  .ib{border-radius:10px;padding:16px 18px;margin:16px 0;border-left:3px solid;}
+  .ib .bt{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:6px;}
+  .ib p{margin:0;font-size:13.5px;color:var(--text2);}
+  .ibg{background:rgba(101,163,13,.06);border-color:var(--acc);}
+  .ibg .bt{color:var(--acc2);}
+  .ibb{background:rgba(56,189,248,.06);border-color:var(--blue);}
+  .ibb .bt{color:var(--blue);}
+  .ibp{background:rgba(167,139,250,.06);border-color:var(--purple);}
+  .ibp .bt{color:var(--purple);}
+  .ibo{background:rgba(251,146,60,.06);border-color:var(--orange);}
+  .ibo .bt{color:var(--orange);}
+  .ibr{background:rgba(248,113,113,.06);border-color:var(--red);}
+  .ibr .bt{color:var(--red);}
+  .ibt{background:rgba(45,212,191,.06);border-color:var(--teal);}
+  .ibt .bt{color:var(--teal);}
+  .iby{background:rgba(251,191,36,.06);border-color:var(--yellow);}
+  .iby .bt{color:var(--yellow);}
+  /* Steps */
+  .steps{list-style:none;margin:13px 0;display:flex;flex-direction:column;gap:10px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .sn{min-width:25px;height:25px;background:linear-gradient(135deg,var(--acc),var(--teal));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .steps li strong{color:var(--text);}
+  /* Bullets */
+  .bl{list-style:none;margin:10px 0 13px;display:flex;flex-direction:column;gap:7px;}
+  .bl li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .bl li::before{content:'▹';color:var(--acc);font-size:13px;flex-shrink:0;margin-top:2px;}
+  .bl li strong{color:var(--text);}
+  /* Realworld */
+  .rw{background:linear-gradient(135deg,rgba(101,163,13,.04),rgba(45,212,191,.04));border:1px solid rgba(101,163,13,.18);border-radius:12px;padding:19px;margin:20px 0;}
+  .rwh{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .rwi{font-size:18px;}
+  .rwl{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--acc);}
+  .rw p{color:var(--text2);font-size:13px;margin:0;line-height:1.7;}
+  .rw p+p{margin-top:8px;}
+  /* Interview */
+  .iq{background:linear-gradient(135deg,rgba(167,139,250,.04),rgba(101,163,13,.04));border:1px solid rgba(167,139,250,.18);border-radius:13px;padding:21px;margin:24px 0;}
+  .iqh{font-family:'Syne',sans-serif;font-weight:700;font-size:14.5px;color:var(--purple);margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+  .qa{margin-bottom:14px;}
+  .qa:last-child{margin-bottom:0;}
+  .qq{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:4px;display:flex;gap:8px;}
+  .qq::before{content:'Q.';color:var(--purple);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .qans{font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.65;display:flex;gap:8px;}
+  .qans::before{content:'A.';color:var(--acc2);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  /* Tip */
+  .tip{display:flex;gap:12px;align-items:flex-start;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:9px;padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.65;}
+  .tpic{font-size:16px;flex-shrink:0;}
+  /* Comparison strip */
+  .compare-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  @media(max-width:600px){.compare-row{grid-template-columns:1fr;}}
+  .cmp-card{border-radius:11px;padding:18px;border:1px solid;}
+  .cmp-edu{background:rgba(101,163,13,.05);border-color:rgba(101,163,13,.25);}
+  .cmp-ent{background:rgba(56,189,248,.05);border-color:rgba(56,189,248,.25);}
+  .cmp-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--h);margin-bottom:10px;}
+  .cmp-body{font-size:12.5px;color:var(--text2);line-height:1.65;}
+  .cmp-body li{list-style:none;padding:3px 0;display:flex;gap:7px;font-size:12.5px;}
+  .cmp-edu .cmp-body li::before{content:'•';color:var(--acc);}
+  .cmp-ent .cmp-body li::before{content:'•';color:var(--blue);}
+  /* Frontline scenario cards */
+  .fl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0;}
+  .fl-card{border-radius:10px;padding:15px;border:1px solid;position:relative;overflow:hidden;}
+  .fl-card::after{content:'';position:absolute;top:0;right:0;width:50px;height:50px;border-radius:0 10px 0 60%;opacity:.1;}
+  .fl-retail{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.22);}
+  .fl-retail::after{background:var(--yellow);}
+  .fl-health{background:rgba(248,113,113,.05);border-color:rgba(248,113,113,.22);}
+  .fl-health::after{background:var(--red);}
+  .fl-mfg{background:rgba(56,189,248,.05);border-color:rgba(56,189,248,.22);}
+  .fl-mfg::after{background:var(--blue);}
+  .fl-field{background:rgba(101,163,13,.05);border-color:rgba(101,163,13,.22);}
+  .fl-field::after{background:var(--acc);}
+  .fl-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--h);margin-bottom:5px;}
+  .fl-body{font-size:12px;color:var(--text2);line-height:1.6;}
+  /* MMD pillar cards */
+  .mmd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0;}
+  .mmd-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px;border-left:3px solid var(--acc);}
+  .mmd-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--h);margin-bottom:6px;}
+  .mmd-body{font-size:12px;color:var(--text2);line-height:1.6;}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0;}
+  .stup{position:fixed;bottom:26px;right:26px;width:40px;height:40px;background:linear-gradient(135deg,var(--acc),var(--teal));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;box-shadow:0 4px 18px rgba(101,163,13,.3);border:none;color:white;z-index:200;text-decoration:none;transition:transform .2s;}
+  .stup:hover{transform:translateY(-3px);}
+  @media(max-width:768px){#sb{transform:translateX(-100%);}#main{margin-left:0;}.cont{padding:26px 16px;}.topbar{padding:11px 16px;}.htitle{font-size:26px;}}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="shd">
+    <div class="slo"><div class="lic">🛡️</div>Intune Mastery</div>
+    <div class="ssu">Complete Learning Series</div>
+    <div class="bbg">⬡ Block 11 of 14 — Specialized Scenarios</div>
+  </div>
+  <div class="snv">
+    <div class="nlb">Block 11 Topics</div>
+    <a href="#t92" class="ni active"><span class="nn">92</span>Intune for Education</a>
+    <a href="#t93" class="ni"><span class="nn">93</span>Shared Device Mode — iOS &amp; Android</a>
+    <a href="#t94" class="ni"><span class="nn">94</span>Frontline Worker Scenarios</a>
+    <a href="#t95" class="ni"><span class="nn">95</span>Microsoft Managed Desktop Overview</a>
+    <div class="nlb" style="margin-top:12px;">Previous Blocks</div>
+    <a href="intune-block1-foundations.html" class="plk">← Block 1: Foundations</a>
+    <a href="intune-block2-azuread.html" class="plk">← Block 2: Azure AD</a>
+    <a href="intune-block3-enrollment.html" class="plk">← Block 3: Enrollment</a>
+    <a href="intune-block4-configprofiles.html" class="plk">← Block 4: Config Profiles</a>
+    <a href="intune-block5-compliance.html" class="plk">← Block 5: Compliance</a>
+    <a href="intune-block6-appmanagement.html" class="plk">← Block 6: App Management</a>
+    <a href="intune-block7-endpointsecurity.html" class="plk">← Block 7: Endpoint Security</a>
+    <a href="intune-block8-rbac.html" class="plk">← Block 8: RBAC</a>
+    <a href="intune-block9-autopatch.html" class="plk">← Block 9: Autopatch</a>
+    <a href="intune-block10-comanagement.html" class="plk">← Block 10: Co-Management</a>
+    <div class="ni" style="opacity:.4;cursor:default;font-size:11.5px;"><span class="nn">→</span>Block 12: Monitoring &amp; Automation (Next)</div>
+  </div>
+  <div class="sft">
+    <div>Overall Progress</div>
+    <div style="color:var(--acc2);margin:2px 0;">Block 11 / 14 — 95 Topics Done</div>
+    <div class="pbar"><div class="pfill"></div></div>
+  </div>
+</nav>
+
+<div id="main">
+<div class="topbar">
+  <div class="bcrumb">Intune Mastery <span>›</span> Block 11 <span>›</span> Education, Frontline &amp; Managed Desktop</div>
+  <div class="tcount">4 Topics · ~2 Hours</div>
+</div>
+<div class="cont">
+
+  <div class="hero">
+    <div class="htag">🎓 BLOCK 11 · SPECIALIZED SCENARIOS</div>
+    <h1 class="htitle">Beyond the Standard<br/><span>Enterprise Laptop</span></h1>
+    <p class="hdesc">Most Intune content focuses on corporate knowledge workers with assigned laptops. But Intune also powers schools with shared iPads, hospitals with shift-based smartphones, factory floors with single-purpose Android tablets, and the premium Microsoft Managed Desktop service for organizations that want Microsoft itself to operate their endpoint fleet. This block covers these specialized but very common real-world scenarios.</p>
+    <div class="hmeta">
+      <div class="hmi"><div class="dot"></div>4 Topics</div>
+      <div class="hmi"><div class="dot b"></div>Education + Frontline</div>
+      <div class="hmi"><div class="dot p"></div>Shared Devices &amp; MMD</div>
+    </div>
+  </div>
+
+  <!-- T92 -->
+  <section class="ts" id="t92">
+    <div class="th"><div class="tnum">TOPIC 92</div>
+      <div><div class="ttl">Intune for Education — Differences &amp; Use Cases</div>
+      <div class="tsub">How Intune works in schools — student devices, shared iPads, and education-specific features</div></div>
+    </div>
+
+    <div class="sh">What Is Intune for Education?</div>
+    <p><strong>Intune for Education</strong> is a simplified, education-optimized version of Microsoft Intune accessible at <strong>intuneeducation.microsoft.com</strong>. It's not a separate product — it's the same Intune backend with a streamlined interface designed for school IT admins who may not be enterprise endpoint management specialists. The full Intune portal is also available for advanced configurations.</p>
+    <p>It's designed to handle the unique challenges schools face: <strong>shared devices</strong> used by multiple students, bulk provisioning of hundreds of iPads or Chromebook-like Windows devices, simplified app deployment for educational software, and age-appropriate content restrictions.</p>
+
+    <div class="sh">Intune for Education vs Standard Intune</div>
+    <div class="compare-row">
+      <div class="cmp-card cmp-edu">
+        <div class="cmp-title">🎓 Intune for Education</div>
+        <ul class="cmp-body">
+          <li>Simplified portal (intuneeducation.microsoft.com)</li>
+          <li>Education-specific group templates</li>
+          <li>Express Configuration wizard for quick setup</li>
+          <li>Built-in support for Take a Test app</li>
+          <li>Student/Teacher role distinction</li>
+          <li>Synced with School Data Sync (SDS) — auto-imports students/teachers from SIS</li>
+          <li>Apple School Manager integration (ASM)</li>
+          <li>Microsoft Education licenses (A1, A3, A5)</li>
+          <li>Simplified app purchasing via Microsoft Store for Education</li>
+          <li>Focus on shared device scenarios</li>
+        </ul>
+      </div>
+      <div class="cmp-card cmp-ent">
+        <div class="cmp-title">🏢 Standard Intune (Enterprise)</div>
+        <ul class="cmp-body">
+          <li>Full Intune admin portal (portal.intune.microsoft.com)</li>
+          <li>Complex custom policy framework</li>
+          <li>Advanced configuration for all settings</li>
+          <li>Secure Assessment via Settings Catalog</li>
+          <li>User/Device role distinction via RBAC</li>
+          <li>Azure AD Connect user sync from HR systems</li>
+          <li>Apple Business Manager (ABM) integration</li>
+          <li>Microsoft 365 Business/Enterprise licenses</li>
+          <li>Microsoft Store (new) + Win32 + LOB apps</li>
+          <li>Focus on assigned device, knowledge worker scenarios</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sh">School Data Sync (SDS) — Auto-Importing School Rosters</div>
+    <p><strong>School Data Sync</strong> is a free Microsoft service that automatically imports school roster data (students, teachers, classes, groups) from your Student Information System (SIS) — like PowerSchool, Infinite Campus, Skyward — into Azure AD. Instead of manually creating 1,000 student accounts, SDS does it automatically at the start of each school year.</p>
+    <ul class="bl">
+      <li><strong>Automatic group creation:</strong> SDS creates Azure AD groups for each class — "Year 10 Science Period 3" — which Intune uses for targeted app and policy deployment.</li>
+      <li><strong>Annual refresh:</strong> At the start of each school year, SDS updates groups — new students added, graduated students removed, class rosters updated.</li>
+      <li><strong>Teacher/Student distinction:</strong> SDS marks accounts with education roles. Teacher devices and student devices get different Intune policies automatically.</li>
+      <li><strong>Integration:</strong> Set up at <strong>sds.microsoft.com</strong>. Connects to your SIS via CSV file export or direct API integration depending on the SIS vendor.</li>
+    </ul>
+
+    <div class="sh">Key Education-Specific Intune Features</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">📝</div>
+        <div class="ctit">Take a Test / Secure Assessment</div>
+        <div class="cbod">Configure Windows devices to boot directly into a secure testing mode — blocks all other apps, browser tabs, copy/paste, screen capture, and internet access (configurable). Used for standardized tests. Configured via Intune's Secure Assessment profile or Take a Test app.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🍎</div>
+        <div class="ctit">Apple School Manager (ASM)</div>
+        <div class="cbod">Education version of Apple Business Manager. Same ADE enrollment capabilities but with education-specific features like Managed Apple IDs for students (under 13 supported), class rostering integration, and shared iPad support. ASM is free for schools.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📱</div>
+        <div class="ctit">Shared iPad for Education</div>
+        <div class="cbod">Apple's iPad feature that lets multiple students use the same iPad with individual user profiles. Each student logs in with their Managed Apple ID — their apps, settings, and files load. Next student logs in, their profile loads. IT manages the shared device centrally via Intune.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔒</div>
+        <div class="ctit">Content Filtering</div>
+        <div class="cbod">Web content filtering appropriate for student age groups. Block adult content, gambling, social media. Set allowed/blocked URL lists. On iOS (supervised): built-in web content filter. On Windows: configure SmartScreen and Edge content policies via Intune.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🖥️</div>
+        <div class="ctit">Set Up School PCs App</div>
+        <div class="cbod">Education equivalent of Windows Configuration Designer. Creates provisioning packages (PPKG) for quick Windows PC setup in schools. Simplified UI for non-technical school IT staff to prepare devices without needing enterprise Intune knowledge.</div>
+      </div>
+      <div class="card">
+        <div class="cico">👩‍🏫</div>
+        <div class="ctit">Microsoft Classroom</div>
+        <div class="cbod">Teachers can remotely view student screens, send URLs to students' devices, lock student screens for focus time, and distribute files — all from their teacher device. Integrated with Intune's supervised iOS and Windows management capabilities.</div>
+      </div>
+    </div>
+
+    <div class="sh">Licensing for Education</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>License</th><th>What's Included</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Microsoft 365 A1</strong></td><td>Office web apps (no desktop), Teams, SharePoint, Exchange Online, Intune (basic), Azure AD P1. Free for qualifying educational institutions.</td><td>Schools on tight budgets — web-only Office, Intune device management</td></tr>
+          <tr><td><strong>Microsoft 365 A3</strong></td><td>Everything in A1 + Office desktop apps, advanced compliance, Information Protection, Intune full, Azure AD P1</td><td>Schools that need Office desktop apps and advanced Intune features</td></tr>
+          <tr><td><strong>Microsoft 365 A5</strong></td><td>Everything in A3 + advanced security (Defender for Endpoint, Identity Protection), Azure AD P2, advanced analytics</td><td>Universities and institutions needing maximum security and compliance features</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🏫</div><div class="rwl">Real Education Deployment Scenario</div></div>
+      <p><strong>School:</strong> 2,000-student secondary school deploying 600 shared iPads and 200 Windows laptops for teachers.<br/>
+      <strong>Setup:</strong><br/>
+      1. Apple School Manager set up — 600 iPads pre-registered via ASM at purchase<br/>
+      2. School Data Sync imports 2,000 students and 150 teachers from PowerSchool → Azure AD groups created per class<br/>
+      3. Intune for Education portal → Express Configuration creates baseline policies in minutes<br/>
+      4. Shared iPad mode enabled for iPads → students log in with Managed Apple ID → their profile loads<br/>
+      5. Student iPad policies: web content filter (block social media, adult content), no App Store access, approved educational apps only (Khan Academy, Duolingo, Google Classroom)<br/>
+      6. Teacher Windows laptops: assigned devices, M365 desktop apps, content creation tools, Microsoft Classroom enabled<br/>
+      7. Take a Test profile configured → IT can lock exam iPads to a single test URL with one policy during exam periods<br/>
+      <strong>Result:</strong> 600 iPads shared among 2,000 students. Each student gets their personal experience on any iPad. Teachers have dedicated managed laptops. Zero physical device pre-configuration needed.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 92</div>
+      <div class="qa"><div class="qq">What is Intune for Education and how does it differ from standard Intune?</div>
+      <div class="qans">Intune for Education is an education-optimized portal at intuneeducation.microsoft.com providing a simplified interface on top of the standard Intune backend. Key differences: Express Configuration wizard for rapid setup, built-in education group templates, School Data Sync integration for automatic student/teacher roster import from SIS systems, Apple School Manager (ASM) support for shared iPad scenarios, and the Take a Test secure assessment configuration. Standard Intune has full depth and complexity; Intune for Education is simplified for school IT admins who may not be endpoint management specialists.</div></div>
+      <div class="qa"><div class="qq">What is School Data Sync and why is it valuable for schools using Intune?</div>
+      <div class="qans">School Data Sync automatically imports school roster data — students, teachers, class groups — from the school's Student Information System into Azure AD. Without SDS, IT would manually create thousands of student accounts and class groups every year. With SDS, the sync runs automatically at the start of each school year: new students get accounts, graduated students are removed, class rosters are updated. These Azure AD groups are then used by Intune to target policies and apps to the right students and teachers automatically.</div></div>
+      <div class="qa"><div class="qq">What is Shared iPad for Education and how does it work with Intune?</div>
+      <div class="qans">Shared iPad is an Apple feature that allows multiple students to use the same iPad with individual user profiles. Each student signs in with their Managed Apple ID (provided via Apple School Manager), and their personal apps, settings, documents, and progress load. When they sign out, the next student's profile loads. IT manages the shared device centrally via Intune — pushing approved apps (which all users see), enforcing web content filters, and controlling device settings. This makes one iPad serve multiple students throughout the day rather than requiring a 1:1 device-to-student ratio.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T93 -->
+  <section class="ts" id="t93">
+    <div class="th"><div class="tnum">TOPIC 93</div>
+      <div><div class="ttl">Shared Device Mode — iOS &amp; Android</div>
+      <div class="tsub">One device, many users — enterprise shared device configuration for shift workers</div></div>
+    </div>
+
+    <div class="sh">The Shared Device Problem</div>
+    <p>In many industries — retail, healthcare, hospitality, logistics — workers don't have personal assigned devices. Instead, they pick up a shared tablet or phone at the start of their shift, use it for work, then return it. The next shift worker picks it up and uses it. <strong>Shared Device Mode</strong> makes this work securely: each user signs in, gets their apps and data, then signs out — and the next user starts fresh with zero data leakage between users.</p>
+
+    <div class="sh">Shared Device Mode — iOS</div>
+    <p><strong>Azure AD Shared Device Mode</strong> for iOS requires the device to be enrolled via ADE (supervised) and uses the <strong>Microsoft Authenticator app</strong> as the broker. When Shared Device Mode is enabled via Intune:</p>
+    <ul class="bl">
+      <li><strong>Single sign-in:</strong> Worker signs in once through Authenticator — all Microsoft apps (Teams, Outlook, SharePoint) immediately authenticate with their identity. No repeated sign-in per app.</li>
+      <li><strong>Global sign-out:</strong> Worker signs out of Authenticator once — ALL apps on the device are signed out simultaneously. The next worker starts with a clean authenticated state.</li>
+      <li><strong>No personal use:</strong> Device is company property. Personal Apple IDs and personal app downloads blocked. Worker doesn't mix personal and work on this device.</li>
+      <li><strong>Data cleared on sign-out:</strong> Apps built with the MSAL (Microsoft Authentication Library) SDK automatically clear their corporate data when global sign-out occurs.</li>
+    </ul>
+
+    <div class="sh">Configuring iOS Shared Device Mode via Intune</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Enroll device via ADE</strong> (supervised iOS device — required for shared device mode)</div></li>
+      <li><div class="sn">2</div><div><strong>Deploy Microsoft Authenticator</strong> as a required app via VPP to the device group</div></li>
+      <li><div class="sn">3</div><div><strong>Create an iOS App Configuration Policy</strong> for Microsoft Authenticator → Enable Shared Device Mode:
+        <div style="background:#030608;border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#bef264;line-height:1.7;">
+          Key: <span style="color:var(--blue);">IntuneMAMUPN</span><br/>
+          Value: <span style="color:#86efac;">{{userprincipalname}}</span><br/>
+          Key: <span style="color:var(--blue);">SharedDeviceMode</span><br/>
+          Value: <span style="color:#86efac;">true</span>
+        </div>
+      </div></li>
+      <li><div class="sn">4</div><div><strong>Configure device restrictions:</strong> Block App Store (no personal apps), block Apple ID sign-in (no personal iCloud), enable auto-lock (clear screen when shift ends)</div></li>
+      <li><div class="sn">5</div><div><strong>Worker experience:</strong> Pick up device → Open Authenticator → Sign in with work credentials → All work apps immediately authenticate → End of shift: sign out of Authenticator → All apps signed out, data cleared → Device ready for next worker</div></li>
+    </ol>
+
+    <div class="sh">Shared Device Mode — Android Enterprise</div>
+    <p>On Android, Shared Device Mode works through <strong>Android Enterprise Dedicated Device</strong> mode + the <strong>Microsoft Authenticator app as broker</strong>. The concept is the same: single sign-in/sign-out that affects all apps simultaneously.</p>
+    <ul class="bl">
+      <li><strong>Enrollment:</strong> Android Enterprise Dedicated Device (Fully Managed kiosk variant) — QR code, Zero Touch, or Knox enrollment</li>
+      <li><strong>App deployment:</strong> Deploy Authenticator and all work apps via Managed Google Play as Required</li>
+      <li><strong>Kiosk launcher:</strong> Use Managed Home Screen app for a controlled launcher showing only work apps</li>
+      <li><strong>Sign-in experience:</strong> Worker signs into Authenticator → all MSAL-enabled apps authenticate → Authenticator sign-out signs out all apps and clears data</li>
+      <li><strong>App compatibility:</strong> Apps must integrate Microsoft's MSAL library for global sign-out to work. Microsoft's own apps (Teams, Outlook, SharePoint) all support this. Custom apps need to integrate MSAL.</li>
+    </ul>
+
+    <div class="sh">Shared Device Mode vs Kiosk Mode</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Feature</th><th>Shared Device Mode</th><th>Kiosk Mode</th></tr></thead>
+        <tbody>
+          <tr><td>Multiple users</td><td>✅ Each worker signs in/out with their own identity</td><td>❌ No user identity — same anonymous experience for all</td></tr>
+          <tr><td>User-specific data</td><td>✅ Each user sees their own emails, files, tasks</td><td>❌ Same static content for everyone</td></tr>
+          <tr><td>App variety</td><td>✅ Multiple work apps (Teams, Outlook, custom apps)</td><td>Limited — one or few apps per kiosk</td></tr>
+          <tr><td>Sign-out process</td><td>✅ Worker signs out — next worker signs in with their identity</td><td>N/A — no sign-in/sign-out concept</td></tr>
+          <tr><td>Data isolation</td><td>✅ Each user's data cleared on sign-out</td><td>N/A — no personal data stored</td></tr>
+          <tr><td>Use case</td><td>Shift workers who need personalized work experience</td><td>Self-service terminals, digital signage, POS</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🏥</div><div class="rwl">Hospital Shared Device Scenario</div></div>
+      <p><strong>Hospital:</strong> 200 nurses across 3 shifts using 50 shared iPhones for patient communication, EHR access, and task management.<br/>
+      <strong>Challenge:</strong> If Nurse A leaves patient data visible and Nurse B picks up the same phone, HIPAA is violated.<br/>
+      <strong>Solution:</strong> ADE-enrolled iPhones + Azure AD Shared Device Mode.<br/>
+      Nurse A starts shift → Signs into Authenticator (Face ID or PIN) → All work apps (Teams, Epic EHR app, patient task app) immediately authenticate with Nurse A's credentials and show her data → End of shift: one tap on "Sign out" in Authenticator → ALL apps sign out simultaneously → Nurse A's patient lists, messages, and data cleared → Phone reset to sign-in screen → Nurse B picks up same phone, signs in, sees only her own patient assignments.<br/>
+      <strong>Result:</strong> HIPAA compliance maintained. 50 phones serve 200 nurses. Zero personal data mixing. Centrally managed via Intune.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 93</div>
+      <div class="qa"><div class="qq">What is Shared Device Mode and how does it differ from Kiosk Mode?</div>
+      <div class="qans">Shared Device Mode allows multiple workers to use the same device with their own identity — each worker signs in, gets their personal work data in apps, then signs out which clears all their data for the next user. It uses Microsoft Authenticator as a broker for single sign-in and global sign-out across all MSAL-enabled apps. Kiosk Mode locks the device to one or a few apps with no user identity — everyone sees the same experience. Shared Device Mode is for shift workers needing personalized work access; Kiosk Mode is for anonymous single-purpose devices like self-service terminals.</div></div>
+      <div class="qa"><div class="qq">What is required for global sign-out to work in Shared Device Mode?</div>
+      <div class="qans">Three things: Microsoft Authenticator app must be installed and configured as the broker for Shared Device Mode, the device must be supervised (iOS via ADE) or enrolled as Android Enterprise Dedicated Device, and each app must integrate Microsoft's MSAL (Microsoft Authentication Library) to receive the global sign-out signal. Microsoft's own apps (Teams, Outlook, SharePoint) all support MSAL global sign-out. Custom line-of-business apps need to integrate MSAL for their data to be cleared on global sign-out — without MSAL integration, an app won't receive the sign-out signal and its data won't be cleared.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T94 -->
+  <section class="ts" id="t94">
+    <div class="th"><div class="tnum">TOPIC 94</div>
+      <div><div class="ttl">Frontline Worker Scenarios — Dedicated Kiosk Devices</div>
+      <div class="tsub">Managing purpose-built devices for workers who don't sit at desks</div></div>
+    </div>
+
+    <div class="sh">Who Are Frontline Workers?</div>
+    <p><strong>Frontline workers</strong> (also called deskless workers or task workers) are the roughly 2 billion people worldwide who work in physical-world roles — retail associates, warehouse pickers, delivery drivers, nurses, factory operators, hotel staff. They don't sit at a desk with a company laptop. Instead they use purpose-built devices: rugged Android scanners, shared tablets, single-purpose kiosk POS terminals, or basic smartphones for task management.</p>
+    <p>Intune is increasingly important for this population because organizations are equipping frontline workers with mobile technology — and these devices need the same security and management as knowledge worker laptops, but with completely different configurations.</p>
+
+    <div class="sh">Frontline Worker Device Scenarios</div>
+    <div class="fl-grid">
+      <div class="fl-card fl-retail">
+        <div class="fl-title">🛍️ Retail</div>
+        <div class="fl-body">Shared Android tablets or handheld scanners. Apps: inventory lookup, price check, customer order management. Config: Kiosk mode limiting to retail apps, Managed Home Screen, no camera on trading floor (some stores), auto-wipe overnight.</div>
+      </div>
+      <div class="fl-card fl-health">
+        <div class="fl-title">🏥 Healthcare</div>
+        <div class="fl-body">Shared iPhones/iPads for nurses, shared workstation tablets for bed-side care. Apps: EHR access, patient communication, medication lookup. Config: ADE supervised, Shared Device Mode, HIPAA-compliant data clearing, screen auto-lock in 30 seconds.</div>
+      </div>
+      <div class="fl-card fl-mfg">
+        <div class="fl-title">🏭 Manufacturing</div>
+        <div class="fl-body">Rugged Android scanners (Zebra, Honeywell) for warehouse picking and quality control. Apps: WMS (Warehouse Mgmt System), barcode scanning, production tracking. Config: Dedicated device (single app kiosk), OEMConfig for hardware-specific settings, no camera in secure areas.</div>
+      </div>
+      <div class="fl-card fl-field">
+        <div class="fl-title">🚚 Field Services</div>
+        <div class="fl-body">Personal or company Android/iOS phones for field technicians or delivery drivers. Apps: route navigation, delivery confirmation, service ticket management. Config: MAM-WE for BYOD or fully managed for company phones, location policies, offline capability.</div>
+      </div>
+    </div>
+
+    <div class="sh">Frontline-Specific Intune Licensing</div>
+    <p>Full M365 E3/E5 licenses are expensive for frontline workers who don't need the full productivity suite. Microsoft offers cheaper frontline-focused licenses:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>License</th><th>Monthly Cost (approx)</th><th>What's Included</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Microsoft 365 F1</strong></td><td>~$2.25/user/month</td><td>Teams (no meetings scheduling), SharePoint, Exchange (no Outlook desktop), Intune (basic), Azure AD P1</td><td>Deskless workers needing basic communication and device management only</td></tr>
+          <tr><td><strong>Microsoft 365 F3</strong></td><td>~$8/user/month</td><td>Everything in F1 + Office web apps, Exchange full, full Intune, advanced compliance</td><td>Frontline workers needing more M365 features with full Intune management</td></tr>
+          <tr><td><strong>M365 Business Premium</strong></td><td>~$22/user/month</td><td>Full suite + advanced security</td><td>If frontline workers also need desktop Office or advanced security</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Managed Home Screen — The Frontline Launcher</div>
+    <p><strong>Microsoft Managed Home Screen (MHS)</strong> is a Microsoft app that provides a controlled launcher for Android Enterprise dedicated devices. Instead of the standard Android home screen, workers see only the apps and shortcuts IT approves — in a branded, organized layout IT controls remotely.</p>
+    <ul class="bl">
+      <li><strong>Custom branding:</strong> Company logo, colors, background image. The device feels like a company-branded tool.</li>
+      <li><strong>Approved apps only:</strong> IT configures exactly which apps appear. Workers can't access Settings, Google Play, or any other system functions.</li>
+      <li><strong>Virtual home button:</strong> A software home button appears since the physical home button is typically disabled in kiosk mode.</li>
+      <li><strong>Notifications:</strong> Configurable — show work notifications but block personal ones.</li>
+      <li><strong>Auto sign-out:</strong> Combined with Shared Device Mode, MHS can trigger sign-out after inactivity.</li>
+      <li><strong>Configured via:</strong> Intune App Configuration Policy for the Managed Home Screen app.</li>
+    </ul>
+
+    <div class="sh">OEMConfig — Managing Hardware-Specific Features</div>
+    <p>Many frontline devices are rugged Android devices from OEM vendors like <strong>Zebra, Honeywell, Datalogic, or Panasonic</strong>. These have hardware features (barcode scanner triggers, gun-form-factor buttons, thermal management) that standard Android MDM can't configure. <strong>OEMConfig</strong> solves this:</p>
+    <ul class="bl">
+      <li><strong>What it is:</strong> OEM-published Android app + JSON schema that exposes the OEM's hardware-specific settings to any MDM (including Intune).</li>
+      <li><strong>How it works:</strong> Download the OEM's OEMConfig app from Managed Google Play. Create an App Configuration Policy in Intune targeting the OEMConfig app. Configure hardware-specific settings in JSON (scanner sensitivity, button remapping, display brightness schedules).</li>
+      <li><strong>Example (Zebra):</strong> Configure the Zebra scanner trigger button behavior, set the scanning mode (1D/2D/QR), configure beep and vibration on scan, set display timeout for outdoor brightness.</li>
+      <li><strong>No custom development:</strong> OEMConfig means you don't need custom MDM agents or proprietary management consoles — everything through standard Intune.</li>
+    </ul>
+
+    <div class="sh">Microsoft Teams for Frontline Workers</div>
+    <p>Teams has specific features built for frontline workers accessible through Intune-managed devices:</p>
+    <ul class="bl">
+      <li><strong>Shifts:</strong> Schedule management — workers see their shifts, request time off, swap shifts in Teams mobile app.</li>
+      <li><strong>Walkie Talkie:</strong> Push-to-talk communication over internet — replacing physical two-way radios for retail, healthcare, and warehouse teams.</li>
+      <li><strong>Tasks by Planner:</strong> Daily task checklists pushed by managers to frontline workers' Teams apps — "Open store checklist," "Clean aisle 7," "Restock shelf 12."</li>
+      <li><strong>Approvals:</strong> Simple approval workflows from mobile — manager approves time off request, expense, or procedure exception from Teams.</li>
+      <li><strong>Deploy via Intune:</strong> Teams deployed as Required app from Managed Google Play or iOS App Store (VPP). App Configuration Policy pre-configures the tenant, disables personal calling, enforces org-specific features.</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🏪</div><div class="rwl">Retail Chain Frontline Deployment</div></div>
+      <p><strong>Company:</strong> 200-store retail chain. Each store has 15 Android tablets shared among 40 sales associates per day across 3 shifts.<br/>
+      <strong>Requirements:</strong> Tablets show inventory lookup app, Teams (for shift communication and Walkie Talkie), and Shifts (schedule). Associates can't install personal apps or access YouTube. Tablets auto-reset between shifts.<br/>
+      <strong>Intune configuration:</strong><br/>
+      • Android Enterprise Dedicated Device enrollment via QR code at warehouse before distribution<br/>
+      • Managed Home Screen configured: Shows only Inventory App, Teams, and Shifts in company-branded layout<br/>
+      • Required apps via Managed Google Play: Teams (Required), Inventory App (Required), MHS (Required)<br/>
+      • Azure AD Shared Device Mode via Authenticator: Associate signs in at shift start, signs out at shift end<br/>
+      • Auto sign-out after 30 minutes of inactivity<br/>
+      • M365 F1 license per associate ($2.25/month) — 40 associates × 200 stores = 8,000 F1 licenses<br/>
+      <strong>Result:</strong> 3,000 tablets managed centrally from one Intune portal. Associates get their personalized shift schedule and inventory access on any store tablet. IT team of 3 manages the entire fleet remotely.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 94</div>
+      <div class="qa"><div class="qq">What is Microsoft Managed Home Screen and when would you use it?</div>
+      <div class="qans">Managed Home Screen is a Microsoft app that replaces the standard Android launcher with a controlled, IT-configured home screen on Android Enterprise Dedicated Devices. IT specifies exactly which apps appear in which layout, adds company branding, and blocks access to system settings, Google Play, and unauthorized apps. Workers interact only with approved apps in a branded environment. It's used for frontline/kiosk scenarios — retail associates, warehouse workers, delivery drivers — where the device should be purpose-built and workers shouldn't be distracted or able to install personal apps.</div></div>
+      <div class="qa"><div class="qq">What is OEMConfig and why is it important for frontline device management?</div>
+      <div class="qans">OEMConfig is a standard that allows device OEMs (Zebra, Honeywell, Datalogic) to expose their hardware-specific settings to any MDM solution including Intune. The OEM publishes an OEMConfig app and a JSON schema defining available settings. In Intune, you deploy the OEMConfig app and create an App Configuration Policy using the OEM's schema to configure hardware-specific features — scanner trigger behavior, button remapping, display settings, device health monitoring. Without OEMConfig, configuring these hardware features would require the OEM's proprietary management console instead of Intune.</div></div>
+      <div class="qa"><div class="qq">What Microsoft 365 license would you recommend for a retail associate who only needs Teams, shift management, and a managed device?</div>
+      <div class="qans">Microsoft 365 F1 at approximately $2.25 per user per month. F1 includes Teams (mobile, with Shifts and Walkie Talkie features), SharePoint, Exchange (without Outlook desktop), and full Intune for device management and Azure AD P1. It doesn't include Office desktop apps or Outlook desktop — but retail associates don't need those. For 8,000 frontline workers, the cost difference between F1 and E3 is enormous: F1 costs ~$18,000/month vs E3 at ~$160,000/month — a 9x cost difference for features that frontline workers don't use.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T95 -->
+  <section class="ts" id="t95">
+    <div class="th"><div class="tnum">TOPIC 95</div>
+      <div><div class="ttl">Microsoft Managed Desktop Overview</div>
+      <div class="tsub">The premium "endpoint management as a service" — Microsoft runs your endpoint ops</div></div>
+    </div>
+
+    <div class="sh">What Is Microsoft Managed Desktop?</div>
+    <p><strong>Microsoft Managed Desktop (MMD)</strong> is a premium cloud-based endpoint management service where <strong>Microsoft itself manages your Windows devices</strong> — including the Intune configuration, security policies, Windows Update management, hardware, and 24/7 support. It's "Intune as a managed service" — instead of your IT team configuring and operating Intune, Microsoft's operations team does it on your behalf.</p>
+    <p>Think of it as the difference between owning a car (Standard Intune) and using a chauffeur service (Microsoft Managed Desktop). You still tell the driver where to go (set business requirements), but you don't drive or maintain the vehicle.</p>
+
+    <div class="sh">The Four Pillars of Microsoft Managed Desktop</div>
+    <div class="mmd-grid">
+      <div class="mmd-card">
+        <div class="mmd-title">🖥️ Hardware</div>
+        <div class="mmd-body">Microsoft-recommended certified devices (Surface, Dell, HP, Lenovo models validated for MMD). Organizations purchase from these certified models. Hardware is pre-validated for compatibility with MMD's configuration baseline.</div>
+      </div>
+      <div class="mmd-card">
+        <div class="mmd-title">🔒 Security</div>
+        <div class="mmd-body">Microsoft pre-configures and maintains security baselines, Defender for Endpoint, BitLocker, Conditional Access, ASR rules. The security posture is Microsoft-managed — updated as the threat landscape evolves. Microsoft monitors for security issues.</div>
+      </div>
+      <div class="mmd-card">
+        <div class="mmd-title">🔄 Updates</div>
+        <div class="mmd-body">Microsoft manages all Windows quality updates, feature updates, Microsoft 365 Apps updates, and Edge updates — using deployment rings similar to Windows Autopatch. SLA: 95% of devices updated within 21 days. Identical to what Autopatch provides but as a fully managed service.</div>
+      </div>
+      <div class="mmd-card">
+        <div class="mmd-title">🎯 Support</div>
+        <div class="mmd-body">Microsoft provides 24/7 operations support for the managed service. Your IT team focuses on line-of-business app deployment and business requirements. Escalation path: your IT → Microsoft support team (not vice versa).</div>
+      </div>
+    </div>
+
+    <div class="sh">What MMD Manages</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Area</th><th>MMD Manages</th><th>Customer Still Manages</th></tr></thead>
+        <tbody>
+          <tr><td>Windows Updates</td><td>✅ Quality + Feature + M365 + Edge updates, ring management</td><td>Business exception requests (devices that must defer)</td></tr>
+          <tr><td>Security Baseline</td><td>✅ Defender AV, BitLocker, Firewall, ASR — all pre-configured by Microsoft</td><td>Cannot customize baseline — must accept Microsoft's configuration</td></tr>
+          <tr><td>Device Compliance</td><td>✅ Compliance policies configured and maintained</td><td>Business-specific compliance requirements (if any)</td></tr>
+          <tr><td>Endpoint Security</td><td>✅ MDE onboarding, monitoring, incident response</td><td>Security investigations that require business context</td></tr>
+          <tr><td>App Deployment</td><td>❌ Not managed by MMD</td><td>✅ Customer deploys LOB apps via MMD's app deployment process</td></tr>
+          <tr><td>User Onboarding/Offboarding</td><td>❌ Not managed by MMD</td><td>✅ Customer creates users, assigns licenses, onboards employees</td></tr>
+          <tr><td>Network/VPN</td><td>❌ Not managed by MMD</td><td>✅ Customer configures VPN, Wi-Fi, network access</td></tr>
+          <tr><td>Helpdesk / Service Desk</td><td>❌ Not included (only operations support)</td><td>✅ Customer maintains their own user-facing helpdesk</td></tr>
+          <tr><td>Hardware lifecycle</td><td>✅ Replacement device provisioning via MMD process</td><td>Hardware purchasing decisions and budget</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">MMD Deployment Rings</div>
+    <p>Like Autopatch, MMD uses four deployment rings for update management:</p>
+    <ul class="bl">
+      <li><strong>Test Ring:</strong> 1% of devices — immediate updates, no deferral. Catch-all for immediate issues.</li>
+      <li><strong>First Ring:</strong> ~9% — 1 day deferral. IT team and early adopters.</li>
+      <li><strong>Fast Ring:</strong> ~20% — 6 day deferral. Tech-comfortable users.</li>
+      <li><strong>Broad Ring:</strong> ~70% — 9 day deferral. Everyone else.</li>
+    </ul>
+    <p>The difference from DIY Autopatch: <strong>Microsoft's operations team monitors these rings</strong>, responds to failures, and manages exceptions — your IT team doesn't have to.</p>
+
+    <div class="sh">MMD Prerequisites and Requirements</div>
+    <ul class="bl">
+      <li><strong>License:</strong> Microsoft 365 E3, E5, or Business Premium (Intune included). MMD service itself has an additional cost — contact Microsoft for pricing as it varies.</li>
+      <li><strong>Hardware:</strong> Must use Microsoft-approved MMD device models. Existing non-approved hardware cannot enroll in MMD.</li>
+      <li><strong>Azure AD:</strong> Cloud-only or Hybrid Azure AD Join. Pure on-premises AD devices not supported.</li>
+      <li><strong>Network:</strong> Devices must reach all Microsoft cloud endpoints directly (or via approved proxy). WSUS, network-based SSL inspection, and certain firewall configurations must be accommodated or removed.</li>
+      <li><strong>No conflicting policies:</strong> Existing Intune policies, SCCM co-management, and third-party security tools that conflict with MMD's baseline cannot be in place.</li>
+    </ul>
+
+    <div class="sh">When to Choose MMD vs Self-Managed Intune</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Factor</th><th>Choose MMD</th><th>Choose Self-Managed Intune</th></tr></thead>
+        <tbody>
+          <tr><td>IT team size</td><td>Small IT team, no dedicated endpoint admin expertise</td><td>Dedicated endpoint team with Intune skills</td></tr>
+          <tr><td>Configuration customization</td><td>Acceptable with Microsoft's standard baseline (limited customization)</td><td>Need custom configurations beyond Microsoft's baseline</td></tr>
+          <tr><td>Cost tolerance</td><td>Willing to pay premium for fully managed service</td><td>Want to minimize licensing costs with in-house management</td></tr>
+          <tr><td>Hardware flexibility</td><td>Willing to standardize on MMD-certified hardware models</td><td>Need to manage varied or legacy hardware fleet</td></tr>
+          <tr><td>SCCM dependency</td><td>No SCCM (cloud-native) — MMD doesn't support SCCM co-management</td><td>Have existing SCCM investment — gradual cloud migration needed</td></tr>
+          <tr><td>Compliance requirements</td><td>Standard enterprise compliance needs</td><td>Highly regulated industry with custom compliance requirements (defense, government)</td></tr>
+          <tr><td>Control preference</td><td>Prefer to outsource operations, focus on business apps</td><td>Prefer to own and control the endpoint management stack</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ib iby">
+      <div class="bt">⚠️ MMD Is NOT for Everyone</div>
+      <p>MMD is a premium, opinionated service. You accept Microsoft's security baseline and update schedule — you cannot significantly deviate. Organizations with complex compliance requirements (defense contractors, government, heavily regulated healthcare) often find MMD too rigid. Organizations heavily invested in SCCM and co-management can't use MMD simultaneously. And organizations with strong internal Intune expertise often find it more cost-effective to manage Intune themselves using Autopatch for the update management piece. MMD's sweet spot is medium-sized organizations with limited IT staff who want enterprise-grade endpoint management without building that expertise internally.</p>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🏢</div><div class="rwl">MMD Customer Profile</div></div>
+      <p><strong>Company:</strong> 500-person professional services firm (accounting/consulting). All knowledge workers with Surface Pro devices. Small IT team of 4 people. No dedicated endpoint admin.<br/>
+      <strong>Challenge:</strong> The IT team spends 30% of their time on endpoint issues — patch failures, AV problems, device enrollment support. They don't have deep Intune expertise. Leadership wants strong security posture but IT can't dedicate staff to learning and maintaining it.<br/>
+      <strong>Why MMD fits:</strong><br/>
+      • Surface Pro devices — all MMD-certified<br/>
+      • M365 E3 licenses already in place<br/>
+      • No SCCM — pure cloud (Intune already in use but poorly configured)<br/>
+      • Small IT team — can't build endpoint management expertise<br/>
+      • Standard professional services compliance (not government/defense)<br/>
+      • Willing to pay premium for fully managed service<br/>
+      <strong>Result:</strong> Microsoft's MMD team takes over endpoint management. IT team focuses on business application support and user onboarding. Update compliance goes from 60% to 97%. Security posture improved to Microsoft baseline standard. IT team recovers 30% of their time for higher-value work.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 95</div>
+      <div class="qa"><div class="qq">What is Microsoft Managed Desktop and how does it differ from standard Intune?</div>
+      <div class="qans">Microsoft Managed Desktop is a premium cloud-based endpoint management service where Microsoft's operations team manages your Windows devices on your behalf — including Intune configuration, security baselines, Windows Update management via deployment rings, hardware support, and 24/7 monitoring. With standard Intune, your IT team configures and operates everything. With MMD, Microsoft does it for you. The tradeoff is cost and control — MMD costs more and you accept Microsoft's opinionated security baseline with limited customization ability.</div></div>
+      <div class="qa"><div class="qq">What types of organizations are NOT good candidates for Microsoft Managed Desktop?</div>
+      <div class="qans">Organizations that are poor MMD candidates: those with heavy SCCM investment and co-management needs (MMD and SCCM co-management conflict), highly regulated environments requiring custom compliance configurations (government, defense contractors, some healthcare), organizations with large, varied hardware fleets (MMD requires certified hardware models), companies with strong internal Intune expertise who can self-manage cost-effectively, and organizations needing to significantly customize the security baseline. MMD is best for organizations with limited IT endpoint expertise, standardized hardware, and standard enterprise compliance needs.</div></div>
+      <div class="qa"><div class="qq">If a customer asks whether they should use Windows Autopatch or Microsoft Managed Desktop, how do you advise them?</div>
+      <div class="qans">Autopatch handles only the update management lifecycle — deploying Windows, M365 Apps, Edge, and Teams updates through deployment rings automatically. The customer still configures and manages all other Intune policies (security, compliance, apps, enrollment). Managed Desktop goes further — Microsoft manages the entire endpoint configuration including security baseline, Defender, BitLocker, compliance, updates, and hardware support. If the customer needs only automated patching, Autopatch is the right choice (and is included in M365 E3 at no extra cost). If they want to outsource the entire endpoint operations function, MMD is the answer — at a higher cost, with standardized hardware requirements.</div></div>
+    </div>
+  </section>
+
+  <!-- Block Complete -->
+  <div style="background:linear-gradient(135deg,rgba(101,163,13,.07),rgba(45,212,191,.05));border:1px solid rgba(101,163,13,.22);border-radius:16px;padding:30px;margin-top:48px;text-align:center;">
+    <div style="font-size:30px;margin-bottom:11px;">🎉</div>
+    <div style="font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--h);margin-bottom:9px;">Block 11 Complete!</div>
+    <div style="color:var(--text2);font-size:13.5px;max-width:600px;margin:0 auto 18px;line-height:1.7;">You've mastered the specialized Intune scenarios — education deployments with School Data Sync and Shared iPads, enterprise Shared Device Mode for shift workers, frontline worker configurations with Managed Home Screen and OEMConfig for rugged devices, and Microsoft Managed Desktop for organizations wanting Microsoft to run their entire endpoint operation.</div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap;">
+      <div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--teal);font-family:'IBM Plex Mono',monospace;">✅ Blocks 1–11 Done — 95 Topics</div>
+      <div style="background:rgba(101,163,13,.1);border:1px solid rgba(101,163,13,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;">⬡ Block 12 Next: Monitoring &amp; Automation</div>
+      <div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--purple);font-family:'IBM Plex Mono',monospace;">📋 34 Topics Remaining</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<a href="#" class="stup">↑</a>
+<script>
+  const secs=document.querySelectorAll('.ts');
+  const navs=document.querySelectorAll('.ni[href^="#"]');
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;navs.forEach(n=>{n.classList.remove('active');if(n.getAttribute('href')==='#'+id)n.classList.add('active');});}});},{rootMargin:'-20% 0px -60% 0px'});
+  secs.forEach(s=>obs.observe(s));
+  navs.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(n.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});}));
+</script>
+</body>
+</html>

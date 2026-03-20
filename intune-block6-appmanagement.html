@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 6: Application Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#07060f;--bg2:#0b0a17;--bg3:#0f0e1e;
+    --sb:#060510;--border:#191730;
+    --acc:#8b5cf6;--acc2:#a78bfa;--acc3:#c4b5fd;
+    --sky:#38bdf8;--green:#34d399;--orange:#fb923c;
+    --red:#f87171;--yellow:#fbbf24;--pink:#f472b6;--teal:#2dd4bf;
+    --text:#ede8ff;--text2:#7c7a9e;--text3:#3d3b5e;
+    --h:#f5f0ff;--card:#090818;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;font-weight:300;display:flex;min-height:100vh;line-height:1.75;}
+
+  /* SIDEBAR */
+  #sb{width:285px;min-width:285px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+  #sb::-webkit-scrollbar{width:3px;}
+  #sb::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .shd{padding:23px 20px 15px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#060510,#0a091a);}
+  .slo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--h);letter-spacing:-.5px;display:flex;align-items:center;gap:10px;}
+  .lic{width:34px;height:34px;background:linear-gradient(135deg,var(--acc),var(--sky));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(139,92,246,.35);}
+  .ssu{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .bbg{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(56,189,248,.1));border:1px solid rgba(139,92,246,.28);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-top:10px;letter-spacing:.5px;}
+  .snv{padding:12px 0;flex:1;}
+  .nlb{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 20px 4px;font-family:'IBM Plex Mono',monospace;}
+  .ni{display:flex;align-items:flex-start;gap:9px;padding:8px 20px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none;color:var(--text2);font-size:12.5px;line-height:1.4;}
+  .ni:hover{background:rgba(139,92,246,.07);color:var(--text);border-left-color:var(--acc);}
+  .ni.active{background:rgba(139,92,246,.11);color:var(--acc2);border-left-color:var(--acc);}
+  .nn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;margin-top:1px;}
+  .ni.active .nn{color:var(--acc);}
+  .plk{display:flex;align-items:center;gap:7px;padding:7px 11px;font-size:11px;color:var(--text3);text-decoration:none;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;margin:0 12px 4px;transition:all .2s;}
+  .plk:hover{color:var(--text2);border-color:rgba(139,92,246,.22);}
+  .sft{padding:13px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .pbar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .pfill{height:100%;width:43%;background:linear-gradient(90deg,var(--acc),var(--sky));border-radius:2px;animation:pglow 2s ease-in-out infinite alternate;}
+  @keyframes pglow{from{box-shadow:0 0 4px var(--acc);}to{box-shadow:0 0 14px var(--sky);}}
+
+  /* MAIN */
+  #main{margin-left:285px;flex:1;min-height:100vh;}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(7,6,15,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 46px;display:flex;align-items:center;justify-content:space-between;}
+  .bcrumb{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:7px;}
+  .bcrumb span{color:var(--acc2);}
+  .tcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 13px;}
+  .cont{padding:50px 46px 80px;max-width:980px;}
+
+  /* Hero */
+  .hero{margin-bottom:56px;position:relative;padding:44px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(139,92,246,.13) 0%,transparent 70%);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(56,189,248,.08) 0%,transparent 70%);border-radius:50%;}
+  .htag{display:inline-flex;align-items:center;gap:6px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);border-radius:20px;padding:5px 14px;font-size:10.5px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;letter-spacing:1px;}
+  .htitle{font-family:'Syne',sans-serif;font-size:39px;font-weight:800;color:var(--h);line-height:1.1;letter-spacing:-1px;margin-bottom:13px;}
+  .htitle span{background:linear-gradient(135deg,var(--acc),var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hdesc{font-size:14.5px;color:var(--text2);max-width:620px;line-height:1.8;}
+  .hmeta{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .hmi{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);}
+  .dot.g{background:var(--green);box-shadow:0 0 8px var(--green);}
+  .dot.s{background:var(--sky);box-shadow:0 0 8px var(--sky);}
+
+  /* Topic */
+  .ts{margin-bottom:68px;scroll-margin-top:66px;opacity:0;animation:fu .5s ease forwards;}
+  .ts:nth-child(1){animation-delay:.05s;}.ts:nth-child(2){animation-delay:.1s;}.ts:nth-child(3){animation-delay:.15s;}.ts:nth-child(4){animation-delay:.2s;}.ts:nth-child(5){animation-delay:.25s;}.ts:nth-child(6){animation-delay:.3s;}.ts:nth-child(7){animation-delay:.35s;}.ts:nth-child(8){animation-delay:.4s;}.ts:nth-child(9){animation-delay:.45s;}.ts:nth-child(10){animation-delay:.5s;}.ts:nth-child(11){animation-delay:.55s;}.ts:nth-child(12){animation-delay:.6s;}.ts:nth-child(13){animation-delay:.65s;}.ts:nth-child(14){animation-delay:.7s;}.ts:nth-child(15){animation-delay:.75s;}
+  @keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .th{display:flex;align-items:flex-start;gap:15px;margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--border);}
+  .tnum{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--acc);background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+  .ttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--h);letter-spacing:-.5px;line-height:1.2;margin-bottom:4px;}
+  .tsub{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .sh{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--h);margin:28px 0 10px;display:flex;align-items:center;gap:10px;}
+  .sh::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,var(--acc),var(--sky));border-radius:2px;flex-shrink:0;}
+  p{color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:12px;}
+  p strong{color:var(--text);font-weight:600;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(139,92,246,.1);color:var(--acc2);padding:2px 6px;border-radius:4px;border:1px solid rgba(139,92,246,.18);}
+
+  /* Cards */
+  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:17px;transition:border-color .2s,transform .2s;}
+  .card:hover{border-color:rgba(139,92,246,.32);transform:translateY(-2px);}
+  .cico{font-size:21px;margin-bottom:8px;}
+  .ctit{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:var(--h);margin-bottom:6px;}
+  .cbod{font-size:12.5px;color:var(--text2);line-height:1.6;}
+
+  /* Table */
+  .tw{overflow-x:auto;margin:16px 0;border-radius:11px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+  th{padding:12px 15px;text-align:left;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--h);letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 15px;color:var(--text2);border-bottom:1px solid rgba(25,23,48,.5);vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(139,92,246,.02);}
+
+  /* Tags */
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+  .tpurp{background:rgba(139,92,246,.15);color:var(--acc2);border:1px solid rgba(139,92,246,.2);}
+  .tsky{background:rgba(56,189,248,.15);color:var(--sky);border:1px solid rgba(56,189,248,.2);}
+  .tgreen{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.2);}
+  .toran{background:rgba(251,146,60,.15);color:var(--orange);border:1px solid rgba(251,146,60,.2);}
+  .tred{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.2);}
+  .tyel{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+  .tpink{background:rgba(244,114,182,.15);color:var(--pink);border:1px solid rgba(244,114,182,.2);}
+
+  /* Info boxes */
+  .ib{border-radius:10px;padding:16px 18px;margin:16px 0;border-left:3px solid;}
+  .ib .bt{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:6px;}
+  .ib p{margin:0;font-size:13.5px;color:var(--text2);}
+  .ibp{background:rgba(139,92,246,.06);border-color:var(--acc);}
+  .ibp .bt{color:var(--acc2);}
+  .ibs{background:rgba(56,189,248,.06);border-color:var(--sky);}
+  .ibs .bt{color:var(--sky);}
+  .ibg{background:rgba(52,211,153,.06);border-color:var(--green);}
+  .ibg .bt{color:var(--green);}
+  .ibo{background:rgba(251,146,60,.06);border-color:var(--orange);}
+  .ibo .bt{color:var(--orange);}
+  .ibr{background:rgba(248,113,113,.06);border-color:var(--red);}
+  .ibr .bt{color:var(--red);}
+  .iby{background:rgba(251,191,36,.06);border-color:var(--yellow);}
+  .iby .bt{color:var(--yellow);}
+
+  /* Steps */
+  .steps{list-style:none;margin:13px 0;display:flex;flex-direction:column;gap:10px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .snum{min-width:25px;height:25px;background:linear-gradient(135deg,var(--acc),var(--sky));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .steps li strong{color:var(--text);}
+
+  /* Bullets */
+  .bl{list-style:none;margin:10px 0 13px;display:flex;flex-direction:column;gap:7px;}
+  .bl li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .bl li::before{content:'▹';color:var(--acc);font-size:13px;flex-shrink:0;margin-top:2px;}
+  .bl li strong{color:var(--text);}
+
+  /* Realworld */
+  .rw{background:linear-gradient(135deg,rgba(52,211,153,.04),rgba(56,189,248,.04));border:1px solid rgba(52,211,153,.18);border-radius:12px;padding:19px;margin:20px 0;}
+  .rwh{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .rwi{font-size:18px;}
+  .rwl{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--green);}
+  .rw p{color:var(--text2);font-size:13px;margin:0;line-height:1.7;}
+  .rw p+p{margin-top:8px;}
+
+  /* Interview */
+  .iq{background:linear-gradient(135deg,rgba(139,92,246,.04),rgba(56,189,248,.04));border:1px solid rgba(139,92,246,.18);border-radius:13px;padding:21px;margin:24px 0;}
+  .iqh{font-family:'Syne',sans-serif;font-weight:700;font-size:14.5px;color:var(--acc2);margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+  .qa{margin-bottom:14px;}
+  .qa:last-child{margin-bottom:0;}
+  .qq{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;gap:8px;}
+  .qq::before{content:'Q.';color:var(--acc2);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .qans{font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.65;display:flex;gap:8px;}
+  .qans::before{content:'A.';color:var(--sky);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+
+  /* Tip */
+  .tip{display:flex;gap:12px;align-items:flex-start;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:9px;padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.65;}
+  .tpic{font-size:16px;flex-shrink:0;}
+
+  /* Code */
+  .code{background:#040308;border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#c4b5fd;overflow-x:auto;line-height:1.75;}
+  .cm{color:var(--text3);}
+  .kw{color:#f472b6;}
+  .st{color:#86efac;}
+  .hl{color:var(--sky);}
+  .vl{color:#fcd34d;}
+
+  /* App type grid */
+  .atg{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px;margin:16px 0;}
+  .atc{border-radius:10px;padding:15px;border:1px solid;transition:transform .2s;}
+  .atc:hover{transform:translateY(-2px);}
+  .at-win32{background:rgba(56,189,248,.05);border-color:rgba(56,189,248,.22);}
+  .at-store{background:rgba(139,92,246,.05);border-color:rgba(139,92,246,.22);}
+  .at-lob{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.22);}
+  .at-web{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.22);}
+  .at-m365{background:rgba(251,146,60,.05);border-color:rgba(251,146,60,.22);}
+  .at-builtin{background:rgba(244,114,182,.05);border-color:rgba(244,114,182,.22);}
+  .at-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--h);margin-bottom:5px;}
+  .at-body{font-size:12px;color:var(--text2);line-height:1.6;}
+
+  /* Intent visual */
+  .intent-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0;}
+  .int-card{border-radius:10px;padding:14px;border:1px solid;}
+  .int-req{background:rgba(248,113,113,.05);border-color:rgba(248,113,113,.22);}
+  .int-avail{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.22);}
+  .int-uninst{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.22);}
+  .int-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--h);margin-bottom:5px;}
+  .int-body{font-size:12px;color:var(--text2);line-height:1.6;}
+
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0;}
+  .stup{position:fixed;bottom:26px;right:26px;width:40px;height:40px;background:linear-gradient(135deg,var(--acc),var(--sky));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;box-shadow:0 4px 18px rgba(139,92,246,.3);border:none;color:white;z-index:200;text-decoration:none;transition:transform .2s;}
+  .stup:hover{transform:translateY(-3px);}
+  @media(max-width:768px){#sb{transform:translateX(-100%);}#main{margin-left:0;}.cont{padding:26px 16px;}.topbar{padding:11px 16px;}.htitle{font-size:26px;}}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="shd">
+    <div class="slo"><div class="lic">🛡️</div>Intune Mastery</div>
+    <div class="ssu">Complete Learning Series</div>
+    <div class="bbg">⬡ Block 6 of 14 — Application Management</div>
+  </div>
+  <div class="snv">
+    <div class="nlb">Block 6 Topics</div>
+    <a href="#t51" class="ni active"><span class="nn">51</span>App Types in Intune</a>
+    <a href="#t52" class="ni"><span class="nn">52</span>Win32 App Packaging — IntuneWinAppUtil</a>
+    <a href="#t53" class="ni"><span class="nn">53</span>Win32 App Deployment — Detection, Dependencies</a>
+    <a href="#t54" class="ni"><span class="nn">54</span>Microsoft Store Integration</a>
+    <a href="#t55" class="ni"><span class="nn">55</span>iOS VPP App Deployment</a>
+    <a href="#t56" class="ni"><span class="nn">56</span>Android Managed Google Play</a>
+    <a href="#t57" class="ni"><span class="nn">57</span>Microsoft 365 Apps Deployment</a>
+    <a href="#t58" class="ni"><span class="nn">58</span>App Configuration Policies</a>
+    <a href="#t59" class="ni"><span class="nn">59</span>App Protection Policies — MAM-WE</a>
+    <a href="#t60" class="ni"><span class="nn">60</span>App Protection Policy Settings &amp; DLP</a>
+    <a href="#t61" class="ni"><span class="nn">61</span>Selective Wipe vs Full Wipe</a>
+    <a href="#t62" class="ni"><span class="nn">62</span>LOB App Deployment</a>
+    <a href="#t63" class="ni"><span class="nn">63</span>Required vs Available vs Uninstall Intent</a>
+    <a href="#t64" class="ni"><span class="nn">64</span>Supersedence &amp; Dependency</a>
+    <a href="#t65" class="ni"><span class="nn">65</span>Troubleshooting App Deployment — IME Log</a>
+    <div class="nlb" style="margin-top:12px;">Previous Blocks</div>
+    <a href="intune-block1-foundations.html" class="plk">← Block 1: Foundations</a>
+    <a href="intune-block2-azuread.html" class="plk">← Block 2: Azure AD</a>
+    <a href="intune-block3-enrollment.html" class="plk">← Block 3: Enrollment</a>
+    <a href="intune-block4-configprofiles.html" class="plk">← Block 4: Config Profiles</a>
+    <a href="intune-block5-compliance.html" class="plk">← Block 5: Compliance</a>
+    <div class="ni" style="opacity:.4;cursor:default;font-size:11.5px;"><span class="nn">→</span>Block 7: Endpoint Security (Next)</div>
+  </div>
+  <div class="sft">
+    <div>Overall Progress</div>
+    <div style="color:var(--acc2);margin:2px 0;">Block 6 / 14 — 65 Topics Done</div>
+    <div class="pbar"><div class="pfill"></div></div>
+  </div>
+</nav>
+
+<div id="main">
+<div class="topbar">
+  <div class="bcrumb">Intune Mastery <span>›</span> Block 6 <span>›</span> Application Management</div>
+  <div class="tcount">15 Topics · ~5 Hours</div>
+</div>
+<div class="cont">
+
+  <div class="hero">
+    <div class="htag">📦 BLOCK 6 · APPLICATION MANAGEMENT</div>
+    <h1 class="htitle">Deploying Apps<br/><span>to Every Device</span></h1>
+    <p class="hdesc">Application Management is one of the most used and most complex areas of Intune. You'll deploy Win32 apps, Store apps, Microsoft 365, LOB apps, and mobile apps silently to thousands of devices. You'll protect corporate data in apps without enrolling devices (MAM-WE). And you'll diagnose app deployment failures using the IME log like a pro. This block covers all 15 topics in full depth.</p>
+    <div class="hmeta">
+      <div class="hmi"><div class="dot"></div>15 Topics</div>
+      <div class="hmi"><div class="dot g"></div>Win32 + Mobile + MAM</div>
+      <div class="hmi"><div class="dot s"></div>IME Log Troubleshooting</div>
+    </div>
+  </div>
+
+  <!-- T51 -->
+  <section class="ts" id="t51">
+    <div class="th"><div class="tnum">TOPIC 51</div>
+      <div><div class="ttl">App Types in Intune</div>
+      <div class="tsub">Every app format Intune supports — what each is, when to use it</div></div>
+    </div>
+    <div class="sh">The App Type Landscape</div>
+    <p>Intune supports many different app formats across platforms. Choosing the wrong app type wastes hours of troubleshooting. Here's the complete map — learn it cold because interviewers love asking about it.</p>
+    <div class="atg">
+      <div class="atc at-win32">
+        <div class="at-title">🖥️ Win32 App</div>
+        <div class="at-body">Standard Windows .exe or .msi installers, packaged into .intunewin. Most powerful, most complex. Supports detection rules, requirements, dependencies, supersedence. Required for most real enterprise apps (Adobe, AutoCAD, Chrome, custom apps).</div>
+      </div>
+      <div class="atc at-store">
+        <div class="at-title">🏪 Microsoft Store App</div>
+        <div class="at-body">New Microsoft Store integration (WinGet-backed). Modern MSIX/UWP apps from the Store. Auto-update. No packaging needed. Replaces the old deprecated Microsoft Store for Business.</div>
+      </div>
+      <div class="atc at-lob">
+        <div class="at-title">📦 Line-of-Business (LOB)</div>
+        <div class="at-body">Upload your own .msi, .msix, .appx, .ipa, .apk directly to Intune. Simpler than Win32 — no IntuneWin packaging. Limited features (no detection rules, no dependencies). Good for simple MSI apps.</div>
+      </div>
+      <div class="atc at-web">
+        <div class="at-title">🌐 Web App (Link)</div>
+        <div class="at-body">Creates a shortcut/bookmark to a URL on the device's desktop or home screen. No installer. Zero bandwidth. Used for web-based tools, SaaS apps, SharePoint sites. Available across all platforms.</div>
+      </div>
+      <div class="atc at-m365">
+        <div class="at-title">📊 Microsoft 365 Apps</div>
+        <div class="at-body">Deploy the full M365 suite (Word, Excel, Outlook, Teams) or individual apps. Uses the Office Deployment Tool (ODT) behind the scenes. Configurable via Intune — choose apps, update channel, languages, architecture.</div>
+      </div>
+      <div class="atc at-builtin">
+        <div class="at-title">🔧 Built-in App</div>
+        <div class="at-body">Pre-vetted Microsoft apps — Company Portal, Edge, Authenticator, OneDrive. One-click deploy, no packaging. Platform-specific. Auto-updated by Microsoft. Always use these for Microsoft's own apps instead of packaging them yourself.</div>
+      </div>
+    </div>
+
+    <div class="sh">Platform-Specific App Types</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Platform</th><th>App Types Available</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tsky">Windows</span></td><td>Win32, Microsoft Store (new), LOB (.msi/.msix), Web link, Microsoft 365 Apps, Built-in</td><td>Win32 is the primary type for enterprise Windows apps</td></tr>
+          <tr><td><span class="tag tpurp">iOS/iPadOS</span></td><td>App Store (VPP), LOB (.ipa), Web clip, Built-in, Custom app (private B2B)</td><td>VPP (via ABM) for paid/free App Store apps without personal Apple ID</td></tr>
+          <tr><td><span class="tag tgreen">Android</span></td><td>Managed Google Play, LOB (.apk), Web link, Built-in, Android Enterprise OEM app</td><td>Managed Google Play is the primary channel for Android Enterprise</td></tr>
+          <tr><td><span class="tag toran">macOS</span></td><td>LOB (.pkg/.dmg), Microsoft 365 Apps, Web link, DMG app, Built-in</td><td>PKG/DMG for enterprise macOS apps; Microsoft 365 as dedicated macOS type</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ib ibp">
+      <div class="bt">💡 Win32 vs LOB — Which to Use for Windows?</div>
+      <p>Use <strong>Win32</strong> when you need: detection rules to verify install success, requirement rules (minimum disk space, OS version, PowerShell pre-check), dependencies (install app A before app B), or supersedence (replace an old version). Use <strong>LOB</strong> only for simple .msi or .msix apps where none of these advanced features are needed. In practice, Win32 is the standard for most enterprise app deployments.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 51</div>
+      <div class="qa"><div class="qq">What is the difference between a Win32 app and a LOB app in Intune?</div>
+      <div class="qans">Win32 apps are packaged into .intunewin format using IntuneWinAppUtil.exe and support advanced features like custom detection rules, requirement rules (PowerShell checks, OS version, disk space), app dependencies, and supersedence. LOB (Line-of-Business) apps are raw .msi/.msix/.ipa files uploaded directly — simpler setup but no detection rules, no dependencies, and limited troubleshooting visibility. Win32 is the enterprise standard for Windows app deployment.</div></div>
+      <div class="qa"><div class="qq">What app type would you use to deploy Google Chrome to 500 Windows laptops via Intune?</div>
+      <div class="qans">Win32 app. Download the Chrome enterprise MSI or EXE installer. Package it with IntuneWinAppUtil.exe into a .intunewin file. Upload to Intune as a Win32 app. Set install command (msiexec /i GoogleChrome.msi /quiet), uninstall command, and a detection rule (registry key or file path). Assign as Required to the All Devices or target device group. Devices receive and silently install Chrome on next check-in.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T52 -->
+  <section class="ts" id="t52">
+    <div class="th"><div class="tnum">TOPIC 52</div>
+      <div><div class="ttl">Win32 App Packaging — IntuneWinAppUtil.exe Step by Step</div>
+      <div class="tsub">Converting any Windows installer into an Intune-deployable .intunewin package</div></div>
+    </div>
+    <div class="sh">What Is IntuneWinAppUtil?</div>
+    <p><strong>IntuneWinAppUtil.exe</strong> is Microsoft's free command-line tool that converts any Windows installer (EXE, MSI, scripts) into an <strong>.intunewin</strong> file — the only format Intune accepts for Win32 app deployment. It zips and encrypts your installer so Intune can securely deliver it to managed devices. The process is simple but must be done correctly.</p>
+
+    <div class="sh">Download and Setup</div>
+    <div class="code">
+<span class="cm"># Download IntuneWinAppUtil from Microsoft GitHub:</span>
+<span class="hl">https://github.com/microsoft/Microsoft-Win32-Content-Prep-Tool</span>
+
+<span class="cm"># Download the latest release .exe</span>
+<span class="cm"># No installation needed — it's a standalone executable</span>
+<span class="cm"># Place it in a working folder, e.g. C:\IntunePackaging\</span>
+    </div>
+
+    <div class="sh">Step-by-Step Packaging Process</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div><strong>Prepare your source folder:</strong> Create a folder containing ONLY the installer files needed. Example: <code>C:\IntunePackaging\Source\Chrome\</code> containing <code>GoogleChromeStandaloneEnterprise64.msi</code></div></li>
+      <li><div class="snum">2</div><div><strong>Run IntuneWinAppUtil:</strong>
+        <div class="code" style="margin-top:8px;">
+<span class="cm"># Syntax:</span>
+IntuneWinAppUtil.exe -c &lt;source_folder&gt; -s &lt;setup_file&gt; -o &lt;output_folder&gt;
+
+<span class="cm"># Example for Chrome MSI:</span>
+IntuneWinAppUtil.exe <span class="kw">-c</span> <span class="st">"C:\IntunePackaging\Source\Chrome"</span> <span class="kw">-s</span> <span class="st">"GoogleChromeStandaloneEnterprise64.msi"</span> <span class="kw">-o</span> <span class="st">"C:\IntunePackaging\Output"</span>
+
+<span class="cm"># Parameters:</span>
+<span class="cm"># -c  Source folder containing all installer files</span>
+<span class="cm"># -s  The main setup file (the entry point installer)</span>
+<span class="cm"># -o  Output folder where .intunewin will be saved</span>
+        </div>
+      </div></li>
+      <li><div class="snum">3</div><div><strong>Output:</strong> A file named <code>GoogleChromeStandaloneEnterprise64.intunewin</code> appears in the output folder. This is your upload-ready package.</div></li>
+      <li><div class="snum">4</div><div><strong>Upload to Intune:</strong> Apps → Windows → Add → App type: Windows app (Win32) → Select the .intunewin file → Configure install commands, detection rules, requirements → Assign → Publish.</div></li>
+    </ol>
+
+    <div class="sh">Key IntuneWinAppUtil Flags</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Flag</th><th>Purpose</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><code>-c</code></td><td>Source content folder — all files the installer needs</td><td><code>-c "C:\Source\MyApp"</code></td></tr>
+          <tr><td><code>-s</code></td><td>Setup file — the main executable or MSI</td><td><code>-s "setup.exe"</code></td></tr>
+          <tr><td><code>-o</code></td><td>Output directory for the .intunewin file</td><td><code>-o "C:\Output"</code></td></tr>
+          <tr><td><code>-q</code></td><td>Quiet mode — suppress prompts for automation</td><td><code>-q</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">What's Inside an .intunewin File?</div>
+    <p>An .intunewin file is actually a ZIP file containing:</p>
+    <ul class="bl">
+      <li><strong>IntunePackage.intunewin:</strong> An AES-256 encrypted ZIP of all your source files</li>
+      <li><strong>Detection.xml:</strong> Metadata about the package (name, version, install command, file size)</li>
+    </ul>
+    <p>You can rename it to .zip and extract it to inspect the contents. The encryption key is generated during packaging and embedded in the detection XML — Intune uses it to decrypt during deployment on the device.</p>
+
+    <div class="sh">Packaging Best Practices</div>
+    <ul class="bl">
+      <li><strong>Always test the installer silently first:</strong> Before packaging, run <code>setup.msi /quiet /norestart</code> or <code>setup.exe /S</code> manually on a test machine. If it doesn't install silently, it won't work via Intune either.</li>
+      <li><strong>Keep source folders clean:</strong> Only include files the installer actually needs. Unnecessary files increase package size and upload time.</li>
+      <li><strong>Document your install/uninstall commands:</strong> Write these down when you package so you don't have to figure them out again in 6 months.</li>
+      <li><strong>Version your packages:</strong> Name your output folders with version numbers: <code>Chrome_108.0.5359.98\</code>. Makes supersedence easy to manage.</li>
+      <li><strong>Test on a pilot device first:</strong> Always assign as Required to a test group, verify it installs correctly, THEN expand to All Devices.</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">📦</div><div class="rwl">Packaging Example — 7-Zip for Enterprise</div></div>
+      <p><strong>Goal:</strong> Deploy 7-Zip 23.01 to all Windows company laptops silently.<br/>
+      <strong>Step 1:</strong> Download 7-Zip enterprise MSI: <code>7z2301-x64.msi</code> to <code>C:\Packaging\Source\7zip\</code><br/>
+      <strong>Step 2:</strong> Test silent install: <code>msiexec /i 7z2301-x64.msi /quiet /norestart</code> → Verify 7-Zip appears in Programs.<br/>
+      <strong>Step 3:</strong> Package: <code>IntuneWinAppUtil.exe -c "C:\Packaging\Source\7zip" -s "7z2301-x64.msi" -o "C:\Packaging\Output"</code><br/>
+      <strong>Step 4:</strong> Upload to Intune → Install command: <code>msiexec /i "7z2301-x64.msi" /quiet /norestart</code><br/>
+      Uninstall command: <code>msiexec /x "{23170F69-40C1-2702-2301-000001000000}" /quiet /norestart</code> (use the MSI product GUID)<br/>
+      <strong>Step 5:</strong> Detection rule: MSI Product Code or registry key. Assign to pilot group → verify → assign to All Devices.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 52</div>
+      <div class="qa"><div class="qq">What is IntuneWinAppUtil and what does it do?</div>
+      <div class="qans">IntuneWinAppUtil.exe is Microsoft's free command-line packaging tool that converts Windows installers (EXE, MSI, scripts) into .intunewin files — the only format accepted by Intune for Win32 app deployment. It zips and AES-256 encrypts all source files so Intune can securely deliver them to managed devices. The tool takes three parameters: source folder, setup file (entry point), and output directory.</div></div>
+      <div class="qa"><div class="qq">Can you use IntuneWinAppUtil with a PowerShell script as the setup file?</div>
+      <div class="qans">Yes. IntuneWinAppUtil accepts any file as the setup file, including PowerShell scripts. Package the .ps1 and any supporting files as the source, specify the .ps1 as the setup file. In Intune, set the install command to: powershell.exe -ExecutionPolicy Bypass -File "script.ps1". This is useful for complex deployments that need pre/post-install tasks, registry modifications, or multi-file operations that a simple MSI can't handle.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T53 -->
+  <section class="ts" id="t53">
+    <div class="th"><div class="tnum">TOPIC 53</div>
+      <div><div class="ttl">Win32 App Deployment — Detection Rules, Requirements &amp; Dependencies</div>
+      <div class="tsub">The three pillars that make Win32 apps reliable at enterprise scale</div></div>
+    </div>
+    <div class="sh">The Three Pillars of Win32 Deployment</div>
+    <p>What separates Win32 from LOB apps is its three advanced features: <strong>Detection Rules</strong> (how Intune knows if the app is installed), <strong>Requirement Rules</strong> (prerequisites before installing), and <strong>Dependency</strong> (other apps that must install first). Together they make Win32 deployments reliable and self-healing.</p>
+
+    <div class="sh">Pillar 1 — Detection Rules</div>
+    <p>Detection rules tell Intune how to determine if the app is <strong>already installed</strong> on the device. Without a correct detection rule, Intune doesn't know if it needs to install the app, or if the app was successfully installed after deploying. This is the most critical Win32 setting.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Detection Type</th><th>How It Works</th><th>Best Used For</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><strong>MSI Product Code</strong></td><td>Intune checks if an MSI with this GUID is installed in Windows Installer database</td><td>MSI-based installers — most reliable for MSIs</td><td>Product code: <code>{23170F69-40C1-2702-2301-000001000000}</code></td></tr>
+          <tr><td><strong>File/Folder</strong></td><td>Check if a specific file or folder exists (optionally check version or date)</td><td>EXE installers, apps that don't register as MSI</td><td>File: <code>C:\Program Files\App\app.exe</code> version ≥ 3.2</td></tr>
+          <tr><td><strong>Registry</strong></td><td>Check if a registry key/value exists (optionally check value data)</td><td>Most apps — write version to HKLM\Software on install</td><td>HKLM\SOFTWARE\Google\Chrome: Version = 108.x</td></tr>
+          <tr><td><strong>PowerShell Script</strong></td><td>Run a custom PS1 script — if it exits with code 0 = detected, non-zero = not detected</td><td>Complex detection logic — multiple conditions, custom checks</td><td>PS1 that checks multiple registry keys AND a file AND a service status</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Finding the MSI Product Code</div>
+    <div class="code">
+<span class="cm"># Method 1: From the MSI file using PowerShell</span>
+$msi = <span class="st">"C:\Path\To\installer.msi"</span>
+$shell = New-Object -ComObject WindowsInstaller.Installer
+$db = $shell.GetType().InvokeMember(<span class="st">"OpenDatabase"</span>, <span class="kw">"InvokeMethod"</span>, $null, $shell, @($msi, 0))
+$view = $db.GetType().InvokeMember(<span class="st">"OpenView"</span>, <span class="kw">"InvokeMethod"</span>, $null, $db, @(<span class="st">"SELECT Value FROM Property WHERE Property='ProductCode'"</span>))
+$view.GetType().InvokeMember(<span class="st">"Execute"</span>, <span class="kw">"InvokeMethod"</span>, $null, $view, $null)
+$record = $view.GetType().InvokeMember(<span class="st">"Fetch"</span>, <span class="kw">"InvokeMethod"</span>, $null, $view, $null)
+$record.GetType().InvokeMember(<span class="st">"StringData"</span>, <span class="kw">"GetProperty"</span>, $null, $record, 1)
+
+<span class="cm"># Method 2: Check registry after manual install</span>
+<span class="cm"># HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\</span>
+<span class="cm"># Look for the app and note its PSChildName (the product code GUID)</span>
+    </div>
+
+    <div class="sh">Pillar 2 — Requirement Rules</div>
+    <p>Requirement rules define <strong>prerequisites that must be met before the app can be installed</strong>. If a device fails a requirement, Intune won't even attempt the installation — it shows "Not Applicable" status for that device.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Requirement Type</th><th>What It Checks</th><th>Example Use Case</th></tr></thead>
+        <tbody>
+          <tr><td>Operating system</td><td>Minimum/maximum Windows version</td><td>App requires Windows 11 22H2 minimum — don't push to Windows 10 devices</td></tr>
+          <tr><td>Disk space</td><td>Free disk space in MB</td><td>Adobe Acrobat requires 2000MB free — skip devices with full disks</td></tr>
+          <tr><td>Physical memory (RAM)</td><td>Minimum RAM in MB</td><td>CAD software requires 8GB RAM minimum</td></tr>
+          <tr><td>Processor speed (MHz)</td><td>Minimum CPU speed</td><td>Encoding software requires 2GHz minimum</td></tr>
+          <tr><td>Logical processors</td><td>Minimum CPU core count</td><td>Multi-threaded software needs 4+ cores</td></tr>
+          <tr><td>PowerShell script</td><td>Custom PS1 — exit 0 = requirement met, exit 1 = not met</td><td>Check if a specific software is already installed, or if device is on VPN, or custom hardware detection</td></tr>
+          <tr><td>Registry</td><td>Check registry key/value exists</td><td>Only install plugin if the parent app is already installed</td></tr>
+          <tr><td>File</td><td>Check file/folder exists</td><td>Only install update if base version is present</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Pillar 3 — App Dependencies</div>
+    <p>Dependencies tell Intune to <strong>automatically install another app first</strong> before this one. If App B depends on App A (like a plugin depending on its host application), Intune installs App A first, waits for success, then installs App B. No manual sequencing needed.</p>
+    <ul class="bl">
+      <li><strong>Auto-install dependency:</strong> When checked, Intune installs the dependency app automatically before the main app — even if the dependency isn't separately assigned to the user/device.</li>
+      <li><strong>Dependency chain:</strong> App A depends on App B which depends on App C — Intune resolves the chain and installs in the correct order automatically.</li>
+      <li><strong>Circular dependency prevention:</strong> Intune detects and blocks circular dependencies (A → B → A).</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔗</div><div class="rwl">Real-World Dependency Example</div></div>
+      <p><strong>Scenario:</strong> You need to deploy a custom .NET 6 application (CompanyApp.exe) to all laptops.<br/>
+      <strong>Problem:</strong> CompanyApp.exe requires .NET 6 Runtime to be installed first. If .NET isn't there, CompanyApp fails silently.<br/>
+      <strong>Solution with Dependencies:</strong><br/>
+      1. Create Win32 app: ".NET 6 Runtime" (using the .NET 6 offline installer)<br/>
+      2. Create Win32 app: "CompanyApp v2.3"<br/>
+      3. In CompanyApp's Dependencies tab → Add .NET 6 Runtime → Check "Auto-install"<br/>
+      <strong>Result:</strong> When Intune deploys CompanyApp to a device, it first checks if .NET 6 is installed. If not, it installs .NET 6 automatically. Once .NET 6 succeeds, CompanyApp installs. Zero manual pre-requisite management. Works even if .NET 6 isn't separately assigned to the device.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 53</div>
+      <div class="qa"><div class="qq">What are detection rules in Intune Win32 app deployment and what types are available?</div>
+      <div class="qans">Detection rules tell Intune whether an app is already installed on a device. Without them, Intune doesn't know if deployment succeeded or if it needs to retry. Four types: MSI Product Code (best for MSI installers — checks Windows Installer database), File/Folder (checks for a specific file with optional version check), Registry (checks for a registry key/value), and PowerShell Script (custom logic for complex scenarios — exit 0 means detected, non-zero means not detected).</div></div>
+      <div class="qa"><div class="qq">What is the difference between a dependency and a requirement rule in Intune Win32 apps?</div>
+      <div class="qans">A Requirement Rule is a prerequisite check — the device must meet the condition before Intune even attempts installation (OS version, disk space, RAM, registry check). If the requirement fails, the app is "Not Applicable" for that device. A Dependency is another Intune app that must be installed first — Intune automatically installs the dependency before the main app. Requirements check device state; dependencies install missing software prerequisites.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T54 -->
+  <section class="ts" id="t54">
+    <div class="th"><div class="tnum">TOPIC 54</div>
+      <div><div class="ttl">Microsoft Store Integration (New Store — WinGet)</div>
+      <div class="tsub">Deploying Store apps at enterprise scale — the new WinGet-powered approach</div></div>
+    </div>
+    <div class="sh">Old Store vs New Store</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Aspect</th><th>Old Microsoft Store for Business (Deprecated)</th><th>New Microsoft Store in Intune</th></tr></thead>
+        <tbody>
+          <tr><td>Status</td><td>❌ Retired March 2023</td><td>✅ Current approach</td></tr>
+          <tr><td>Technology</td><td>MSIX packages from Microsoft Store</td><td>WinGet (Windows Package Manager) powered</td></tr>
+          <tr><td>App catalog</td><td>Limited Microsoft-approved apps only</td><td>Thousands of apps including Win32 apps via WinGet</td></tr>
+          <tr><td>Updates</td><td>Manual republishing required</td><td>✅ Auto-update — apps update themselves</td></tr>
+          <tr><td>Packaging required</td><td>No (MSIX delivered directly)</td><td>No — WinGet handles delivery</td></tr>
+          <tr><td>Setup in Intune</td><td>Separate portal sync required</td><td>Built directly into Intune Apps section</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Adding a Microsoft Store App via New Store</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div>Intune → Apps → Windows → Add → App type: <strong>Microsoft Store app (new)</strong></div></li>
+      <li><div class="snum">2</div><div>Click <strong>Search the Microsoft Store app (new)</strong> → Type the app name (e.g., "Zoom", "Slack", "VLC")</div></li>
+      <li><div class="snum">3</div><div>Select the app from search results → Review app details</div></li>
+      <li><div class="snum">4</div><div>Configure: Install behavior (User or System context), auto-update settings, scope tags</div></li>
+      <li><div class="snum">5</div><div>Assign as Required or Available → Publish. Intune deploys via WinGet on next device sync.</div></li>
+    </ol>
+
+    <div class="ib ibg">
+      <div class="bt">✅ Auto-Update — The Key Advantage</div>
+      <p>New Microsoft Store apps in Intune auto-update themselves through WinGet. You don't need to package a new version, upload it, and reassign. When the app publisher releases an update on WinGet, it automatically applies on enrolled devices. For common apps like Zoom, Slack, VLC, Teams, and Notepad++ — use New Store instead of Win32 when possible. Reserve Win32 for apps not available in the Store or apps requiring complex detection/dependency logic.</p>
+    </div>
+
+    <div class="sh">WinGet CLI — Useful for Finding App IDs</div>
+    <div class="code">
+<span class="cm"># Search for an app in WinGet catalog:</span>
+winget search <span class="st">"Zoom"</span>
+<span class="cm"># Output shows: Name | ID | Version | Source</span>
+<span class="cm"># Zoom.Zoom | 5.16.2 | winget</span>
+
+<span class="cm"># Install directly via WinGet (test before Intune deployment):</span>
+winget install --id <span class="st">Zoom.Zoom</span> --silent --accept-package-agreements
+
+<span class="cm"># Show installed apps via WinGet:</span>
+winget list
+
+<span class="cm"># Tip: If WinGet can install it silently, Intune New Store can deploy it</span>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 54</div>
+      <div class="qa"><div class="qq">What happened to Microsoft Store for Business and what replaced it?</div>
+      <div class="qans">Microsoft Store for Business was retired in March 2023. It was replaced by the new Microsoft Store app type in Intune, powered by WinGet (Windows Package Manager). The new approach has a much larger app catalog, automatic updates via WinGet, and doesn't require a separate sync portal. Apps are searched and added directly within the Intune Apps section, making it significantly simpler to deploy common apps like Zoom, Slack, and VLC.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T55 -->
+  <section class="ts" id="t55">
+    <div class="th"><div class="tnum">TOPIC 55</div>
+      <div><div class="ttl">iOS App Store &amp; VPP App Deployment</div>
+      <div class="tsub">Deploying iOS apps at enterprise scale without personal Apple IDs</div></div>
+    </div>
+    <div class="sh">The Problem VPP Solves</div>
+    <p>In a consumer context, downloading an App Store app requires a personal Apple ID and sometimes a payment method. In enterprise, you can't ask 2,000 employees to use personal Apple IDs for work apps, and you can't share a corporate Apple ID across thousands of devices. <strong>VPP (Volume Purchase Program, now part of Apple Business Manager)</strong> solves this by letting organizations buy app licenses in bulk and assign them to devices or users — without any Apple ID needed on the device.</p>
+
+    <div class="sh">Device Licensing vs User Licensing</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">📱</div>
+        <div class="ctit">Device-Based Licensing</div>
+        <div class="cbod">App license is assigned to the device, not the user. Any user who picks up that device can use the app. No Apple ID required on device. Ideal for shared devices, kiosks, and supervised iPads. License stays on device even if a different user signs in.</div>
+      </div>
+      <div class="card">
+        <div class="cico">👤</div>
+        <div class="ctit">User-Based Licensing</div>
+        <div class="cbod">App license is assigned to the user's Managed Apple ID. User can install on up to 5 of their devices. Requires Managed Apple IDs from ABM. License follows the user, not the device — good for personal-use corporate iPhones.</div>
+      </div>
+    </div>
+
+    <div class="sh">Deploying iOS Apps via VPP</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div><strong>Purchase app licenses in ABM:</strong> Go to business.apple.com → Apps and Books → Search app → Buy licenses. Free apps still need to be "purchased" (at $0) to be manageable via VPP.</div></li>
+      <li><div class="snum">2</div><div><strong>Sync ABM token with Intune:</strong> Ensure your VPP token is connected (Tenant Administration → Apple VPP tokens). Apps purchased in ABM automatically appear in Intune after token sync (up to 15 minutes).</div></li>
+      <li><div class="snum">3</div><div><strong>Find the app in Intune:</strong> Apps → iOS/iPadOS → the app should appear in the list (synced from ABM). Or add it manually: Add → iOS Store App → search → Select VPP license.</div></li>
+      <li><div class="snum">4</div><div><strong>Configure assignment:</strong> Assign as Required or Available. Select Device or User licensing. Assign to target group.</div></li>
+      <li><div class="snum">5</div><div><strong>Intune deploys silently:</strong> On supervised devices, apps install without any user interaction or App Store prompts. On unsupervised BYOD devices, app appears in Company Portal for user to install.</div></li>
+    </ol>
+
+    <div class="sh">License Reclamation</div>
+    <p>One of VPP's most valuable features: when an employee leaves, you can <strong>reclaim their app licenses</strong> and reassign them to a new employee. Without VPP, paid apps downloaded on personal Apple IDs can't be reclaimed — the license stays with the ex-employee's personal account.</p>
+    <ul class="bl">
+      <li><strong>Automatic reclamation:</strong> When a device is retired/wiped or a user's license assignment is removed, the VPP license is automatically reclaimed.</li>
+      <li><strong>Manual reclamation:</strong> Intune → Apps → find the app → Licenses → View device/user assignments → Remove assignment from a specific device/user.</li>
+    </ul>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 55</div>
+      <div class="qa"><div class="qq">What is VPP and why is it needed for iOS enterprise app deployment?</div>
+      <div class="qans">VPP (Volume Purchase Program, now part of Apple Business Manager) lets organizations buy iOS app licenses in bulk and deploy them to devices without requiring personal Apple IDs. Without VPP, each App Store app download requires a personal Apple ID — impractical for enterprise. VPP separates app licenses from personal identity, allows silent app deployment to supervised devices, enables license reclamation when employees leave, and supports both device-based and user-based licensing models.</div></div>
+      <div class="qa"><div class="qq">What is the difference between device-based and user-based VPP licensing?</div>
+      <div class="qans">Device-based licensing assigns the app to the device — any user can access it and no Apple ID is needed. Ideal for supervised, shared, or kiosk devices. User-based licensing assigns to a user's Managed Apple ID — the license follows the user across up to 5 of their Apple devices, requiring Managed Apple IDs from Apple Business Manager. Device-based is simpler for corporate-owned supervised iOS devices; user-based is better when users move between devices.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T56 -->
+  <section class="ts" id="t56">
+    <div class="th"><div class="tnum">TOPIC 56</div>
+      <div><div class="ttl">Android Managed Google Play App Deployment</div>
+      <div class="tsub">The enterprise app channel for Android — silent deployment without personal Google accounts</div></div>
+    </div>
+    <div class="sh">What Is Managed Google Play?</div>
+    <p><strong>Managed Google Play</strong> is Google's enterprise version of the Play Store, integrated with Intune. It provides a curated, IT-controlled app store for Android Enterprise devices. Employees on Fully Managed or Work Profile devices see only the apps IT approves — not the public Play Store (which can be blocked on corporate-owned devices).</p>
+
+    <div class="sh">Connecting Managed Google Play to Intune</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div>Intune → Devices → Android → Android enrollment → Managed Google Play → Connect. This links your Intune tenant to a Managed Google Play account.</div></li>
+      <li><div class="snum">2</div><div>You're redirected to Google's enterprise signup. Sign in with a corporate Google account (or create one). This becomes your Managed Google Play admin account.</div></li>
+      <li><div class="snum">3</div><div>Approve the integration. The connection is established — Intune can now sync apps from Managed Google Play.</div></li>
+    </ol>
+
+    <div class="sh">Types of Apps in Managed Google Play</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🏪</div>
+        <div class="ctit">Public Play Store Apps</div>
+        <div class="cbod">Any app from the public Google Play Store — Slack, Zoom, Salesforce, SAP. IT approves them in Managed Google Play portal first, then they appear in the managed store available to users. Employees see only approved apps.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔒</div>
+        <div class="ctit">Private (LOB) Apps</div>
+        <div class="cbod">Upload your own .apk directly to Managed Google Play as a private app. Only your organization's devices can see and install it. No Google review required for private apps. Ideal for internal custom Android apps.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🌐</div>
+        <div class="ctit">Web Apps</div>
+        <div class="cbod">Create web app shortcuts that appear as app icons on Android devices. Points to a URL — runs in a managed Chrome session. No APK needed. Good for web-based enterprise tools.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🏭</div>
+        <div class="ctit">OEM / System Apps</div>
+        <div class="cbod">Pre-installed device apps specific to a manufacturer (Samsung, Zebra, Honeywell). Enabled or disabled via OEMConfig profiles or specific system app enablement in Intune. No download needed.</div>
+      </div>
+    </div>
+
+    <div class="sh">Approving and Deploying a Play Store App</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div>In Intune: Apps → Android → Add → Managed Google Play app</div></li>
+      <li><div class="snum">2</div><div>Search for the app (e.g., "Microsoft Teams"). Click the app → Click <strong>Approve</strong> — this adds it to your Managed Google Play catalog and accepts the app's permissions on behalf of users.</div></li>
+      <li><div class="snum">3</div><div>After approving, click <strong>Sync</strong> or wait 15 minutes for it to appear in your Intune app list.</div></li>
+      <li><div class="snum">4</div><div>Find the app in Intune → Assign as Required (silent install) or Available (user-initiated from Managed Play Store).</div></li>
+      <li><div class="snum">5</div><div>On Android Enterprise devices, Required apps install silently without user interaction. Available apps appear in the device's restricted Play Store.</div></li>
+    </ol>
+
+    <div class="ib ibo">
+      <div class="bt">⚠️ Permission Handling for Play Store Apps</div>
+      <p>When you approve an app in Managed Google Play, you accept its required Android permissions on behalf of your organization. This means users won't see "Allow Camera access?" prompts for work apps — you pre-approve permissions. Be careful: only approve apps that genuinely need the requested permissions. Review permissions before approving. You can also use App Configuration policies to auto-grant specific runtime permissions silently on Android Enterprise devices.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 56</div>
+      <div class="qa"><div class="qq">What is Managed Google Play and how does it differ from the regular Google Play Store?</div>
+      <div class="qans">Managed Google Play is Google's enterprise app channel — IT controls which apps appear on corporate Android devices. Regular Play Store shows all public apps to users without IT control. With Managed Google Play connected to Intune, only IT-approved apps appear in the device's Play Store. Required apps install silently without user interaction. IT can also publish private LOB apps that are invisible to the public. It also handles permissions pre-approval so users don't see permission prompts for work apps.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T57 -->
+  <section class="ts" id="t57">
+    <div class="th"><div class="tnum">TOPIC 57</div>
+      <div><div class="ttl">Microsoft 365 Apps Deployment via Intune</div>
+      <div class="tsub">Deploying Word, Excel, Outlook, Teams to Windows devices using the ODT integration</div></div>
+    </div>
+    <div class="sh">Why M365 Apps Has a Dedicated Intune App Type</div>
+    <p>Microsoft 365 Apps (formerly Office 365 ProPlus) is complex to deploy — it's a suite of products, supports different update channels, requires click-to-run technology, and has many configuration options. Intune has a dedicated app type for M365 Apps that uses the <strong>Office Deployment Tool (ODT)</strong> behind the scenes, with a GUI configuration experience instead of XML editing.</p>
+
+    <div class="sh">Configuring M365 Apps Deployment</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div>Intune → Apps → Windows → Add → App type: <strong>Microsoft 365 Apps for Windows 10 and later</strong></div></li>
+      <li><div class="snum">2</div><div><strong>App Suite Configuration:</strong> Select which apps to include — Word, Excel, PowerPoint, Outlook, Teams, OneNote, Publisher, Access, Visio (if licensed). Exclude apps the organization doesn't use.</div></li>
+      <li><div class="snum">3</div><div><strong>App Suite Settings:</strong>
+        <ul class="bl" style="margin-top:8px;">
+          <li><strong>Update channel:</strong> Current Channel (latest features fast), Monthly Enterprise (monthly, tested), Semi-Annual Enterprise (6-month cycle, most stable for enterprises)</li>
+          <li><strong>Version:</strong> Latest or pin to a specific version</li>
+          <li><strong>Architecture:</strong> 64-bit (recommended) or 32-bit (legacy compatibility)</li>
+          <li><strong>Languages:</strong> Add languages to install alongside English</li>
+          <li><strong>Accept EULA:</strong> Yes — pre-accept for silent install</li>
+          <li><strong>Shared computer activation:</strong> Enable for VDI/RDS environments where multiple users share one machine</li>
+        </ul>
+      </div></li>
+      <li><div class="snum">4</div><div>Assign as <strong>Required</strong> to target groups → Deploy. Devices download M365 from Microsoft's CDN and install silently. ~3–5GB download per device.</div></li>
+    </ol>
+
+    <div class="sh">Update Channels Compared</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Channel</th><th>Update Frequency</th><th>Stability</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Current Channel</strong></td><td>Multiple times/month</td><td>Lower — cutting edge</td><td>Innovation-focused orgs, early adopters, developers</td></tr>
+          <tr><td><strong>Monthly Enterprise Channel</strong></td><td>Once per month (2nd Tuesday)</td><td>Medium — tested monthly</td><td>Most enterprises — balance of currency and stability</td></tr>
+          <tr><td><strong>Semi-Annual Enterprise Channel</strong></td><td>Twice per year (Jan + Jul)</td><td>Highest — most stable</td><td>Regulated industries, healthcare, government, where stability is critical</td></tr>
+          <tr><td><strong>Current Channel (Preview)</strong></td><td>Weekly preview builds</td><td>Lowest — preview</td><td>IT testing and validation before rollout to main fleet</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip">
+      <div class="tpic">💡</div>
+      <div><strong>Shared Computer Activation for VDI/RDS:</strong> In Virtual Desktop Infrastructure (VDI) or Remote Desktop Services environments, multiple users share one Windows session. Enable "Use shared computer activation" in the M365 Apps deployment to prevent license conflicts when multiple users access Office on the same machine. Without this, Office shows "Not licensed" errors for secondary users on the same VM.</div>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 57</div>
+      <div class="qa"><div class="qq">Which Microsoft 365 update channel would you recommend for a regulated healthcare organization?</div>
+      <div class="qans">Semi-Annual Enterprise Channel. Healthcare organizations require maximum stability — they can't afford Office crashes or unexpected behavior changes interfering with clinical workflows. Semi-Annual Channel releases major feature updates only twice per year (January and July), giving IT time to thoroughly test updates before they hit clinical workstations. Security updates still arrive monthly on Patch Tuesday. The tradeoff is being 6 months behind on new features, which is acceptable in regulated environments.</div></div>
+      <div class="qa"><div class="qq">What is Shared Computer Activation and when is it needed?</div>
+      <div class="qans">Shared Computer Activation is a Microsoft 365 Apps licensing mode for environments where multiple users share one Windows machine — like VDI (Virtual Desktop Infrastructure) or RDS (Remote Desktop Services). Without it, Office activates to the first user who signs in and other users get "unlicensed" errors. With Shared Computer Activation, each user's license is verified from Microsoft's cloud on sign-in, allowing concurrent activation across multiple users on the same machine.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T58 -->
+  <section class="ts" id="t58">
+    <div class="th"><div class="tnum">TOPIC 58</div>
+      <div><div class="ttl">App Configuration Policies</div>
+      <div class="tsub">Pre-configuring app settings without user action — for managed devices and managed apps</div></div>
+    </div>
+    <div class="sh">What Are App Configuration Policies?</div>
+    <p><strong>App Configuration Policies</strong> push settings INTO a managed app — configuring the app's behavior before the user first opens it. Think of it as the app-level equivalent of a Device Configuration Profile. Instead of configuring the device's OS, you're configuring a specific app's settings (email server, default account, feature toggles).</p>
+
+    <div class="sh">Two Types of App Configuration Policies</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">💻</div>
+        <div class="ctit">Managed Devices</div>
+        <div class="cbod">Applies to MDM-enrolled devices. App receives configuration via the MDM channel. Works with any managed app that supports configuration. The device must be enrolled in Intune. Configuration delivered reliably with device check-in.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📱</div>
+        <div class="ctit">Managed Apps (MAM)</div>
+        <div class="cbod">Applies to apps protected by App Protection Policies — even on non-enrolled (BYOD) devices. App receives config via the Intune MAM SDK. Works even without device enrollment. Used for BYOD scenarios.</div>
+      </div>
+    </div>
+
+    <div class="sh">Common App Configuration Examples</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>App</th><th>Configurable Settings</th><th>Business Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Microsoft Outlook (iOS/Android)</strong></td><td>Account name, Exchange server, email address, S/MIME config, Focused Inbox, contact sync, calendar sync</td><td>Outlook auto-configures work email. User opens Outlook → already signed in and configured.</td></tr>
+          <tr><td><strong>Microsoft Teams</strong></td><td>Default account, disable specific features, meeting join experience, custom background policy</td><td>Teams pre-configured for first launch. Enterprise features enforced.</td></tr>
+          <tr><td><strong>Microsoft Edge</strong></td><td>Homepage URL, bookmarks, disable InPrivate, allowed/blocked URLs, enterprise mode site list</td><td>Edge opens to corporate intranet by default. Specific sites blocked/allowed from first launch.</td></tr>
+          <tr><td><strong>Managed Browser / Edge</strong></td><td>Allowed URLs, proxy settings, per-app VPN trigger, certificate pinning</td><td>Data protection — work web browsing controlled. Personal and work browsing separated.</td></tr>
+          <tr><td><strong>Cisco Webex / Zoom</strong></td><td>Meeting server URL, login domain, SSO configuration</td><td>Users auto-routed to corporate Webex/Zoom environment without manual server entry.</td></tr>
+          <tr><td><strong>Custom/LOB Apps</strong></td><td>Any key-value pair the app developer has built in (app-specific)</td><td>Configure backend API URL, feature flags, license key, environment (Dev/Prod) without rebuilding the app.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Creating an App Config Policy for Outlook</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div>Intune → Apps → App configuration policies → Add → Select: <strong>Managed devices</strong> or <strong>Managed apps</strong></div></li>
+      <li><div class="snum">2</div><div>Platform: iOS/iPadOS → Target app: Microsoft Outlook</div></li>
+      <li><div class="snum">3</div><div>Configuration settings format: Use Configuration Designer (GUI) or Enter XML data (advanced)</div></li>
+      <li><div class="snum">4</div><div>Add settings:
+        <div class="code" style="margin-top:8px;">
+<span class="cm">// Common Outlook app config keys:</span>
+<span class="hl">com.microsoft.outlook.EmailProfile.AccountType</span> = <span class="st">ModernAuth</span>
+<span class="hl">com.microsoft.outlook.EmailProfile.EmailAddress</span> = <span class="st">{{userprincipalname}}</span>
+<span class="hl">com.microsoft.outlook.EmailProfile.AccountName</span> = <span class="st">Work Email</span>
+<span class="hl">com.microsoft.outlook.FocusedInbox.enabled</span> = <span class="vl">true</span>
+<span class="hl">com.microsoft.outlook.Mail.ContactsSync</span> = <span class="vl">true</span>
+        </div>
+      </div></li>
+      <li><div class="snum">5</div><div>Assign to target group → Deploy. When users open Outlook on their device, it's already pre-configured with their work email account.</div></li>
+    </ol>
+
+    <div class="ib ibs">
+      <div class="bt">💡 Dynamic Variables in App Config</div>
+      <p>App Configuration Policies support Intune-provided dynamic variables that auto-populate with per-user values. Key variables:<br/>
+      <code>{{userprincipalname}}</code> → user's email/UPN<br/>
+      <code>{{mail}}</code> → user's email address<br/>
+      <code>{{displayname}}</code> → user's display name<br/>
+      <code>{{aaddeviceid}}</code> → device's Azure AD device ID<br/>
+      Use these so one policy serves all users — Outlook gets configured with each individual user's account automatically.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 58</div>
+      <div class="qa"><div class="qq">What is an App Configuration Policy and how does it differ from a Device Configuration Profile?</div>
+      <div class="qans">An App Configuration Policy pushes settings into a specific app — configuring the app's behavior (email server, default account, feature toggles) before the user opens it. A Device Configuration Profile configures the device's OS-level settings (Wi-Fi, VPN, device restrictions). App Config operates at the app layer; Device Config operates at the OS layer. App Config can also apply to non-enrolled BYOD devices via MAM, while Device Config requires full MDM enrollment.</div></div>
+      <div class="qa"><div class="qq">What are dynamic variables in App Configuration Policies and give an example?</div>
+      <div class="qans">Dynamic variables are Intune-provided tokens that automatically populate with per-user or per-device values at assignment time. For example, {{userprincipalname}} is replaced with each user's actual UPN (e.g., ravi@contoso.com). This allows one policy to configure Outlook's email account setting correctly for every user in the assigned group — without creating separate policies per user. Other variables include {{mail}}, {{displayname}}, and {{aaddeviceid}}.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T59 -->
+  <section class="ts" id="t59">
+    <div class="th"><div class="tnum">TOPIC 59</div>
+      <div><div class="ttl">App Protection Policies — MAM Without Enrollment</div>
+      <div class="tsub">Protecting corporate data in apps on personal devices — without enrolling the device</div></div>
+    </div>
+    <div class="sh">What Is MAM-WE?</div>
+    <p><strong>MAM Without Enrollment (MAM-WE)</strong> is one of Intune's most powerful features for BYOD scenarios. It lets you apply <strong>App Protection Policies (APPs)</strong> to managed apps (Outlook, Teams, OneDrive) on personal devices — without enrolling the device in MDM. The device stays personal. IT only controls corporate data inside those specific apps.</p>
+    <p>The secret is the <strong>Intune MAM SDK</strong> — embedded in all Microsoft apps and available to third-party developers. When a user signs into a managed app with their corporate Azure AD account, the MAM SDK contacts Intune and downloads the applicable App Protection Policy — automatically, silently, without device enrollment.</p>
+
+    <div class="sh">How MAM-WE Works — Technical Flow</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div>Employee installs <strong>Microsoft Outlook</strong> from the public App Store/Play Store on their personal iPhone.</div></li>
+      <li><div class="snum">2</div><div>Employee opens Outlook → signs in with corporate Azure AD account (ravi@company.com).</div></li>
+      <li><div class="snum">3</div><div><strong>Intune MAM SDK</strong> inside Outlook contacts the Intune MAM service (via Azure AD token).</div></li>
+      <li><div class="snum">4</div><div>Intune checks if there's an App Protection Policy assigned to this user for Outlook on iOS.</div></li>
+      <li><div class="snum">5</div><div>The policy is downloaded and enforced by the SDK inside the app: PIN required, copy/paste blocked to personal apps, iCloud save blocked, etc.</div></li>
+      <li><div class="snum">6</div><div>IT has control over corporate data in Outlook. Employee's personal WhatsApp, photos, contacts — completely untouched and invisible to IT.</div></li>
+    </ol>
+
+    <div class="sh">Which Apps Support MAM-WE?</div>
+    <div class="cg">
+      <div class="card" style="border-color:rgba(56,189,248,.3);">
+        <div class="cico">✅</div>
+        <div class="ctit">Built-in MAM SDK (Microsoft Apps)</div>
+        <div class="cbod">All Microsoft apps include the Intune MAM SDK: Outlook, Teams, OneDrive, SharePoint, Office apps (Word, Excel, PowerPoint), Edge, OneNote, Planner, To Do, Authenticator. These all support MAM-WE out of the box.</div>
+      </div>
+      <div class="card" style="border-color:rgba(52,211,153,.3);">
+        <div class="cico">🔧</div>
+        <div class="ctit">Third-Party Apps with SDK</div>
+        <div class="cbod">Many enterprise apps have integrated the Intune MAM SDK: Salesforce, Cisco Webex, Box, Citrix Files, Adobe Acrobat, Slack. Check the Intune-protected apps list at docs.microsoft.com for the full catalog.</div>
+      </div>
+      <div class="card" style="border-color:rgba(248,113,113,.3);">
+        <div class="cico">❌</div>
+        <div class="ctit">Apps WITHOUT SDK</div>
+        <div class="cbod">Most consumer apps (WhatsApp, Instagram, banking apps) don't have the Intune MAM SDK. You cannot apply App Protection Policies to these apps. This is by design — IT shouldn't control personal apps on personal devices.</div>
+      </div>
+    </div>
+
+    <div class="sh">MAM-WE vs MDM — When to Use Which</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Scenario</th><th>Recommended Approach</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Employee's personal phone accessing work email</td><td>MAM-WE (App Protection Policy)</td><td>Privacy — IT shouldn't control personal device. MAM protects only work data in Outlook.</td></tr>
+          <tr><td>Company-owned iPhone for work only</td><td>MDM enrollment (ADE) + optionally APP on top</td><td>Company owns it — full management appropriate. APP adds app-level DLP on top.</td></tr>
+          <tr><td>Contractor with personal laptop</td><td>MAM-WE on browser/apps</td><td>Can't enroll contractor's personal device. MAM lets them access work via managed Edge safely.</td></tr>
+          <tr><td>New employee, company laptop</td><td>MDM enrollment (Autopilot)</td><td>Company owns the device — full MDM management is the right approach.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🏢</div><div class="rwl">Real-World MAM-WE Deployment</div></div>
+      <p><strong>Company:</strong> 800-person organization. 600 office staff have company laptops (MDM enrolled). 200 field sales use personal iPhones to check email and Teams.<br/>
+      <strong>Challenge:</strong> IT can't enroll 200 personal iPhones — employees refuse. But company data is in their Outlook and Teams apps with no protection.<br/>
+      <strong>Solution:</strong> Deploy MAM-WE App Protection Policy for iOS targeting the "Sales Team" group:<br/>
+      - Require PIN to open Outlook/Teams<br/>
+      - Block copy from managed apps to personal apps<br/>
+      - Block saving attachments to personal iCloud<br/>
+      - Enable selective wipe on app removal<br/>
+      <strong>Result:</strong> 200 personal iPhones now have corporate data protected in Outlook and Teams. Employees' personal photos, messages, banking apps — completely untouched. When a sales rep leaves, IT does a selective wipe — only Outlook and Teams corporate data is removed. No device enrollment ever needed.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 59</div>
+      <div class="qa"><div class="qq">What is MAM Without Enrollment (MAM-WE) and how does it work?</div>
+      <div class="qans">MAM-WE allows applying App Protection Policies to managed apps on personal devices without MDM enrollment. The Intune MAM SDK is embedded in Microsoft apps (Outlook, Teams, etc.). When a user signs into the app with their corporate Azure AD account, the SDK contacts Intune, downloads the applicable protection policy, and enforces it — requiring PIN, blocking copy/paste to personal apps, blocking iCloud saves. The device itself remains personal and unmanaged. IT only controls corporate data within specific managed apps.</div></div>
+      <div class="qa"><div class="qq">Can App Protection Policies be applied to WhatsApp or Instagram?</div>
+      <div class="qans">No. App Protection Policies require the Intune MAM SDK to be embedded in the app. WhatsApp, Instagram, and most consumer apps don't include this SDK. This is intentional by design — on a personal device, IT should not be able to control personal apps. APPs are specifically designed to protect corporate data in enterprise/Microsoft apps while respecting personal app privacy.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T60 -->
+  <section class="ts" id="t60">
+    <div class="th"><div class="tnum">TOPIC 60</div>
+      <div><div class="ttl">App Protection Policy Settings &amp; DLP</div>
+      <div class="tsub">Every APP setting explained — data protection, access requirements, and conditional launch</div></div>
+    </div>
+    <div class="sh">App Protection Policy Structure</div>
+    <p>App Protection Policies have three sections of settings: <strong>Data Protection</strong> (what data can flow where), <strong>Access Requirements</strong> (what's needed to open the app), and <strong>Conditional Launch</strong> (what happens when device conditions change). Together they form a comprehensive data loss prevention layer at the app level.</p>
+
+    <div class="sh">Section 1 — Data Protection Settings</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Setting</th><th>Options</th><th>Recommended</th><th>What It Prevents</th></tr></thead>
+        <tbody>
+          <tr><td>Backup org data to iTunes/Android backup</td><td>Allow / Block</td><td>Block</td><td>Corporate Outlook data backed up to personal iCloud/Google Drive</td></tr>
+          <tr><td>Send org data to other apps</td><td>All apps / Policy managed apps only / None</td><td>Policy managed apps only</td><td>Sharing attachments to WhatsApp, personal mail, etc.</td></tr>
+          <tr><td>Receive data from other apps</td><td>All apps / Policy managed apps only / None</td><td>Policy managed apps only</td><td>Pasting personal notes or photos into corporate Outlook</td></tr>
+          <tr><td>Restrict cut, copy, paste</td><td>Any app / Policy managed / None</td><td>Policy managed apps only</td><td>Copying email content and pasting into WhatsApp or Notes</td></tr>
+          <tr><td>Save copies of org data</td><td>Allow / Block</td><td>Block (select allowed locations)</td><td>Saving attachments to personal iCloud Drive, Google Drive, local storage</td></tr>
+          <tr><td>Allowed save locations</td><td>OneDrive, SharePoint, Box, etc.</td><td>OneDrive for Business only</td><td>Limits save destinations to corporate storage only</td></tr>
+          <tr><td>Print org data</td><td>Allow / Block</td><td>Block (or Allow with managed print)</td><td>Printing confidential documents from personal printers</td></tr>
+          <tr><td>Sync policy managed app data with native apps</td><td>Allow / Block</td><td>Block</td><td>Syncing corporate contacts to native phone contacts (visible to all apps)</td></tr>
+          <tr><td>Notifications for org data</td><td>Allow / Block Org Data / Block All</td><td>Block Org Data</td><td>Corporate email subject lines visible on lock screen to bystanders</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Section 2 — Access Requirements</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Setting</th><th>Purpose</th><th>Recommendation</th></tr></thead>
+        <tbody>
+          <tr><td>PIN for access</td><td>Require PIN before opening the managed app</td><td>Require — 6-digit minimum</td></tr>
+          <tr><td>PIN type</td><td>Numeric PIN or Passcode (alphanumeric)</td><td>Numeric for most; Passcode for high-security</td></tr>
+          <tr><td>Biometrics override PIN</td><td>Allow Face ID/fingerprint instead of PIN</td><td>Allow — better user experience, same security</td></tr>
+          <tr><td>PIN reset after days</td><td>Force PIN change after X days</td><td>90 days</td></tr>
+          <tr><td>Work or school account credentials for access</td><td>Require Azure AD re-auth periodically</td><td>Optional — adds security but friction</td></tr>
+          <tr><td>Recheck access requirements (minutes)</td><td>How long before PIN required again after backgrounding app</td><td>30–60 minutes for most, shorter for high-security</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Section 3 — Conditional Launch</div>
+    <p>Conditional Launch settings define <strong>what happens when a device or app condition changes</strong>. These are automatic security responses.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Condition</th><th>Action Options</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>Max PIN attempts</td><td>Block access / Wipe data</td><td>After 5 failed PIN attempts → wipe corporate data</td></tr>
+          <tr><td>Offline grace period</td><td>Block access / Wipe data</td><td>If offline for 720 hours (30 days) → block access. 90 days → wipe.</td></tr>
+          <tr><td>Min app version</td><td>Warn / Block / Wipe</td><td>Outlook version below 4.2.0 → warn user to update. Below 4.0 → block.</td></tr>
+          <tr><td>Min OS version</td><td>Warn / Block / Wipe</td><td>iOS below 16 → warn. iOS below 15 → block access to Outlook.</td></tr>
+          <tr><td>Jailbroken/rooted devices</td><td>Block access / Wipe data</td><td>Jailbreak detected → immediately wipe corporate data from Outlook and Teams.</td></tr>
+          <tr><td>Device threat level (MDE)</td><td>Block access / Wipe data</td><td>If Defender detects High threat → block Outlook access until threat resolved.</td></tr>
+          <tr><td>Disabled account</td><td>Block access / Wipe</td><td>User's Azure AD account disabled (terminated employee) → app access blocked immediately.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔐</div><div class="rwl">Complete APP Policy Example — Financial Services</div></div>
+      <p><strong>Context:</strong> Bank deploying Outlook and Teams to 500 bankers' personal iPhones via MAM-WE.<br/>
+      <strong>Data Protection:</strong> Send data → Policy managed apps only. Restrict cut/copy/paste → Policy managed. Save copies → Block (OneDrive for Business only). Notifications → Block org data (no email subjects on lock screen).<br/>
+      <strong>Access Requirements:</strong> PIN required → 6 numeric digits. Biometrics → Allow. PIN reset → 60 days. Recheck access → 30 minutes.<br/>
+      <strong>Conditional Launch:</strong> Max PIN attempts → 5 → Wipe data. Offline grace → 30 days → Block, 60 days → Wipe. Jailbroken → Wipe immediately. Min iOS 16.0 → Block. MDE High threat → Block.<br/>
+      <strong>Effect:</strong> 500 personal iPhones access bank email securely. Data can't leave Outlook/Teams to personal apps. If a banker's phone is jailbroken or compromised, bank data is immediately wiped. Regulators are satisfied — no need to issue corporate phones.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 60</div>
+      <div class="qa"><div class="qq">What does the "Send org data to other apps" setting do in an App Protection Policy?</div>
+      <div class="qans">It controls where corporate data from managed apps can be sent. Set to "Policy managed apps only" — data from Outlook (corporate email) can only be pasted or shared to other MAM-managed apps (like Teams or OneDrive for Business), not to unmanaged personal apps like WhatsApp, personal Gmail, or Notes. This is the most important DLP control — it prevents corporate data from leaking to personal apps on the device.</div></div>
+      <div class="qa"><div class="qq">What is Conditional Launch in App Protection Policies?</div>
+      <div class="qans">Conditional Launch defines automated security responses when device or app conditions change. Examples: after 5 failed PINs → wipe corporate data; if the device is jailbroken → wipe immediately; if offline for 30 days → block access; if OS version is below minimum → block. These conditions are evaluated by the MAM SDK inside the app at each launch and periodically in the background, providing ongoing security enforcement beyond just initial access control.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T61 -->
+  <section class="ts" id="t61">
+    <div class="th"><div class="tnum">TOPIC 61</div>
+      <div><div class="ttl">Selective Wipe vs Full Wipe</div>
+      <div class="tsub">The two wipe methods — what gets removed, when to use each, and the legal implications</div></div>
+    </div>
+    <div class="sh">The Core Difference</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Aspect</th><th>Selective Wipe (Retire)</th><th>Full Wipe (Factory Reset)</th></tr></thead>
+        <tbody>
+          <tr><td>What's removed</td><td>Corporate apps, data, configuration profiles, certificates. Personal data stays.</td><td>EVERYTHING — factory reset. Personal photos, apps, messages — all gone.</td></tr>
+          <tr><td>Device after wipe</td><td>Still functional with all personal data. User keeps their phone.</td><td>Device is blank, like new out of box.</td></tr>
+          <tr><td>MDM enrollment after wipe</td><td>Device is unenrolled from Intune</td><td>Device is unenrolled from Intune</td></tr>
+          <tr><td>Use on</td><td>BYOD personal devices — preserves personal data</td><td>Company-owned devices only (legally and ethically)</td></tr>
+          <tr><td>Legal implication</td><td>Safe for BYOD — IT cannot wipe personal data</td><td>Never use on personal devices — destroying personal property creates legal liability</td></tr>
+          <tr><td>When it takes effect</td><td>Next time device connects to Intune (or within 15 min if online)</td><td>Near-immediate if device is online and MDM-connected</td></tr>
+          <tr><td>Triggered from</td><td>Intune → Device → Retire, or automatic via non-compliance action or APP Conditional Launch</td><td>Intune → Device → Wipe</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">When to Use Each</div>
+    <ul class="bl">
+      <li><strong>Employee resigning (personal BYOD phone):</strong> Selective Wipe. Remove Outlook, Teams, corporate data. Employee keeps their personal phone intact.</li>
+      <li><strong>Company phone lost/stolen:</strong> Full Wipe. Company owns the device. Protect corporate data by wiping everything immediately.</li>
+      <li><strong>Employee terminated (potential data theft risk):</strong> Selective Wipe on BYOD immediately. Full Wipe on company devices.</li>
+      <li><strong>Device being repurposed for a new employee:</strong> Full Wipe. Start fresh for the new user.</li>
+      <li><strong>APP Conditional Launch — jailbreak detected on BYOD:</strong> Selective Wipe (automatic via APP). Only corporate app data removed.</li>
+    </ul>
+
+    <div class="sh">Selective Wipe via App Protection Policy</div>
+    <p>You can trigger selective wipe in two ways:</p>
+    <ul class="bl">
+      <li><strong>Manual:</strong> Intune → Apps → App protection policies → Find user → Wipe. Admin triggers the wipe manually.</li>
+      <li><strong>Automatic via Conditional Launch:</strong> APP setting "Offline grace period → 90 days → Wipe data" automatically selective-wipes the user's managed apps if they haven't connected in 90 days (likely left the company or lost the device).</li>
+    </ul>
+
+    <div class="ib ibr">
+      <div class="bt">🚨 Full Wipe on Personal Device — Legal Risk</div>
+      <p>Never perform a Full Wipe on a personally-owned device. Destroying personal photos, messages, and apps on someone's personal property is legally problematic — it could expose the company to lawsuits for property destruction and data loss. Always use Selective Wipe for BYOD. This is why it's critical to correctly classify device ownership during enrollment and enforce policy accordingly. An accidental full wipe of a personal device can cost the company far more than any data breach.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 61</div>
+      <div class="qa"><div class="qq">What is selective wipe in Intune and when would you use it over a full wipe?</div>
+      <div class="qans">Selective wipe removes only corporate data, apps, and configuration profiles from a device while leaving personal data (photos, personal apps, messages) intact. Use it for BYOD personal devices — when an employee leaves or a personal device is lost. Full wipe factory-resets the entire device, removing everything. Only use full wipe on company-owned devices. Using full wipe on a personal device destroys personal property and creates legal liability for the organization.</div></div>
+      <div class="qa"><div class="qq">Can selective wipe be triggered automatically in Intune?</div>
+      <div class="qans">Yes, in two ways: via App Protection Policy Conditional Launch settings (e.g., offline for 90 days → wipe data, or jailbreak detected → wipe data) and via Compliance Policy Actions for Non-Compliance (e.g., device non-compliant for 30 days → retire the device). These automated triggers are important for BYOD scenarios where IT may not be notified when an employee leaves or a device is compromised.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T62 -->
+  <section class="ts" id="t62">
+    <div class="th"><div class="tnum">TOPIC 62</div>
+      <div><div class="ttl">LOB (Line-of-Business) App Deployment</div>
+      <div class="tsub">Deploying custom internal apps directly to managed devices</div></div>
+    </div>
+    <div class="sh">What Is an LOB App?</div>
+    <p>A <strong>Line-of-Business (LOB) app</strong> is a custom or internally-developed application specific to your organization — not available in any public app store. Examples: your company's custom ERP mobile app, a proprietary Windows tool, an internal HR portal app. Intune lets you upload LOB apps directly and deploy them to managed devices without going through a public store.</p>
+
+    <div class="sh">LOB App Formats by Platform</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Platform</th><th>Supported Formats</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Windows</td><td>.msi, .msix, .msixbundle, .appx, .appxbundle</td><td>For complex EXE-based apps, use Win32 instead. LOB suits simple MSI/MSIX apps.</td></tr>
+          <tr><td>iOS/iPadOS</td><td>.ipa</td><td>Must be enterprise-signed (Apple Developer Enterprise Program cert). App Store review NOT required for internal LOB apps.</td></tr>
+          <tr><td>Android</td><td>.apk</td><td>Upload to Managed Google Play as a private app (preferred) or directly as LOB. Private MGP is recommended for Android Enterprise.</td></tr>
+          <tr><td>macOS</td><td>.pkg, .dmg (via DMG app type)</td><td>PKG is the standard for macOS enterprise apps. DMG requires wrapping with Intune's tool.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Uploading a Windows LOB App</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div>Intune → Apps → Windows → Add → App type: <strong>Line-of-business app</strong></div></li>
+      <li><div class="snum">2</div><div>Upload the .msi or .msix file</div></li>
+      <li><div class="snum">3</div><div>Fill in app information: Name, Description, Publisher, Version</div></li>
+      <li><div class="snum">4</div><div>Configure install context: <strong>Device context</strong> (installs for all users on the device — recommended for most LOB apps) or <strong>User context</strong> (installs only for the signed-in user)</div></li>
+      <li><div class="snum">5</div><div>Assign and deploy. Note: LOB apps don't support detection rules or dependencies — if you need those, use Win32 instead.</div></li>
+    </ol>
+
+    <div class="tip">
+      <div class="tpic">💡</div>
+      <div><strong>LOB vs Win32 Decision:</strong> Start with LOB for simplicity — if the MSI installs silently without arguments, LOB is fine. Move to Win32 if you need: custom install arguments, detection rules to verify installation, requirement rules (minimum OS, disk space), app dependencies, or supersedence for version upgrades. Most enterprise LOB apps quickly outgrow the simple LOB type and need Win32.</div>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 62</div>
+      <div class="qa"><div class="qq">What is a LOB app in Intune and when would you use Win32 instead?</div>
+      <div class="qans">An LOB (Line-of-Business) app is a custom internal app uploaded directly to Intune — .msi/.msix for Windows, .ipa for iOS, .apk for Android. LOB is simple — upload and assign. Use Win32 instead when you need detection rules (to verify successful installation), requirement rules (prerequisites like minimum OS or disk space), app dependencies (install another app first), supersedence (replace old versions), or custom install arguments. LOB works for simple MSI apps; Win32 is needed for complex enterprise deployments.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T63 -->
+  <section class="ts" id="t63">
+    <div class="th"><div class="tnum">TOPIC 63</div>
+      <div><div class="ttl">Required vs Available vs Uninstall — Deployment Intent</div>
+      <div class="tsub">Controlling how and whether an app reaches each device</div></div>
+    </div>
+    <div class="sh">The Three Deployment Intents</div>
+    <div class="intent-grid">
+      <div class="int-card int-req">
+        <div class="int-title">🔴 Required</div>
+        <div class="int-body">App is FORCED to every device in the assigned group. Installs silently in the background without user action. User cannot prevent installation. If uninstalled by user, Intune reinstalls it on next sync. Use for: security tools, corporate apps everyone must have.</div>
+      </div>
+      <div class="int-card int-avail">
+        <div class="int-title">🟢 Available</div>
+        <div class="int-body">App appears in the Company Portal for users to install if they want. Not forced. User chooses to install. For enrolled devices, or for BYOD users via Company Portal (web or app). Use for: optional productivity apps, departmental tools not everyone needs.</div>
+      </div>
+      <div class="int-card int-uninst">
+        <div class="int-title">🟡 Uninstall</div>
+        <div class="int-body">Intune actively REMOVES the app from devices in the assigned group. Used to clean up apps that should no longer be on certain devices — e.g., removing a legacy app after migration, or removing a department's app when a user transfers. Works silently.</div>
+      </div>
+    </div>
+
+    <div class="sh">Intent Assignment Rules</div>
+    <ul class="bl">
+      <li><strong>Required overrides Available:</strong> If the same user is in a "Required" group and an "Available" group for the same app, Required wins — the app installs silently.</li>
+      <li><strong>Required overrides Uninstall:</strong> If a user is in both Required and Uninstall groups, Required wins — app stays installed.</li>
+      <li><strong>Uninstall vs Available:</strong> If a user is in both Uninstall and Available groups, the app is uninstalled (Uninstall wins over Available).</li>
+      <li><strong>Exclude overrides all:</strong> If excluded from a Required assignment, the app is not installed — regardless of other assignments.</li>
+    </ul>
+
+    <div class="sh">Available for Enrolled + BYOD Unenrolled Devices</div>
+    <p>The "Available" intent has two sub-options:</p>
+    <ul class="bl">
+      <li><strong>Available for enrolled devices:</strong> App appears in Company Portal (app or website) for enrolled MDM devices.</li>
+      <li><strong>Available with or without enrollment:</strong> Available for MDM-enrolled AND unenrolled (BYOD MAM-WE) users via the Company Portal website. Great for BYOD where users access the Company Portal web at portal.manage.microsoft.com to install optional apps on their personal devices.</li>
+    </ul>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 63</div>
+      <div class="qa"><div class="qq">What is the difference between Required and Available app assignment in Intune?</div>
+      <div class="qans">Required installs the app silently and automatically on all devices in the assigned group — the user cannot prevent it, and if they uninstall it, Intune reinstalls it on next sync. Available makes the app appear in the Company Portal for users to optionally install at their discretion. Use Required for mandatory corporate apps (security tools, core productivity apps) and Available for optional departmental or productivity tools that not everyone needs.</div></div>
+      <div class="qa"><div class="qq">If a user is in both a "Required" and "Uninstall" assignment group for the same app, what happens?</div>
+      <div class="qans">Required wins. The app is installed (and stays installed). Required intent has the highest priority — it overrides both Available and Uninstall intents. The only exception is Exclude, which removes the device/user from receiving any assignment. If you truly need to uninstall an app for a specific group while keeping it required for others, use Exclude in the Required assignment instead of an Uninstall assignment.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T64 -->
+  <section class="ts" id="t64">
+    <div class="th"><div class="tnum">TOPIC 64</div>
+      <div><div class="ttl">Supersedence &amp; Dependency Between Apps</div>
+      <div class="tsub">Managing app version upgrades and prerequisite relationships at scale</div></div>
+    </div>
+    <div class="sh">Supersedence — Replacing Old Versions</div>
+    <p><strong>Supersedence</strong> tells Intune that this new app version should <strong>replace an older version</strong>. When you configure supersedence, Intune automatically uninstalls the old app and installs the new one — without you needing to change assignments or manually uninstall the old version first.</p>
+
+    <div class="sh">How Supersedence Works</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div>You have Chrome 108 deployed as a Win32 app to All Devices.</div></li>
+      <li><div class="snum">2</div><div>You package Chrome 120 as a new Win32 app.</div></li>
+      <li><div class="snum">3</div><div>In Chrome 120's properties → Supersedence tab → Add Chrome 108 as a superseded app.</div></li>
+      <li><div class="snum">4</div><div>Set behavior: <strong>Uninstall the previous version</strong> (removes Chrome 108 first) or <strong>Update</strong> (upgrades in-place without full uninstall).</div></li>
+      <li><div class="snum">5</div><div>Assign Chrome 120 to All Devices (same assignment as Chrome 108 had).</div></li>
+      <li><div class="snum">6</div><div>Intune detects Chrome 108 is installed, uninstalls it, installs Chrome 120. Devices that never had Chrome 108 just get Chrome 120 directly.</div></li>
+    </ol>
+
+    <div class="sh">Supersedence Behavior Options</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Option</th><th>What Happens</th><th>Use When</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Uninstall previous version</strong></td><td>Old app is fully uninstalled before new app installs. Clean slate.</td><td>Major version upgrades, different MSI product codes, incompatible versions that can't coexist.</td></tr>
+          <tr><td><strong>Update</strong></td><td>New app installs over the existing one (upgrade in-place). Old app not explicitly uninstalled first.</td><td>Minor updates where the installer handles upgrading itself. Same product code MSI upgrades.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Dependency — Prerequisite Apps</div>
+    <p>Dependencies are covered in Topic 53, but here's the full dependency chain concept:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Feature</th><th>Dependency</th><th>Supersedence</th></tr></thead>
+        <tbody>
+          <tr><td>Direction</td><td>"This app needs ANOTHER app FIRST" (before me)</td><td>"This app REPLACES another app" (replacing old with new)</td></tr>
+          <tr><td>Timeline</td><td>Affects installation ORDER (prerequisite)</td><td>Affects version LIFECYCLE (upgrade/replace)</td></tr>
+          <tr><td>Common use</td><td>.NET Runtime → Custom App needs .NET first</td><td>Chrome 120 → supersedes Chrome 108</td></tr>
+          <tr><td>Auto-action</td><td>Dependency auto-installs if not present</td><td>Superseded app auto-uninstalls or upgrades</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔄</div><div class="rwl">Complete Lifecycle Example — VLC Updates</div></div>
+      <p><strong>Setup:</strong> VLC 3.0 is deployed to 300 devices.<br/>
+      <strong>VLC 3.1 released:</strong><br/>
+      1. Package VLC 3.1.intunewin with IntuneWinAppUtil<br/>
+      2. Upload to Intune as new Win32 app<br/>
+      3. In VLC 3.1 → Supersedence → Add VLC 3.0 → Behavior: Uninstall previous version<br/>
+      4. Assign VLC 3.1 as Required to All Devices<br/>
+      <strong>Result:</strong> All 300 devices automatically uninstall VLC 3.0 and install VLC 3.1 on next check-in. No manual assignment changes. No uninstall task needed. Devices that didn't have VLC simply receive 3.1 directly. The old VLC 3.0 assignment can be removed once migration is complete.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 64</div>
+      <div class="qa"><div class="qq">What is supersedence in Intune and how does it simplify app version management?</div>
+      <div class="qans">Supersedence tells Intune that a new app version should replace an older version. When configured, Intune automatically uninstalls the old version and installs the new one on devices where the old version is detected — without requiring manual uninstall assignments or separate cleanup tasks. This simplifies version lifecycle management enormously: instead of maintaining separate uninstall and install assignments, you define the relationship once in the new app's supersedence settings.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T65 -->
+  <section class="ts" id="t65">
+    <div class="th"><div class="tnum">TOPIC 65</div>
+      <div><div class="ttl">Troubleshooting App Deployment Failures — IME Log</div>
+      <div class="tsub">The definitive guide to diagnosing why apps aren't installing via Intune</div></div>
+    </div>
+    <div class="sh">The Troubleshooting Hierarchy</div>
+    <ol class="steps">
+      <li><div class="snum">1</div><div><strong>Check app assignment:</strong> Is the app assigned to a group the device/user belongs to? Is the device in an excluded group?</div></li>
+      <li><div class="snum">2</div><div><strong>Check app deployment status in Intune:</strong> Apps → find the app → Device install status → Find the device → Note the status: Installed / Failed / Pending / Not Applicable.</div></li>
+      <li><div class="snum">3</div><div><strong>Check requirement rules:</strong> If "Not Applicable" — a requirement rule is blocking installation. Disk space? OS version? Registry prerequisite?</div></li>
+      <li><div class="snum">4</div><div><strong>Check the IME log:</strong> On the device → <code>C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log</code></div></li>
+      <li><div class="snum">5</div><div><strong>Check Event Viewer:</strong> Application and Services → Microsoft → Windows → DeviceManagement-Enterprise-Diagnostics-Provider</div></li>
+      <li><div class="snum">6</div><div><strong>Test the installer manually:</strong> Download the .intunewin contents → run the install command manually on the device → watch for errors.</div></li>
+    </ol>
+
+    <div class="sh">The IME Log — Your Most Powerful App Troubleshooting Tool</div>
+    <p>The <strong>IntuneManagementExtension.log</strong> is the primary log for Win32 app deployment, PowerShell scripts, and Proactive Remediation on Windows. It records everything the IME agent does — app downloads, install attempts, detection rule checks, and error codes.</p>
+
+    <div class="code">
+<span class="cm"># IME Log location:</span>
+<span class="hl">C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log</span>
+
+<span class="cm"># Open with CMTrace.exe (the best log viewer for Intune/SCCM logs)</span>
+<span class="cm"># Download CMTrace: free from Microsoft, part of Config Manager toolkit</span>
+
+<span class="cm"># Key things to search for in IME log:</span>
+<span class="cm"># Search "Win32App" to find all app-related entries</span>
+<span class="cm"># Search the app name to find specific app deployment entries</span>
+<span class="cm"># Look for "ExitCode" to find install result codes</span>
+<span class="cm"># Look for "Detection" to see if detection rule passed/failed</span>
+
+<span class="cm"># Example log entries (simplified):</span>
+<span class="vl">[Win32App] Downloading app: Google Chrome 120</span>
+<span class="vl">[Win32App] Download complete. Starting install...</span>
+<span class="vl">[Win32App] Install command: msiexec /i GoogleChrome.msi /quiet</span>
+<span class="vl">[Win32App] ExitCode: 0 (Success)</span>
+<span class="vl">[Win32App] Running detection rule...</span>
+<span class="vl">[Win32App] Detection result: Detected (app is installed)</span>
+<span class="vl">[Win32App] Final status: Installed</span>
+    </div>
+
+    <div class="sh">Common App Deployment Errors and Fixes</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Error Code / Message</th><th>Meaning</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Exit code 1603</strong></td><td>Fatal error during installation — most common MSI error. Could be: another install running, permissions issue, corrupted package, prerequisite missing.</td><td>Check if Windows Installer service is running. Check MSI verbose log. Verify silent install works manually. Check disk space and permissions.</td></tr>
+          <tr><td><strong>Exit code 1618</strong></td><td>Another installation is already in progress</td><td>Wait for other installs to complete, or restart Windows Installer service. Retry.</td></tr>
+          <tr><td><strong>Exit code 0x80070002</strong></td><td>File not found — installer couldn't find a file it needs</td><td>Verify all required files are in the source folder that was packaged. Re-package with all dependencies included.</td></tr>
+          <tr><td><strong>Exit code 1</strong></td><td>Application exited with error 1 — usually means the installer requires user interaction or a reboot happened</td><td>Verify /quiet or /S flag works for your installer. Try running manually with exact same command as Intune.</td></tr>
+          <tr><td><strong>Not Applicable</strong></td><td>Requirement rule not met — app not attempted</td><td>Check which requirement rule is failing (OS version, disk space, registry). Either fix the device or adjust the requirement.</td></tr>
+          <tr><td><strong>Detection Failed after install</strong></td><td>App installed (exit 0) but detection rule didn't find the app</td><td>Detection rule is wrong — check the file path, registry key, or MSI product code. The app installed but Intune can't verify it.</td></tr>
+          <tr><td><strong>App stays "Pending"</strong></td><td>IME agent not running, device offline, or MDM channel issue</td><td>Check if IntuneManagementExtension service is running. Sync device. Restart IME service.</td></tr>
+          <tr><td><strong>Status: Failed, ExitCode: 3010</strong></td><td>App installed successfully but needs a reboot to complete</td><td>Exit code 3010 is actually a success code. Configure the Win32 app to restart the device after installation in the app settings. OR accept as successful post-reboot.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Using CMTrace to Read IME Logs</div>
+    <ul class="bl">
+      <li><strong>Download CMTrace.exe</strong> from Microsoft's SCCM/ConfigMgr toolkit — it's free and purpose-built for reading Intune/SCCM log files.</li>
+      <li><strong>Color coding:</strong> CMTrace highlights errors in red, warnings in yellow, and information in white — instantly spots problems in large log files.</li>
+      <li><strong>Real-time monitoring:</strong> CMTrace can follow a log file live — useful while testing an app deployment to watch it happen in real-time.</li>
+      <li><strong>Search function:</strong> Ctrl+F → search "ExitCode" or the app name to jump directly to relevant entries.</li>
+    </ul>
+
+    <div class="tip">
+      <div class="tpic">💡</div>
+      <div><strong>The Gold Standard Test:</strong> Before blaming Intune for an app install failure, always test the exact install command manually on the device. Open Command Prompt as SYSTEM (use PSExec: <code>psexec -s cmd.exe</code>) and run the exact same command Intune uses. If it fails manually as SYSTEM, the issue is with the installer itself — not Intune. Intune runs installs in the SYSTEM context by default, so testing as SYSTEM replicates the exact same conditions.</div>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔧</div><div class="rwl">Real IME Log Investigation</div></div>
+      <p><strong>Ticket:</strong> "Adobe Reader is assigned to 200 laptops. 180 installed fine. 20 show 'Failed' in Intune."<br/>
+      <strong>Step 1:</strong> Open IME log on one of the failing devices. Search "Adobe".<br/>
+      <strong>Step 2:</strong> Find entry: "Install command: AcroRdrDC2300120169_en_US.exe /sAll /rs /rps /msi EULA_ACCEPT=YES — ExitCode: 1603"<br/>
+      <strong>Step 3:</strong> Exit code 1603 = fatal install error. Run the same command manually on the device as SYSTEM via PSExec.<br/>
+      <strong>Step 4:</strong> Gets error: "The file C:\Windows\Temp\AdobeInstall\prerequisites\vcredist_x64.exe was not found."<br/>
+      <strong>Root cause:</strong> Adobe installer needs a Visual C++ Redistributable as a prerequisite. The 20 failing laptops don't have it. The 180 that worked already had it from another app.<br/>
+      <strong>Fix:</strong> Add Visual C++ Redistributable as a Dependency in the Adobe Win32 app settings. Intune now installs VCRT first, then Adobe. All 20 failing devices install successfully on next sync.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 65</div>
+      <div class="qa"><div class="qq">Where is the IME log and what does it contain?</div>
+      <div class="qans">The Intune Management Extension log is at C:\ProgramData\Microsoft\IntuneManagementExtension\Logs\IntuneManagementExtension.log. It records all IME agent activity: Win32 app downloads, install command execution, exit codes, detection rule results, PowerShell script execution, and Proactive Remediation outcomes. It's the primary diagnostic tool for Win32 app deployment failures. Best viewed with CMTrace.exe which highlights errors in red for quick identification.</div></div>
+      <div class="qa"><div class="qq">An app shows "Failed" in Intune with exit code 1603. What does this mean and what do you do?</div>
+      <div class="qans">Exit code 1603 is a Windows Installer fatal error — the installation failed for some reason. Common causes: another installation already in progress, insufficient permissions, missing prerequisites, corrupted package, or disk space issues. First, replicate the failure manually: open CMD as SYSTEM (PSExec -s cmd.exe) and run the exact install command from Intune. This tells you if the issue is the installer itself vs an Intune delivery issue. Check IME log for more context around the 1603. Enable MSI verbose logging (/l*v install.log) to get the detailed MSI error.</div></div>
+      <div class="qa"><div class="qq">An app shows "Not Applicable" in Intune deployment status. What does this mean?</div>
+      <div class="qans">Not Applicable means a Requirement Rule is preventing the installation attempt. Intune evaluated the device against the app's requirement rules and found a condition not met — the device's OS version may be too old, there may be insufficient disk space, a required registry key may be absent, or a custom PowerShell requirement script returned a non-zero exit code. The app is not attempted on that device. Check the requirement rules configured for the Win32 app and compare against the specific device's properties to identify which requirement is failing.</div></div>
+    </div>
+  </section>
+
+  <!-- Block Complete -->
+  <div style="background:linear-gradient(135deg,rgba(139,92,246,.07),rgba(56,189,248,.05));border:1px solid rgba(139,92,246,.22);border-radius:16px;padding:30px;margin-top:48px;text-align:center;">
+    <div style="font-size:30px;margin-bottom:11px;">🎉</div>
+    <div style="font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--h);margin-bottom:9px;">Block 6 Complete!</div>
+    <div style="color:var(--text2);font-size:13.5px;max-width:600px;margin:0 auto 18px;line-height:1.7;">You've mastered Application Management end-to-end — all app types, Win32 packaging with IntuneWinAppUtil, detection rules, iOS VPP, Android Managed Google Play, M365 deployment, App Config Policies, MAM-WE protection, App Protection Policy DLP settings, selective vs full wipe, supersedence, and IME log troubleshooting.</div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap;">
+      <div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;">✅ Blocks 1–6 Done — 65 Topics</div>
+      <div style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;">⬡ Block 7 Next: Endpoint Security</div>
+      <div style="background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--sky);font-family:'IBM Plex Mono',monospace;">📋 64 Topics Remaining</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<a href="#" class="stup">↑</a>
+<script>
+  const secs=document.querySelectorAll('.ts');
+  const navs=document.querySelectorAll('.ni[href^="#"]');
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;navs.forEach(n=>{n.classList.remove('active');if(n.getAttribute('href')==='#'+id)n.classList.add('active');});}});},{rootMargin:'-20% 0px -60% 0px'});
+  secs.forEach(s=>obs.observe(s));
+  navs.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(n.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});}));
+</script>
+</body>
+</html>

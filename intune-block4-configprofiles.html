@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 4: Configuration Profiles</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=IBM+Plex+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#060810;--bg2:#0a0d1a;--bg3:#0e1120;--sb:#08091a;--border:#181e36;--a:#f97316;--a2:#fb923c;--a3:#fbbf24;--g:#10b981;--sky:#38bdf8;--pu:#a78bfa;--red:#f87171;--teal:#2dd4bf;--t:#e8e4f0;--t2:#8892aa;--t3:#434d66;--h:#f4f0ff;--card:#0a0c1a;}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;font-weight:300;display:flex;min-height:100vh;line-height:1.75;}
+#sb{width:280px;min-width:280px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+#sb::-webkit-scrollbar{width:3px;}#sb::-webkit-scrollbar-thumb{background:var(--border);}
+.sh{padding:22px 18px 14px;border-bottom:1px solid var(--border);}
+.sl{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:var(--h);display:flex;align-items:center;gap:9px;}
+.li{width:32px;height:32px;background:linear-gradient(135deg,var(--a),var(--a3));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 0 14px rgba(249,115,22,.35);}
+.ss{font-size:9px;color:var(--t3);margin-top:4px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+.bb{display:inline-flex;align-items:center;background:rgba(249,115,22,.13);border:1px solid rgba(249,115,22,.27);border-radius:20px;padding:3px 11px;font-size:9.5px;color:var(--a2);font-family:'IBM Plex Mono',monospace;margin-top:9px;}
+.sn{padding:10px 0;flex:1;}
+.snl{font-size:8.5px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:7px 18px 3px;font-family:'IBM Plex Mono',monospace;}
+.ni{display:flex;align-items:flex-start;gap:8px;padding:7px 18px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none;color:var(--t2);font-size:12px;line-height:1.4;}
+.ni:hover{background:rgba(249,115,22,.07);color:var(--t);border-left-color:var(--a);}
+.ni.active{background:rgba(249,115,22,.11);color:var(--a2);border-left-color:var(--a);}
+.nn{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--t3);min-width:18px;margin-top:1px;}
+.ni.active .nn{color:var(--a);}
+.pl{display:flex;align-items:center;gap:6px;padding:6px 10px;font-size:10.5px;color:var(--t3);text-decoration:none;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:6px;margin:0 10px 3px;transition:all .2s;}
+.pl:hover{color:var(--t2);}
+.sf{padding:12px 18px;border-top:1px solid var(--border);font-size:10.5px;color:var(--t3);font-family:'IBM Plex Mono',monospace;}
+.pb{height:3px;background:var(--border);border-radius:2px;margin-top:7px;overflow:hidden;}
+.pf{height:100%;width:30%;background:linear-gradient(90deg,var(--a),var(--a3));border-radius:2px;animation:pg 2s ease-in-out infinite alternate;}
+@keyframes pg{from{box-shadow:0 0 4px var(--a);}to{box-shadow:0 0 12px var(--a3);}}
+#main{margin-left:280px;flex:1;}
+.tb{position:sticky;top:0;z-index:50;background:rgba(6,8,16,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:12px 42px;display:flex;align-items:center;justify-content:space-between;}
+.bc{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--t3);display:flex;align-items:center;gap:6px;}
+.bc span{color:var(--a2);}
+.tc{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--t3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:3px 12px;}
+.content{padding:46px 42px 80px;max-width:960px;}
+.hero{margin-bottom:52px;position:relative;padding:40px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-60px;right:-40px;width:200px;height:200px;background:radial-gradient(circle,rgba(249,115,22,.12) 0%,transparent 70%);border-radius:50%;}
+.ht{display:inline-flex;align-items:center;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.24);border-radius:20px;padding:4px 13px;font-size:10px;color:var(--a2);font-family:'IBM Plex Mono',monospace;margin-bottom:15px;letter-spacing:1px;}
+.htitle{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--h);line-height:1.1;letter-spacing:-1px;margin-bottom:12px;}
+.htitle span{background:linear-gradient(135deg,var(--a),var(--a3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hdesc{font-size:14px;color:var(--t2);max-width:600px;line-height:1.8;}
+.hm{display:flex;gap:18px;margin-top:20px;flex-wrap:wrap;}
+.hmi{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--t2);font-family:'IBM Plex Mono',monospace;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--a);box-shadow:0 0 7px var(--a);}
+.dot.g{background:var(--g);box-shadow:0 0 7px var(--g);}
+.dot.s{background:var(--sky);box-shadow:0 0 7px var(--sky);}
+.ts{margin-bottom:62px;scroll-margin-top:62px;opacity:0;animation:fu .5s ease forwards;}
+.ts:nth-child(1){animation-delay:.04s}.ts:nth-child(2){animation-delay:.08s}.ts:nth-child(3){animation-delay:.12s}.ts:nth-child(4){animation-delay:.16s}.ts:nth-child(5){animation-delay:.2s}.ts:nth-child(6){animation-delay:.24s}.ts:nth-child(7){animation-delay:.28s}.ts:nth-child(8){animation-delay:.32s}.ts:nth-child(9){animation-delay:.36s}.ts:nth-child(10){animation-delay:.4s}.ts:nth-child(11){animation-delay:.44s}.ts:nth-child(12){animation-delay:.48s}.ts:nth-child(13){animation-delay:.52s}.ts:nth-child(14){animation-delay:.56s}
+@keyframes fu{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.th{display:flex;align-items:flex-start;gap:13px;margin-bottom:22px;padding-bottom:15px;border-bottom:1px solid var(--border);}
+.tn{font-family:'IBM Plex Mono',monospace;font-size:9.5px;color:var(--a);background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);border-radius:5px;padding:3px 9px;white-space:nowrap;margin-top:3px;}
+.tt{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--h);letter-spacing:-.4px;line-height:1.2;margin-bottom:3px;}
+.tsub{font-size:11.5px;color:var(--t3);font-family:'IBM Plex Mono',monospace;}
+.sh2{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--h);margin:24px 0 9px;display:flex;align-items:center;gap:9px;}
+.sh2::before{content:'';width:3px;height:15px;background:linear-gradient(180deg,var(--a),var(--a3));border-radius:2px;flex-shrink:0;}
+p{color:var(--t2);font-size:13.5px;line-height:1.85;margin-bottom:11px;}
+p strong{color:var(--t);font-weight:600;}
+code{font-family:'IBM Plex Mono',monospace;font-size:11.5px;background:rgba(249,115,22,.1);color:var(--a2);padding:1px 5px;border-radius:3px;border:1px solid rgba(249,115,22,.17);}
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:15px;transition:border-color .2s,transform .2s;}
+.card:hover{border-color:rgba(249,115,22,.3);transform:translateY(-2px);}
+.ci{font-size:19px;margin-bottom:7px;}
+.ct{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--h);margin-bottom:5px;}
+.cb{font-size:12px;color:var(--t2);line-height:1.6;}
+.tw{overflow-x:auto;margin:14px 0;border-radius:10px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+th{padding:11px 14px;text-align:left;font-family:'Syne',sans-serif;font-size:10.5px;font-weight:700;color:var(--h);letter-spacing:.3px;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:9px 14px;color:var(--t2);border-bottom:1px solid rgba(24,30,54,.5);vertical-align:top;line-height:1.5;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(249,115,22,.02);}
+.tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;font-family:'IBM Plex Mono',monospace;}
+.to{background:rgba(249,115,22,.14);color:var(--a2);border:1px solid rgba(249,115,22,.2);}
+.tg{background:rgba(16,185,129,.14);color:var(--g);border:1px solid rgba(16,185,129,.2);}
+.ts2{background:rgba(56,189,248,.14);color:var(--sky);border:1px solid rgba(56,189,248,.2);}
+.tp{background:rgba(167,139,250,.14);color:var(--pu);border:1px solid rgba(167,139,250,.2);}
+.tr2{background:rgba(248,113,113,.14);color:var(--red);border:1px solid rgba(248,113,113,.2);}
+.ty{background:rgba(251,191,36,.14);color:var(--a3);border:1px solid rgba(251,191,36,.2);}
+.tt2{background:rgba(45,212,191,.14);color:var(--teal);border:1px solid rgba(45,212,191,.2);}
+.ib{border-radius:9px;padding:14px 16px;margin:14px 0;border-left:3px solid;}
+.ib .bt{font-family:'Syne',sans-serif;font-weight:700;font-size:11.5px;margin-bottom:5px;}
+.ib p{margin:0;font-size:13px;}
+.io{background:rgba(249,115,22,.06);border-color:var(--a);}.io .bt{color:var(--a2);}
+.ig{background:rgba(16,185,129,.06);border-color:var(--g);}.ig .bt{color:var(--g);}
+.is{background:rgba(56,189,248,.06);border-color:var(--sky);}.is .bt{color:var(--sky);}
+.ir{background:rgba(248,113,113,.06);border-color:var(--red);}.ir .bt{color:var(--red);}
+.ip{background:rgba(167,139,250,.06);border-color:var(--pu);}.ip .bt{color:var(--pu);}
+.iy{background:rgba(251,191,36,.06);border-color:var(--a3);}.iy .bt{color:var(--a3);}
+ol.steps{list-style:none;margin:12px 0;display:flex;flex-direction:column;gap:9px;}
+ol.steps li{display:flex;gap:11px;align-items:flex-start;font-size:13px;color:var(--t2);line-height:1.65;}
+.sn2{min-width:23px;height:23px;background:linear-gradient(135deg,var(--a),var(--a3));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+ol.steps li strong{color:var(--t);}
+ul.bl{list-style:none;margin:9px 0 12px;display:flex;flex-direction:column;gap:6px;}
+ul.bl li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--t2);line-height:1.65;}
+ul.bl li::before{content:'▹';color:var(--a);font-size:12.5px;flex-shrink:0;margin-top:2px;}
+ul.bl li strong{color:var(--t);}
+.rw{background:linear-gradient(135deg,rgba(16,185,129,.04),rgba(56,189,248,.04));border:1px solid rgba(16,185,129,.17);border-radius:11px;padding:17px;margin:18px 0;}
+.rwh{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.rwi{font-size:17px;}
+.rwl{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--g);}
+.rw p{color:var(--t2);font-size:12.5px;margin:0;line-height:1.7;}
+.rw p+p{margin-top:7px;}
+.iq{background:linear-gradient(135deg,rgba(167,139,250,.04),rgba(249,115,22,.04));border:1px solid rgba(167,139,250,.17);border-radius:12px;padding:19px;margin:22px 0;}
+.iqh{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--pu);margin-bottom:13px;display:flex;align-items:center;gap:8px;}
+.qa{margin-bottom:13px;}
+.qa:last-child{margin-bottom:0;}
+.qq{font-size:12px;font-weight:600;color:var(--t);margin-bottom:3px;display:flex;gap:7px;}
+.qq::before{content:'Q.';color:var(--pu);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+.qa2{font-size:12px;color:var(--t2);padding-left:18px;line-height:1.65;display:flex;gap:7px;}
+.qa2::before{content:'A.';color:var(--a2);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+.tip{display:flex;gap:11px;align-items:flex-start;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.17);border-radius:8px;padding:13px 15px;margin:13px 0;font-size:12.5px;color:var(--t2);line-height:1.65;}
+.tpi{font-size:15px;flex-shrink:0;}
+.cb2{background:#040609;border:1px solid var(--border);border-radius:9px;padding:16px;margin:12px 0;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#7dd3fc;overflow-x:auto;line-height:1.75;}
+.cm{color:var(--t3);}
+.kw{color:#c084fc;}
+.st{color:#86efac;}
+.hl{color:var(--a2);}
+.val{color:#fcd34d;}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:40px 0;}
+.cs{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin:12px 0;}
+.cst{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--h);margin-bottom:8px;}
+.csb{font-size:12.5px;color:var(--t2);line-height:1.65;}
+.csr{margin-top:9px;padding:9px 11px;background:rgba(249,115,22,.07);border-radius:7px;border-left:3px solid var(--a);font-size:12px;color:var(--t2);}
+.csr strong{color:var(--a2);}
+.pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:11px;margin:14px 0;}
+.pc{border-radius:9px;padding:13px;border:1px solid;transition:transform .2s;}
+.pc:hover{transform:translateY(-2px);}
+.pw{background:rgba(56,189,248,.05);border-color:rgba(56,189,248,.22);}
+.pi{background:rgba(167,139,250,.05);border-color:rgba(167,139,250,.22);}
+.pa{background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.22);}
+.pm{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.22);}
+.pal{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.22);}
+.pct{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--h);margin-bottom:5px;}
+.pcb{font-size:11.5px;color:var(--t2);line-height:1.6;}
+.stup{position:fixed;bottom:24px;right:24px;width:38px;height:38px;background:linear-gradient(135deg,var(--a),var(--a3));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 16px rgba(249,115,22,.3);color:white;z-index:200;text-decoration:none;transition:transform .2s;}
+.stup:hover{transform:translateY(-3px);}
+@media(max-width:768px){#sb{transform:translateX(-100);}#main{margin-left:0;}.content{padding:24px 14px;}.htitle{font-size:26px;}.tb{padding:10px 14px;}}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="sh">
+    <div class="sl"><div class="li">🛡️</div>Intune Mastery</div>
+    <div class="ss">Complete Learning Series</div>
+    <div class="bb">⬡ Block 4 of 14 — Configuration Profiles</div>
+  </div>
+  <div class="sn">
+    <div class="snl">Block 4 Topics</div>
+    <a href="#t29" class="ni active"><span class="nn">29</span>What Are Configuration Profiles?</a>
+    <a href="#t30" class="ni"><span class="nn">30</span>Settings Catalog Deep Dive</a>
+    <a href="#t31" class="ni"><span class="nn">31</span>Administrative Templates (ADMX)</a>
+    <a href="#t32" class="ni"><span class="nn">32</span>Endpoint Security vs Config Profiles</a>
+    <a href="#t33" class="ni"><span class="nn">33</span>Wi-Fi Profiles</a>
+    <a href="#t34" class="ni"><span class="nn">34</span>VPN Profiles — Always On VPN</a>
+    <a href="#t35" class="ni"><span class="nn">35</span>Email Profiles</a>
+    <a href="#t36" class="ni"><span class="nn">36</span>Certificate Profiles — SCEP, PKCS</a>
+    <a href="#t37" class="ni"><span class="nn">37</span>Custom OMA-URI Profiles</a>
+    <a href="#t38" class="ni"><span class="nn">38</span>Kiosk Mode &amp; Shared Device</a>
+    <a href="#t39" class="ni"><span class="nn">39</span>Device Restrictions</a>
+    <a href="#t40" class="ni"><span class="nn">40</span>Profile Assignment — Include/Exclude</a>
+    <a href="#t41" class="ni"><span class="nn">41</span>Profile Conflict Resolution</a>
+    <a href="#t42" class="ni"><span class="nn">42</span>Troubleshooting Config Profiles</a>
+    <div class="snl" style="margin-top:10px">Previous Blocks</div>
+    <a href="intune-block1-foundations.html" class="pl">← Block 1: Foundations</a>
+    <a href="intune-block2-azuread.html" class="pl">← Block 2: Azure AD</a>
+    <a href="intune-block3-enrollment.html" class="pl">← Block 3: Enrollment</a>
+    <div class="ni" style="opacity:.4;cursor:default;font-size:11px"><span class="nn">→</span>Block 5: Compliance (Next)</div>
+  </div>
+  <div class="sf">
+    <div>Overall Progress</div>
+    <div style="color:var(--a2);margin:2px 0">Block 4 / 14 — 42 Topics Done</div>
+    <div class="pb"><div class="pf"></div></div>
+  </div>
+</nav>
+
+<div id="main">
+<div class="tb">
+  <div class="bc">Intune Mastery <span>›</span> Block 4 <span>›</span> Configuration Profiles</div>
+  <div class="tc">14 Topics · ~4.5 Hours</div>
+</div>
+<div class="content">
+
+<div class="hero">
+  <div class="ht">⚙️ BLOCK 4 · CONFIGURATION PROFILES</div>
+  <h1 class="htitle">Configuring Every<br/><span>Device Setting</span></h1>
+  <p class="hdesc">Configuration Profiles are the backbone of Intune management — they push settings to every enrolled device. Wi-Fi passwords, VPN configs, certificates, kiosk lockdowns, ADMX templates, OMA-URI tweaks — all covered here with real-world examples, conflict resolution, and deep troubleshooting.</p>
+  <div class="hm">
+    <div class="hmi"><div class="dot"></div>14 Topics</div>
+    <div class="hmi"><div class="dot g"></div>All Profile Types</div>
+    <div class="hmi"><div class="dot s"></div>Conflict Resolution</div>
+  </div>
+</div>
+
+<!-- T29 -->
+<section class="ts" id="t29">
+  <div class="th">
+    <div class="tn">TOPIC 29</div>
+    <div><div class="tt">What Are Configuration Profiles?</div><div class="tsub">Types, purpose, delivery mechanism — the master overview</div></div>
+  </div>
+  <div class="sh2">The Core Concept</div>
+  <p>A <strong>Configuration Profile</strong> is a policy in Intune that pushes specific settings to enrolled devices — the cloud equivalent of a Group Policy Object (GPO), delivered over the internet to any device anywhere, targeted to Azure AD groups instead of OUs. Create it once in the Intune portal, assign it to a group, and every device in that group receives the settings on next check-in.</p>
+  <div class="sh2">Profile Types per Platform</div>
+  <div class="pg">
+    <div class="pc pw"><div class="pct">🖥️ Windows</div><div class="pcb">Settings Catalog, ADMX Templates, Custom OMA-URI, Device Restrictions, Kiosk, Shared Multi-User, Wired Network, Edition Upgrade</div></div>
+    <div class="pc pi"><div class="pct">📱 iOS/iPadOS</div><div class="pcb">Device Features, Restrictions, Email, Wi-Fi, VPN, Certificate, Kiosk (Single App), Notifications, Web Content Filter</div></div>
+    <div class="pc pa"><div class="pct">🤖 Android</div><div class="pcb">Enterprise Restrictions, OEMConfig, Wi-Fi, VPN, Certificate, Managed Home Screen, Dedicated Device (Kiosk)</div></div>
+    <div class="pc pm"><div class="pct">🍎 macOS</div><div class="pcb">Device Features, Restrictions, Custom (PLIST), Wi-Fi, VPN, Certificate, FileVault, System Extensions, Settings Catalog</div></div>
+    <div class="pc pal"><div class="pct">🌐 All Platforms</div><div class="pcb">Wi-Fi, VPN, Certificate profiles (SCEP, PKCS, Trusted Root) available across all major platforms</div></div>
+  </div>
+  <div class="sh2">How Profiles Are Delivered</div>
+  <ol class="steps">
+    <li><div class="sn2">1</div><div><strong>Admin creates profile</strong> in Intune → selects platform → configures settings</div></li>
+    <li><div class="sn2">2</div><div><strong>Admin assigns to Azure AD group</strong> with optional exclusions and filters</div></li>
+    <li><div class="sn2">3</div><div><strong>Device checks in</strong> every 8 hours automatically, or when Intune pushes a notification after a policy change</div></li>
+    <li><div class="sn2">4</div><div><strong>Intune delivers settings</strong> via MDM channel — on Windows, written to registry under MDM CSP paths</div></li>
+    <li><div class="sn2">5</div><div><strong>Device reports status</strong> back: Succeeded / Failed / Conflict / Pending / Not Applicable — visible per device in portal</div></li>
+  </ol>
+  <div class="ib io"><div class="bt">⚡ Config Profile vs Compliance Policy vs App — Critical Difference</div><p><strong>Configuration Profile:</strong> Pushes settings TO the device (enforces Wi-Fi, camera block, VPN). <strong>Compliance Policy:</strong> Checks if the device meets requirements (evaluates BitLocker, OS version). Non-compliant devices can be blocked via Conditional Access. <strong>App:</strong> Deploys software. All three work together but do very different jobs — confusing them is a red flag in interviews.</p></div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 29</div>
+    <div class="qa"><div class="qq">What is the difference between a Configuration Profile and a Compliance Policy?</div><div class="qa2">A Configuration Profile pushes settings to configure the device — Wi-Fi, VPN, device restrictions. A Compliance Policy checks whether the device meets security requirements — is BitLocker enabled, is the OS version current. Profiles enforce; compliance policies evaluate. Non-compliant devices can be blocked via Conditional Access, but compliance policies don't configure anything themselves.</div></div>
+    <div class="qa"><div class="qq">How quickly does a device receive a new profile after it's assigned?</div><div class="qa2">When a policy is created or changed, Intune sends a push notification to online devices prompting an early check-in — usually within minutes. Without the push, devices check in every 8 hours. You can force immediate sync from Intune portal (Device → Sync) or from the device Settings → Access work or school → Info → Sync.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T30 -->
+<section class="ts" id="t30">
+  <div class="th">
+    <div class="tn">TOPIC 30</div>
+    <div><div class="tt">Windows Settings Catalog — Deep Dive</div><div class="tsub">5,000+ searchable settings — the modern replacement for Device Restrictions</div></div>
+  </div>
+  <div class="sh2">What Is the Settings Catalog?</div>
+  <p>The <strong>Settings Catalog</strong> is a searchable interface with 5,000+ Windows (and macOS) settings in Intune. Instead of fixed templates, you search for any setting by name and add only what you need. It replaces the older Device Restrictions profile for Windows and grows with every Windows update — the recommended approach for all new profiles.</p>
+  <div class="sh2">Key Settings Catalog Categories</div>
+  <div class="tw"><table><thead><tr><th>Category</th><th>What It Controls</th><th>Common Use</th></tr></thead><tbody>
+    <tr><td><strong>BitLocker</strong></td><td>Encryption, recovery key escrow, startup PIN</td><td>Silently enable BitLocker. Escrow keys to Azure AD.</td></tr>
+    <tr><td><strong>Defender</strong></td><td>AV settings, scan schedule, exclusions</td><td>Configure beyond Endpoint Security defaults</td></tr>
+    <tr><td><strong>Windows Update</strong></td><td>Deferral, active hours, feature updates</td><td>Defer quality updates 7 days. Block untested feature updates.</td></tr>
+    <tr><td><strong>Microsoft Edge</strong></td><td>Homepage, extensions, IE mode, passwords</td><td>Set corporate homepage, disable password manager</td></tr>
+    <tr><td><strong>Experience</strong></td><td>Start menu, Cortana, lock screen, taskbar</td><td>Remove OneDrive from Explorer. Disable Cortana.</td></tr>
+    <tr><td><strong>Accounts</strong></td><td>Block personal Microsoft accounts</td><td>Prevent adding personal accounts on corporate devices</td></tr>
+    <tr><td><strong>Search</strong></td><td>Windows Search, Bing integration</td><td>Disable Bing web results in Windows Search bar</td></tr>
+    <tr><td><strong>Security</strong></td><td>SmartScreen, Credential Guard, Windows Hello</td><td>Enable SmartScreen. Require Windows Hello for Business.</td></tr>
+  </tbody></table></div>
+  <div class="rw"><div class="rwh"><div class="rwi">🏢</div><div class="rwl">Real-World Example</div></div>
+    <p><strong>Task:</strong> Block USB storage on all employee laptops except IT team; disable Bing in Windows Search.<br/>
+    Settings Catalog profile (assigned to All Employees, excluding IT Admins):<br/>
+    → Search "Removable storage" → Enable "All Removable Storage classes: Deny all access"<br/>
+    → Search "Search" → Enable "Don't search the web or display web results in Search"<br/>
+    Two settings, one profile, deployed in 10 minutes — 5,000 devices updated on next check-in.</p>
+  </div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 30</div>
+    <div class="qa"><div class="qq">What is the Settings Catalog and how does it differ from Device Restrictions?</div><div class="qa2">Settings Catalog is a searchable repository of 5,000+ Windows settings where you add only the settings you need. Device Restrictions is an older fixed-template with a limited pre-selected set. Settings Catalog is more flexible, has vastly more settings, is continuously updated, and is the recommended approach for all new Windows configuration profiles.</div></div>
+    <div class="qa"><div class="qq">How do you block USB storage via Intune?</div><div class="qa2">Create a Windows Settings Catalog profile. Search "Removable storage." Enable "All Removable Storage classes: Deny all access" (or "Removable Disks: Deny write access" for read-only USB). Assign to the target device group. On next check-in, USB storage is blocked.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T31 -->
+<section class="ts" id="t31">
+  <div class="th">
+    <div class="tn">TOPIC 31</div>
+    <div><div class="tt">Administrative Templates (ADMX) in Intune</div><div class="tsub">Group Policy settings delivered to cloud devices — no domain controller required</div></div>
+  </div>
+  <div class="sh2">What Are Administrative Templates?</div>
+  <p>Administrative Templates (ADMX-backed policies) bring traditional Group Policy settings to Intune — cloud-delivered, no domain join needed. Over <strong>2,500 settings</strong> covering Microsoft Office, Edge, OneDrive, Internet Explorer, and Windows. Familiar to any GPO admin — the same tree structure as GPMC.</p>
+  <div class="sh2">ADMX Templates vs Settings Catalog</div>
+  <div class="tw"><table><thead><tr><th>Aspect</th><th>Administrative Templates</th><th>Settings Catalog</th></tr></thead><tbody>
+    <tr><td>Setting count</td><td>~2,500 Windows + Office</td><td>5,000+ (growing)</td></tr>
+    <tr><td>Interface</td><td>Tree-based — mirrors GPMC</td><td>Flat searchable list</td></tr>
+    <tr><td>Office coverage</td><td>✅ Excellent</td><td>⚠️ Limited</td></tr>
+    <tr><td>Custom ADMX import</td><td>✅ Chrome, Firefox, Citrix, etc.</td><td>❌ Microsoft only</td></tr>
+    <tr><td>Best for</td><td>Office settings, OneDrive KFM, Chrome management</td><td>Modern Windows security, device settings</td></tr>
+  </tbody></table></div>
+  <div class="sh2">Common ADMX Use Cases</div>
+  <div class="cg">
+    <div class="card"><div class="ci">📊</div><div class="ct">Microsoft Office</div><div class="cb">Disable macros from internet. Set default save format. Configure Trusted Locations. Block VBA in downloaded files.</div></div>
+    <div class="card"><div class="ci">☁️</div><div class="ct">OneDrive KFM</div><div class="cb">Known Folder Move — silently redirect Desktop, Documents, Pictures to OneDrive. Lock users from redirecting back.</div></div>
+    <div class="card"><div class="ci">🌐</div><div class="ct">Microsoft Edge</div><div class="cb">Force install extensions. Set homepage. Disable InPrivate. Configure IE mode site list.</div></div>
+    <div class="card"><div class="ci">🔧</div><div class="ct">Custom ADMX (Chrome)</div><div class="cb">Import Google's Chrome ADMX → manage Chrome policies via Intune exactly like on-prem GPO.</div></div>
+  </div>
+  <div class="sh2">Importing Custom ADMX (Chrome Example)</div>
+  <ol class="steps">
+    <li><div class="sn2">1</div><div>Download Chrome ADMX bundle from <code>chromeenterprise.google</code></div></li>
+    <li><div class="sn2">2</div><div>Intune → Devices → Configuration → <strong>Import ADMX</strong> → upload .admx + .adml files</div></li>
+    <li><div class="sn2">3</div><div>Wait 5–15 min for processing. Then create Administrative Templates profile — Chrome settings appear under "Google" category.</div></li>
+    <li><div class="sn2">4</div><div>Configure Chrome homepage, extension allowlist, safe browsing, incognito restrictions — same as on-prem GPO.</div></li>
+  </ol>
+  <div class="tip"><div class="tpi">💡</div><div><strong>Group Policy Analytics:</strong> Migrating from on-prem GPO? Go to Devices → Group Policy Analytics. Import your GPO XML files — Intune automatically maps each setting to its Intune equivalent and shows migration readiness. Saves hours of manual research per GPO.</div></div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 31</div>
+    <div class="qa"><div class="qq">When would you use Administrative Templates over Settings Catalog?</div><div class="qa2">When configuring Microsoft Office app settings (Settings Catalog has limited Office coverage), OneDrive Known Folder Move, Edge enterprise configurations, or third-party apps via custom ADMX import like Chrome or Firefox. Settings Catalog is better for modern Windows security and device settings.</div></div>
+    <div class="qa"><div class="qq">How do you configure OneDrive Known Folder Move via Intune?</div><div class="qa2">Create an Administrative Templates profile. Under Computer Configuration → OneDrive, enable "Silently move Windows known folders to OneDrive" and enter your tenant ID. Enable "Prevent users from redirecting known folders back to their PC." This silently redirects Desktop, Documents, and Pictures to OneDrive for Business without user interaction.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T32 -->
+<section class="ts" id="t32">
+  <div class="th">
+    <div class="tn">TOPIC 32</div>
+    <div><div class="tt">Endpoint Security Profiles vs Configuration Profiles</div><div class="tsub">Two overlapping security paths — understanding the right tool for each scenario</div></div>
+  </div>
+  <div class="sh2">The Overlap and How to Resolve It</div>
+  <p>Both Devices → Configuration and Endpoint Security can configure BitLocker, Defender AV, and Firewall settings. Configuring the same setting in both causes conflicts. Here is the definitive guidance.</p>
+  <div class="tw"><table><thead><tr><th>Aspect</th><th>Configuration Profiles</th><th>Endpoint Security</th></tr></thead><tbody>
+    <tr><td>Location</td><td>Devices → Configuration</td><td>Endpoint Security → Antivirus / Disk Encryption / Firewall / EDR / ASR / Account Protection</td></tr>
+    <tr><td>Purpose</td><td>General device configuration — any setting</td><td>Security-focused hardening and threat protection</td></tr>
+    <tr><td>Security Baselines</td><td>❌</td><td>✅ Dedicated concept</td></tr>
+    <tr><td>MDE integration</td><td>Limited</td><td>✅ Deep integration with Defender for Endpoint</td></tr>
+    <tr><td>Conflict priority</td><td>Normal</td><td>Endpoint Security generally wins for same settings</td></tr>
+    <tr><td>Best used by</td><td>General IT admin</td><td>Security team / SOC</td></tr>
+  </tbody></table></div>
+  <div class="sh2">Endpoint Security Profile Types</div>
+  <div class="cg">
+    <div class="card"><div class="ci">🦠</div><div class="ct">Antivirus</div><div class="cb">Defender AV real-time protection, cloud protection, scan schedules, exclusions, PUA blocking.</div></div>
+    <div class="card"><div class="ci">🔒</div><div class="ct">Disk Encryption</div><div class="cb">BitLocker (Windows) and FileVault (macOS). Silent enablement, recovery key escrow to Azure AD.</div></div>
+    <div class="card"><div class="ci">🔥</div><div class="ct">Firewall</div><div class="cb">Windows Firewall per profile (Domain, Private, Public). Enable/disable, inbound/outbound defaults, specific rules.</div></div>
+    <div class="card"><div class="ci">🛡️</div><div class="ct">EDR</div><div class="cb">Onboard devices to Microsoft Defender for Endpoint. Required before MDE can detect and respond to threats.</div></div>
+    <div class="card"><div class="ci">⚔️</div><div class="ct">Attack Surface Reduction</div><div class="cb">Block common attack techniques — Office child processes, LSASS credential theft, untrusted USB executables. Use Audit mode first.</div></div>
+    <div class="card"><div class="ci">👤</div><div class="ct">Account Protection</div><div class="cb">Windows Hello for Business, Credential Guard, LAPS (Local Admin Password Solution).</div></div>
+  </div>
+  <div class="ib ig"><div class="bt">✅ Decision Rule</div><p>Use <strong>Configuration Profiles</strong> for general config: Wi-Fi, VPN, email, restrictions, ADMX, Windows Update, browser. Use <strong>Endpoint Security</strong> for hardening: Defender AV, BitLocker, Firewall, ASR, EDR, LAPS. Never configure the same setting in both — document which system owns each setting.</p></div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 32</div>
+    <div class="qa"><div class="qq">Can BitLocker be configured in both places? Which is preferred?</div><div class="qa2">Yes, both can configure BitLocker. Prefer Endpoint Security → Disk Encryption — dedicated interface, integrates with Security dashboard, generally wins in conflicts. Never configure the same BitLocker setting in both places — conflicts cause unpredictable effective values.</div></div>
+    <div class="qa"><div class="qq">What are ASR rules and why use Audit before Block mode?</div><div class="qa2">ASR rules block common attack techniques like Office spawning child processes and LSASS credential theft. Audit mode logs what WOULD be blocked without blocking — letting you identify legitimate processes that would be caught. Review Audit logs for 2–4 weeks, confirm no false positives, then switch to Block confidently.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T33 -->
+<section class="ts" id="t33">
+  <div class="th">
+    <div class="tn">TOPIC 33</div>
+    <div><div class="tt">Wi-Fi Profiles</div><div class="tsub">Push corporate Wi-Fi to devices silently — user never needs to know the password</div></div>
+  </div>
+  <div class="sh2">Wi-Fi Profile Key Settings</div>
+  <div class="tw"><table><thead><tr><th>Setting</th><th>Description</th><th>Recommendation</th></tr></thead><tbody>
+    <tr><td>Wi-Fi type</td><td>Basic (PSK) or Enterprise (802.1X)</td><td>Enterprise for corporate — maximum security</td></tr>
+    <tr><td>SSID</td><td>Network name (case-sensitive)</td><td>Match your broadcast SSID exactly</td></tr>
+    <tr><td>Connect automatically</td><td>Auto-connect when in range</td><td>Yes — always for corporate networks</td></tr>
+    <tr><td>Security type</td><td>WPA2-Personal, WPA2-Enterprise, WPA3</td><td>WPA2-Enterprise or WPA3-Enterprise</td></tr>
+    <tr><td>Pre-shared key</td><td>Password for WPA2-Personal</td><td>Stored encrypted — never visible to users</td></tr>
+    <tr><td>EAP type</td><td>EAP-TLS (cert) or PEAP-MSCHAPv2 (password)</td><td>EAP-TLS for highest security</td></tr>
+  </tbody></table></div>
+  <div class="sh2">WPA2-Personal vs WPA2-Enterprise</div>
+  <div class="cg">
+    <div class="card"><div class="ci">🔑</div><div class="ct">WPA2-Personal (PSK)</div><div class="cb">One shared password for all devices. Simple but risky — if leaked, all devices compromised. Password must be changed organization-wide when someone leaves.</div></div>
+    <div class="card"><div class="ci">🏆</div><div class="ct">WPA2-Enterprise (802.1X)</div><div class="cb">Each device authenticates with a unique certificate (EAP-TLS) or credentials. No shared secret. Individual revocation possible. Required for security-conscious enterprise environments.</div></div>
+  </div>
+  <div class="rw"><div class="rwh"><div class="rwi">📡</div><div class="rwl">Autopilot + Wi-Fi Certificate Scenario</div></div>
+    <p>Company deploys laptops via Autopilot. Device starts on employee's home Wi-Fi. Intune pushes: 1) Trusted Root cert → 2) SCEP device cert → 3) Wi-Fi profile (EAP-TLS referencing the cert). When employee walks into office, laptop auto-connects to 802.1X corporate Wi-Fi using its certificate — no password, no IT support, completely seamless.</p>
+  </div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 33</div>
+    <div class="qa"><div class="qq">What is the benefit of EAP-TLS over PSK in enterprise Wi-Fi?</div><div class="qa2">EAP-TLS uses a unique device certificate instead of a shared password. No shared secret can be leaked. Certificates can be individually revoked per device — a stolen device's cert can be revoked, blocking corporate Wi-Fi access even without password knowledge. Individual device accountability is maintained per connection.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T34 -->
+<section class="ts" id="t34">
+  <div class="th">
+    <div class="tn">TOPIC 34</div>
+    <div><div class="tt">VPN Profiles — Always On VPN</div><div class="tsub">Auto-configured secure access to on-premises resources from anywhere</div></div>
+  </div>
+  <div class="sh2">VPN Types in Intune</div>
+  <div class="cg">
+    <div class="card"><div class="ci">🔗</div><div class="ct">Manual VPN</div><div class="cb">Intune configures the client (server, auth, credentials) but user triggers connect/disconnect. Most common in enterprises where VPN is optional.</div></div>
+    <div class="card"><div class="ci">🔄</div><div class="ct">Always On VPN</div><div class="cb">Auto-connects whenever device has internet. Zero user action. All corporate traffic tunneled. For compliance-heavy environments needing guaranteed connectivity.</div></div>
+    <div class="card"><div class="ci">📱</div><div class="ct">Per-App VPN</div><div class="cb">VPN only activates for specific managed apps. Personal browsing goes direct to internet. BYOD privacy — only corporate app traffic in VPN.</div></div>
+    <div class="card"><div class="ci">🌐</div><div class="ct">Split Tunnel</div><div class="cb">Corporate traffic → VPN. Internet traffic → direct. Reduces VPN server load dramatically. Standard practice since remote work surge.</div></div>
+  </div>
+  <div class="sh2">Windows Always On VPN Setup</div>
+  <p><strong>Always On VPN (AOVPN)</strong> is Microsoft's modern DirectAccess replacement. Uses native Windows IKEv2. Auto-connects, no separate VPN app needed, configured entirely via Intune.</p>
+  <ol class="steps">
+    <li><div class="sn2">1</div><div><strong>Deploy certificates first:</strong> Trusted Root CA → SCEP user/device certificates for VPN authentication</div></li>
+    <li><div class="sn2">2</div><div><strong>Create VPN profile:</strong> Windows 10 → VPN → Type: IKEv2 → Server FQDN → Auth: Certificates → Enable Always On</div></li>
+    <li><div class="sn2">3</div><div><strong>Device Tunnel vs User Tunnel:</strong> Device tunnel = connects before login (for pre-auth AD). User tunnel = after login (user resources). Both can coexist.</div></li>
+    <li><div class="sn2">4</div><div><strong>Split tunnel routes:</strong> Add on-prem subnets (e.g., 10.0.0.0/8) through VPN. All other traffic goes direct to internet.</div></li>
+    <li><div class="sn2">5</div><div>Assign to device group → Deploy. VPN connects silently on every boot — users never see a connect button.</div></li>
+  </ol>
+  <div class="sh2">Supported VPN Clients</div>
+  <div class="tw"><table><thead><tr><th>Client</th><th>Platforms</th><th>Notes</th></tr></thead><tbody>
+    <tr><td>Microsoft Tunnel</td><td>iOS, Android</td><td>Microsoft's cloud VPN gateway for mobile devices. Requires Intune Suite.</td></tr>
+    <tr><td>Cisco AnyConnect</td><td>All platforms</td><td>Most common enterprise VPN. Deep Intune integration.</td></tr>
+    <tr><td>GlobalProtect (Palo Alto)</td><td>All platforms</td><td>Popular in security-focused enterprises.</td></tr>
+    <tr><td>IKEv2 Built-in</td><td>Windows</td><td>Native Windows VPN — no separate app. Used for Always On VPN.</td></tr>
+    <tr><td>Pulse Secure/Ivanti</td><td>All platforms</td><td>Common in healthcare and government.</td></tr>
+  </tbody></table></div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 34</div>
+    <div class="qa"><div class="qq">What is Always On VPN vs traditional VPN?</div><div class="qa2">AOVPN auto-connects whenever the device has internet — zero user action. Traditional VPN requires the user to launch a client and initiate the connection. AOVPN supports Device Tunnel (connects before login) and User Tunnel (after login). On Windows, it uses native IKEv2 — no separate app required. Fully managed via Intune profiles.</div></div>
+    <div class="qa"><div class="qq">What is split tunneling and why enable it?</div><div class="qa2">Split tunneling routes only corporate traffic through VPN; internet traffic goes directly to the internet. Without it, ALL traffic — YouTube, news, personal browsing — goes through corporate VPN, creating congestion and performance issues especially for large remote workforces. Split tunneling dramatically reduces VPN server load at the cost of less visibility into internet traffic.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T35 -->
+<section class="ts" id="t35">
+  <div class="th">
+    <div class="tn">TOPIC 35</div>
+    <div><div class="tt">Email Profiles</div><div class="tsub">Auto-configure Exchange email on managed devices — zero user setup required</div></div>
+  </div>
+  <div class="sh2">What Email Profiles Do</div>
+  <p>Email profiles automatically configure the native email app (iOS Mail, Android Email, Windows Mail) with Exchange Online settings. Employees receive a new device and corporate email is already working — no server addresses, no manual configuration, no support calls about email setup.</p>
+  <div class="sh2">Key Settings</div>
+  <div class="tw"><table><thead><tr><th>Setting</th><th>Description</th><th>Recommended</th></tr></thead><tbody>
+    <tr><td>Email server</td><td>Exchange server hostname</td><td>outlook.office365.com for Exchange Online</td></tr>
+    <tr><td>Username attribute</td><td>How Intune fills the username</td><td>userPrincipalName (UPN)</td></tr>
+    <tr><td>Email address</td><td>Where the email address comes from</td><td>Primary SMTP Address from Azure AD</td></tr>
+    <tr><td>Authentication</td><td>Password or Modern Auth (OAuth)</td><td>Modern Authentication — required for Exchange Online</td></tr>
+    <tr><td>Sync days</td><td>Days of email synced to device</td><td>7–30 days depending on role</td></tr>
+    <tr><td>Allow account changes</td><td>User can modify the email config</td><td>No — prevent switching to personal accounts</td></tr>
+    <tr><td>S/MIME</td><td>Email signing and encryption</td><td>Enable with certs for regulated environments</td></tr>
+  </tbody></table></div>
+  <div class="ib is"><div class="bt">💡 Email Profile vs App Configuration Policy for Outlook</div><p><strong>Email Profile</strong> configures the NATIVE mail app — simple, no separate app required. <strong>App Configuration Policy</strong> configures the Outlook app specifically — more powerful with Outlook-specific settings (focused inbox, signature, S/MIME integration). For organizations standardized on Outlook (most enterprises), App Configuration Policy is the better choice.</p></div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 35</div>
+    <div class="qa"><div class="qq">Why use Modern Authentication instead of Basic Auth for email profiles?</div><div class="qa2">Basic Auth sends credentials with every request — vulnerable to credential theft. Microsoft disabled Basic Auth for Exchange Online. Modern Auth uses OAuth 2.0 tokens — credentials exchanged once, subsequent requests use short-lived tokens. Supports MFA and Conditional Access, meaning stolen credentials alone aren't enough to access email.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T36 -->
+<section class="ts" id="t36">
+  <div class="th">
+    <div class="tn">TOPIC 36</div>
+    <div><div class="tt">Certificate Profiles — SCEP, PKCS &amp; Trusted Root</div><div class="tsub">Deploying digital certificates for passwordless Wi-Fi, VPN, and email authentication</div></div>
+  </div>
+  <div class="sh2">The Three Certificate Profile Types</div>
+  <div class="cg">
+    <div class="card"><div class="ci">🌳</div><div class="ct">Trusted Certificate</div><div class="cb">Deploys your Root/Intermediate CA cert to the device's trusted store. ALWAYS deploy first — without it the device won't trust your CA-issued certs. Required before any SCEP or PKCS profile.</div></div>
+    <div class="card"><div class="ci">📋</div><div class="ct">SCEP Certificate</div><div class="cb">Device generates its own key pair and requests a unique cert from your CA. Private key NEVER leaves the device. Most secure. Requires NDES server or Cloud PKI. Each device gets its own unique certificate.</div></div>
+    <div class="card"><div class="ci">🔑</div><div class="ct">PKCS Certificate</div><div class="cb">Admin exports cert from CA; Intune delivers it to devices. Simpler setup (no NDES). Private key handled during export — less secure. Same cert can go to multiple devices.</div></div>
+  </div>
+  <div class="sh2">SCEP vs PKCS</div>
+  <div class="tw"><table><thead><tr><th>Aspect</th><th>SCEP</th><th>PKCS</th></tr></thead><tbody>
+    <tr><td>Certificate uniqueness</td><td>✅ Each device gets unique cert</td><td>⚠️ Same cert can go to multiple devices</td></tr>
+    <tr><td>Private key</td><td>✅ Never leaves device</td><td>⚠️ Admin handles during export</td></tr>
+    <tr><td>Infrastructure</td><td>NDES + Connector, or Cloud PKI</td><td>Intune Certificate Connector only (simpler)</td></tr>
+    <tr><td>Revocation</td><td>✅ Per-device revocation</td><td>Revoking affects all devices with that cert</td></tr>
+    <tr><td>Best for</td><td>Wi-Fi/VPN auth, large deployments</td><td>Simple setups, email S/MIME</td></tr>
+  </tbody></table></div>
+  <div class="sh2">Certificate Deployment Order — Always Follow This</div>
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0;display:flex;align-items:center;flex-wrap:wrap;gap:0;">
+    <div style="background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(56,189,248,.08));border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:11px 14px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--h);text-align:center;min-width:130px;">Step 1<br/><span style="font-size:10px;color:var(--t3);font-weight:400">Trusted Root CA</span></div>
+    <div style="color:var(--t3);font-size:18px;padding:0 10px">→</div>
+    <div style="background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(251,191,36,.08));border:1px solid rgba(249,115,22,.25);border-radius:8px;padding:11px 14px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--h);text-align:center;min-width:130px;">Step 2<br/><span style="font-size:10px;color:var(--t3);font-weight:400">SCEP or PKCS cert</span></div>
+    <div style="color:var(--t3);font-size:18px;padding:0 10px">→</div>
+    <div style="background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(56,189,248,.08));border:1px solid rgba(167,139,250,.25);border-radius:8px;padding:11px 14px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--h);text-align:center;min-width:130px;">Step 3<br/><span style="font-size:10px;color:var(--t3);font-weight:400">Wi-Fi/VPN references cert</span></div>
+  </div>
+  <p style="font-size:12px;color:var(--t3);margin-top:6px">Wrong order = Wi-Fi fails silently (cert not trusted yet). Trusted Root must succeed before SCEP; SCEP must succeed before Wi-Fi/VPN.</p>
+  <div class="sh2">Microsoft Cloud PKI</div>
+  <p>Setting up NDES on-premises is complex (Windows Server, IIS, CA, NDES role, Certificate Connector). <strong>Cloud PKI</strong> (part of Intune Suite) is a fully cloud-hosted CA — create it in the Intune portal and issue SCEP certificates with zero server infrastructure.</p>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 36</div>
+    <div class="qa"><div class="qq">Difference between SCEP and PKCS certificate profiles?</div><div class="qa2">SCEP: device generates its own key pair and requests a unique certificate — private key never leaves the device. Most secure. PKCS: admin exports a cert from CA and Intune delivers it — private key is admin-handled, same cert can go to multiple devices. SCEP is more secure and scalable; PKCS is simpler but less secure.</div></div>
+    <div class="qa"><div class="qq">Why must Trusted Root be deployed before SCEP?</div><div class="qa2">Trusted Root establishes the device's trust in your Certificate Authority. Without it, the device won't recognize certificates your CA issues as valid. When SCEP delivers the identity cert, or when Wi-Fi presents it for 802.1X, the device validates against trusted CAs — if your root isn't trusted, authentication fails even if the certificate is technically valid.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T37 -->
+<section class="ts" id="t37">
+  <div class="th">
+    <div class="tn">TOPIC 37</div>
+    <div><div class="tt">Custom OMA-URI Profiles</div><div class="tsub">Configure any Windows MDM setting not exposed in the Intune UI</div></div>
+  </div>
+  <div class="sh2">What Is OMA-URI?</div>
+  <p><strong>OMA-URI (Open Mobile Alliance Uniform Resource Identifier)</strong> is the path format for Windows MDM CSP settings. Every Intune-configurable setting has an OMA-URI. When a setting isn't in Settings Catalog or ADMX Templates, you configure it directly using a Custom OMA-URI profile.</p>
+  <div class="cb2">
+<span class="cm">// OMA-URI path format:</span>
+./Device/Vendor/MSFT/<span class="hl">PolicyArea</span>/<span class="val">SettingName</span>
+
+<span class="cm">// Block camera (also in Settings Catalog now):</span>
+./Device/Vendor/MSFT/Policy/Config/Camera/<span class="hl">AllowCamera</span>
+<span class="cm">// Data type: Integer | Value: 0 = disabled</span>
+
+<span class="cm">// Enable Credential Guard with UEFI lock:</span>
+./Device/Vendor/MSFT/Policy/Config/DeviceGuard/<span class="hl">LsaCfgFlags</span>
+<span class="cm">// Data type: Integer | Value: 1</span>
+
+<span class="cm">// Disable consumer Microsoft account experience:</span>
+./Vendor/MSFT/Policy/Config/Experience/<span class="hl">AllowWindowsConsumerFeatures</span>
+<span class="cm">// Data type: Integer | Value: 0</span>
+
+<span class="cm">// Reference: docs.microsoft.com/windows/client-management/mdm/policy-csp</span>
+  </div>
+  <div class="sh2">OMA-URI Data Types</div>
+  <div class="tw"><table><thead><tr><th>Type</th><th>Used For</th><th>Example</th></tr></thead><tbody>
+    <tr><td>Integer</td><td>Enable/disable, numeric values</td><td>0 = disabled, 1 = enabled</td></tr>
+    <tr><td>String</td><td>Text, URLs, domain names</td><td>Homepage URL, DNS suffix</td></tr>
+    <tr><td>Boolean</td><td>True/False</td><td>true / false</td></tr>
+    <tr><td>Base64</td><td>Certificates, binary data</td><td>Certificate .cer in Base64</td></tr>
+    <tr><td>XML</td><td>Complex structures</td><td>Wi-Fi XML, VPN profile XML</td></tr>
+  </tbody></table></div>
+  <div class="tip"><div class="tpi">💡</div><div><strong>When to use OMA-URI:</strong> Setting exists in Windows CSP documentation but isn't in Settings Catalog or ADMX yet. Third-party software MDM settings. Granular firewall rules. Always verify the correct path at <strong>docs.microsoft.com/windows/client-management/mdm/policy-csp</strong>. Test on a single pilot device first — wrong paths silently fail.</div></div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 37</div>
+    <div class="qa"><div class="qq">What is OMA-URI and when would you use a Custom profile?</div><div class="qa2">OMA-URI is the path format for Windows MDM CSP settings. Use Custom OMA-URI when a setting isn't in Settings Catalog or ADMX Templates but exists in Microsoft's Windows MDM CSP documentation. Common scenarios: advanced Defender settings, granular firewall rules, third-party software MDM settings, or new Windows CSPs not yet surfaced in the Intune UI.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T38 -->
+<section class="ts" id="t38">
+  <div class="th">
+    <div class="tn">TOPIC 38</div>
+    <div><div class="tt">Kiosk Mode &amp; Shared Device Configuration</div><div class="tsub">Lock devices to specific apps for dedicated-purpose deployments</div></div>
+  </div>
+  <div class="sh2">Windows Kiosk Modes</div>
+  <div class="cg">
+    <div class="card"><div class="ci">🎯</div><div class="ct">Single App Kiosk</div><div class="cb">Device boots directly into one app. Taskbar hidden. Start disabled. Auto-login with kiosk account. User cannot exit. Perfect for ATMs, self-checkout, check-in terminals, digital signage.</div></div>
+    <div class="card"><div class="ci">📋</div><div class="ct">Multi-App Kiosk</div><div class="cb">Custom Start menu showing only approved apps. Users switch between them but can't access Windows settings or unauthorized software. For restricted shared workstations.</div></div>
+    <div class="card"><div class="ci">👥</div><div class="ct">Shared PC Mode</div><div class="cb">For multi-user PCs (libraries, shift workers). Auto-delete profiles after inactivity. Guest account access. Fast sign-in. Automatic disk management.</div></div>
+  </div>
+  <div class="sh2">Single App Kiosk — Key Settings</div>
+  <div class="tw"><table><thead><tr><th>Setting</th><th>Options</th><th>Purpose</th></tr></thead><tbody>
+    <tr><td>User logon type</td><td>Auto sign-in / Azure AD / Domain account</td><td>Auto sign-in = zero user interaction for public kiosks</td></tr>
+    <tr><td>Application type</td><td>UWP (Store app), Win32, Microsoft Edge kiosk</td><td>Match your kiosk app technology</td></tr>
+    <tr><td>App AUMID</td><td>App User Model ID for UWP apps</td><td>Get via PowerShell: <code>Get-AppxPackage | Select Name,PackageFamilyName</code></td></tr>
+    <tr><td>Edge kiosk type</td><td>Digital/Interactive Signage (full screen) or Public Browsing (resets after session)</td><td>Full screen for dashboards; Public Browsing for internet cafes</td></tr>
+    <tr><td>Maintenance window</td><td>Off-hours schedule</td><td>Allow Windows Updates without disrupting operation</td></tr>
+  </tbody></table></div>
+  <div class="rw"><div class="rwh"><div class="rwi">🏨</div><div class="rwl">Hotel Check-in Kiosk</div></div>
+    <p>50 Surface Pro tablets for hotel self check-in. Autopilot Self-Deploying → zero IT touch. Kiosk: Single App → Edge kiosk mode → URL: https://checkin.hotel.com → Auto sign-in → 3-minute idle reset. Device Restrictions: camera, USB, Action Center all blocked. IT manages all 50 remotely from Intune — never visits the property.</p>
+  </div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 38</div>
+    <div class="qa"><div class="qq">Difference between Single App and Multi-App Kiosk?</div><div class="qa2">Single App boots the device straight into one application — no access to anything else. Multi-App creates a custom Start menu with a curated set of approved apps that users can switch between, but cannot access the full Windows environment, settings, or other software. Single App for purpose-built terminals; Multi-App for restricted shared workstations with defined roles.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T39 -->
+<section class="ts" id="t39">
+  <div class="th">
+    <div class="tn">TOPIC 39</div>
+    <div><div class="tt">Device Restrictions</div><div class="tsub">Control hardware features, built-in apps, and OS behaviors across all platforms</div></div>
+  </div>
+  <div class="sh2">Windows Restrictions (via Settings Catalog)</div>
+  <div class="tw"><table><thead><tr><th>Setting</th><th>What It Does</th><th>Use Case</th></tr></thead><tbody>
+    <tr><td>Block camera</td><td>Disable all cameras</td><td>Secure govt/banking environments</td></tr>
+    <tr><td>Block removable storage</td><td>Block USB, SD cards, optical</td><td>Data Loss Prevention — stop exfiltration</td></tr>
+    <tr><td>Block Microsoft Store</td><td>Prevent Store app installs</td><td>Block games and unauthorized apps</td></tr>
+    <tr><td>Block Bluetooth</td><td>Disable Bluetooth entirely</td><td>High-security classified environments</td></tr>
+    <tr><td>Block screen capture</td><td>Disable Print Screen</td><td>DLP for sensitive-data environments</td></tr>
+    <tr><td>Block gaming</td><td>Disable Xbox features</td><td>Productivity focus on corporate devices</td></tr>
+  </tbody></table></div>
+  <div class="sh2">iOS Device Restrictions (Key Enterprise Settings)</div>
+  <ul class="bl">
+    <li><strong>Block App Store (supervised):</strong> Employees can't install personal apps — only IT-deployed apps accessible</li>
+    <li><strong>Block iCloud backup/photo library:</strong> Company data stays in IT-controlled storage, not personal iCloud</li>
+    <li><strong>Block AirDrop:</strong> Prevent data sharing to nearby unauthorized Apple devices</li>
+    <li><strong>Block screenshots:</strong> Prevent capturing sensitive data (supervised devices only)</li>
+    <li><strong>Block copy to unmanaged apps:</strong> Corporate data can't be pasted into personal apps like Notes or WhatsApp</li>
+    <li><strong>Passcode requirements:</strong> Minimum length, complexity, max age, failed attempts before wipe</li>
+  </ul>
+  <div class="sh2">Android Enterprise Restrictions</div>
+  <ul class="bl">
+    <li><strong>Block factory reset:</strong> Prevent company device wipe by user (Fully Managed only)</li>
+    <li><strong>Require Google Play Protect:</strong> Block sideloaded malicious apps</li>
+    <li><strong>Block unknown sources:</strong> Only managed Google Play apps allowed</li>
+    <li><strong>Block safe boot:</strong> Prevent bypassing kiosk restrictions via safe mode</li>
+    <li><strong>Block status bar:</strong> Hide status bar on kiosk/dedicated devices</li>
+  </ul>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 39</div>
+    <div class="qa"><div class="qq">How do you prevent copying company data from a managed iOS app to a personal app?</div><div class="qa2">Two layers working together: In iOS Device Restrictions, enable "Block sending corporate data to unmanaged apps." Also configure App Protection Policies (MAM) with "Restrict cut, copy, paste" set to "Policy managed apps only." Device Restrictions handles the OS level; MAM handles the app level — together they create complete DLP coverage.</div></div>
+    <div class="qa"><div class="qq">How do you prevent Android factory reset on company devices?</div><div class="qa2">In the Android Enterprise Device Restrictions profile for Fully Managed (COBO) or COPE mode, enable "Block factory reset." This prevents users from resetting the device from settings. Note this only works for company-owned Android Enterprise modes — on BYOD Work Profile devices, users can always remove the work profile (and effectively their management) since they own the device.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T40 -->
+<section class="ts" id="t40">
+  <div class="th">
+    <div class="tn">TOPIC 40</div>
+    <div><div class="tt">Profile Assignment — User Groups vs Device Groups, Include/Exclude, Filters</div><div class="tsub">Targeting profiles precisely — the mechanics every Intune admin must master</div></div>
+  </div>
+  <div class="sh2">User Groups vs Device Groups</div>
+  <div class="tw"><table><thead><tr><th>Assignment</th><th>Behavior</th><th>Best For</th><th>Examples</th></tr></thead><tbody>
+    <tr><td>User Group</td><td>Follows the USER — applies on any device they sign into</td><td>Settings tied to person's identity</td><td>Email profile, user VPN, user certs, OneDrive KFM</td></tr>
+    <tr><td>Device Group</td><td>Follows the DEVICE — regardless of who signs in</td><td>Hardware-specific or shared device settings</td><td>BitLocker, kiosk mode, Wi-Fi, trusted root cert</td></tr>
+    <tr><td>All Users</td><td>Every user in tenant</td><td>Company-wide user policies</td><td>Company email profile, compliance notification</td></tr>
+    <tr><td>All Devices</td><td>Every enrolled device</td><td>Universal baseline</td><td>Security baseline, trusted root, firewall</td></tr>
+  </tbody></table></div>
+  <div class="sh2">Include + Exclude Rules</div>
+  <ul class="bl">
+    <li><strong>Exclude always wins:</strong> Device/user in BOTH included and excluded group → excluded. No exceptions ever.</li>
+    <li><strong>All except VIPs:</strong> Include = All Employees / Exclude = VIP Executives (relaxed policies for executives)</li>
+    <li><strong>Pilot rollout:</strong> Include = Pilot Group (50 users) → test 2 weeks → add All Employees → remove pilot separately</li>
+    <li><strong>Cannot mix types:</strong> User group assignments can only exclude user groups; device group assignments only exclude device groups</li>
+  </ul>
+  <div class="sh2">Assignment Filters — Granular Targeting Without New Groups</div>
+  <div class="cb2">
+<span class="cm">// Filter: Only Windows 11 devices</span>
+<span class="hl">device.osVersion</span> <span class="kw">-startsWith</span> <span class="st">"10.0.22"</span>
+
+<span class="cm">// Filter: Only Dell laptops</span>
+<span class="hl">device.manufacturer</span> <span class="kw">-eq</span> <span class="st">"Dell Inc."</span>
+
+<span class="cm">// Filter: Only Autopilot enrolled devices</span>
+<span class="hl">device.enrollmentProfileName</span> <span class="kw">-startsWith</span> <span class="st">"Autopilot"</span>
+
+<span class="cm">// Usage: Assign to "All Devices" group + apply filter above</span>
+<span class="cm">// Result: Only Dell Windows 11 Autopilot devices → no new group needed</span>
+  </div>
+  <div class="tip"><div class="tpi">💡</div><div><strong>Filters vs Dynamic Groups:</strong> Use Dynamic Groups when reusing the same subset across many policies (create once, reference everywhere). Use Filters for one-off targeting without creating new groups. Filters evaluate at assignment time (nearly instant) vs dynamic groups which can take 24 hours — critical for Autopilot scenarios where policies must apply immediately during first boot.</div></div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 40</div>
+    <div class="qa"><div class="qq">When do you assign to a device group vs a user group?</div><div class="qa2">Device group when the setting is hardware-specific or should apply regardless of who logs in — BitLocker (needs TPM check), kiosk mode, Wi-Fi (device always needs corporate Wi-Fi), trusted root certificates. User group when the setting follows the person across devices — email profiles, user VPN, user certs, OneDrive KFM. If the same user uses multiple devices, user group ensures they get the right settings on every device they use.</div></div>
+    <div class="qa"><div class="qq">Why are Filters faster than dynamic groups for Autopilot?</div><div class="qa2">Filters evaluate at policy assignment time — nearly instant. Dynamic group membership can take up to 24 hours after enrollment. During Autopilot's Enrollment Status Page, the device needs policies immediately. If the device isn't in the dynamic group yet, it won't get the profile during setup. Filters eliminate this timing issue entirely, making them the reliable choice for Autopilot deployments.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T41 -->
+<section class="ts" id="t41">
+  <div class="th">
+    <div class="tn">TOPIC 41</div>
+    <div><div class="tt">Profile Conflict Resolution</div><div class="tsub">What happens when two profiles set the same setting differently — and how to fix it</div></div>
+  </div>
+  <div class="sh2">How Intune Handles Conflicts</div>
+  <div class="tw"><table><thead><tr><th>Scenario</th><th>Result</th></tr></thead><tbody>
+    <tr><td>Two profiles set same setting to SAME value</td><td><span class="tag tg">✅ No conflict</span> — setting applies normally</td></tr>
+    <tr><td>Two profiles set same setting to DIFFERENT values</td><td><span class="tag tr2">⚠️ Conflict</span> — both report Error/Conflict status. Setting may revert to default or remain at last applied value. Unpredictable behavior.</td></tr>
+    <tr><td>Profile A sets setting X; Profile B doesn't mention X</td><td><span class="tag tg">✅ No conflict</span> — Profile A's value applies cleanly</td></tr>
+    <tr><td>Endpoint Security vs Settings Catalog for same setting</td><td><span class="tag to">Endpoint Security wins</span> — designed to have priority for security settings</td></tr>
+  </tbody></table></div>
+  <div class="sh2">Real Conflict Examples</div>
+  <div class="cs">
+    <div class="cst">⚔️ Conflict: Password Length</div>
+    <div class="csb">Profile A (All Devices): Minimum password = 6 digits<br/>Profile B (Security Team): Minimum password = 12 characters<br/>Security Team member receives BOTH profiles.</div>
+    <div class="csr"><strong>Result:</strong> Conflict. Both show Error. Effective password length unpredictable. <strong>Fix:</strong> Exclude "Security Team" from Profile A, OR create one consolidated profile per scenario — never overlap the same setting.</div>
+  </div>
+  <div class="cs">
+    <div class="cst">⚔️ Conflict: Camera Block vs Allow</div>
+    <div class="csb">Profile A (All Employees): Block camera = Yes<br/>Profile B (Design Team): Block camera = No (designers need cameras)<br/>Design Team member receives both.</div>
+    <div class="csr"><strong>Fix:</strong> In Profile A's assignment, Exclude "Design Team." Now only Profile B reaches Design Team members — clean, no conflict.</div>
+  </div>
+  <div class="cs">
+    <div class="cst">✅ No Conflict: Different Settings</div>
+    <div class="csb">Profile A: Blocks camera. Profile B: Configures Wi-Fi. Different settings — no overlap.</div>
+    <div class="csr"><strong>Result:</strong> Both apply cleanly. Camera blocked AND Wi-Fi configured. Intune merges non-conflicting settings. Only same setting + different values triggers conflicts.</div>
+  </div>
+  <div class="sh2">Resolving Conflicts — Step by Step</div>
+  <ol class="steps">
+    <li><div class="sn2">1</div><div>Intune → Devices → All Devices → Click affected device → <strong>Device configuration</strong> tab → Find profiles with "Conflict" or "Error" status</div></li>
+    <li><div class="sn2">2</div><div>Click the conflicting profile → identify the specific setting in error</div></li>
+    <li><div class="sn2">3</div><div>Find ALL profiles that configure that same setting (review each profile in the tenant)</div></li>
+    <li><div class="sn2">4</div><div>Resolution options: (a) Remove setting from one profile, (b) Use Include/Exclude so only one profile reaches the device, (c) Consolidate into one authoritative profile</div></li>
+    <li><div class="sn2">5</div><div>Trigger device sync → verify Conflict status resolves to Succeeded in Device configuration tab</div></li>
+  </ol>
+  <div class="ib ip"><div class="bt">💡 Architecture Principle — Avoid Overlapping Profiles</div><p>Best prevention: <strong>One baseline profile</strong> (All Devices) for universal settings. <strong>Role-specific profiles</strong> for department variations — never duplicate baseline settings. <strong>Use exclusions liberally</strong> — if a group needs different behavior for one setting, exclude them from the baseline for that setting rather than creating a competing profile. Document which profile "owns" which settings.</p></div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 41</div>
+    <div class="qa"><div class="qq">What happens when two profiles set the same setting to different values?</div><div class="qa2">A conflict occurs. Both profiles report Conflict or Error status in Intune for that setting. The effective value becomes unpredictable — it may stay at last applied value, revert to default, or fluctuate. Resolution requires removing the setting from one profile, using exclusions so only one profile reaches the device, or consolidating into a single authoritative profile.</div></div>
+    <div class="qa"><div class="qq">How would you architect profiles to minimize conflicts in a 1,000-person org?</div><div class="qa2">Layered approach: one baseline profile assigned to All Devices covering universal settings. Role-specific profiles for department groups — critical rule: never duplicate a baseline setting in a role-specific profile. If a role needs different behavior for a setting, exclude that group from the baseline for that setting using the Exclude group. Document a "settings ownership" map — which profile controls which settings — to prevent duplication as the environment grows.</div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- T42 -->
+<section class="ts" id="t42">
+  <div class="th">
+    <div class="tn">TOPIC 42</div>
+    <div><div class="tt">Troubleshooting Configuration Profiles</div><div class="tsub">Diagnosing why a profile isn't applying — the systematic L2 approach</div></div>
+  </div>
+  <div class="sh2">The Troubleshooting Hierarchy — Always Work in Order</div>
+  <ol class="steps">
+    <li><div class="sn2">1</div><div><strong>Is the device enrolled?</strong> → Intune → Devices → All Devices → Search. No device = enrollment issue, not a profile issue.</div></li>
+    <li><div class="sn2">2</div><div><strong>Is the profile assigned to a group the device/user belongs to?</strong> → Open profile → Assignments → Check included groups. Check device/user's group memberships in Azure AD.</div></li>
+    <li><div class="sn2">3</div><div><strong>Is the device in an excluded group?</strong> → Check Exclude groups in the profile. Exclusion overrides inclusion — if excluded, profile won't apply by design.</div></li>
+    <li><div class="sn2">4</div><div><strong>Has the device checked in recently?</strong> → Devices → All Devices → Find device → "Last check-in" time. If stale (days old), device is offline or MDM agent is unhealthy.</div></li>
+    <li><div class="sn2">5</div><div><strong>What is the profile status for this device?</strong> → Devices → Configuration → Click profile → Device and user check-in status → Find device → read Status column.</div></li>
+    <li><div class="sn2">6</div><div><strong>Is the setting applicable to this OS version?</strong> → Some Settings Catalog settings require specific Windows versions. Check the setting's documentation for minimum requirements.</div></li>
+  </ol>
+  <div class="sh2">Profile Status Meanings</div>
+  <div class="tw"><table><thead><tr><th>Status</th><th>Meaning</th><th>Action</th></tr></thead><tbody>
+    <tr><td><span class="tag tg">Succeeded</span></td><td>Profile applied successfully — settings are active on device</td><td>No action needed</td></tr>
+    <tr><td><span class="tag tr2">Failed</span></td><td>Profile received but couldn't apply — setting not supported on this device/OS</td><td>Check device OS version. Check if setting requires specific hardware.</td></tr>
+    <tr><td><span class="tag to">Conflict</span></td><td>Same setting configured in two profiles with different values</td><td>Find conflicting profile. Remove setting from one. Use exclusions.</td></tr>
+    <tr><td><span class="tag ts2">Pending</span></td><td>Profile assigned but device hasn't checked in yet</td><td>Wait up to 8 hours or trigger manual sync.</td></tr>
+    <tr><td><span class="tag tt2">Not Applicable</span></td><td>Profile assigned but doesn't apply to this device (wrong OS, filter excluded it)</td><td>Review platform requirements and assignment filters.</td></tr>
+    <tr><td><span class="tag ty">Error</span></td><td>Profile applied but one or more specific settings returned an error</td><td>Click into the profile status for this device to see exactly which settings errored.</td></tr>
+  </tbody></table></div>
+  <div class="sh2">Windows Troubleshooting Tools</div>
+  <div class="tw"><table><thead><tr><th>Tool</th><th>How to Access</th><th>What to Look For</th></tr></thead><tbody>
+    <tr><td>MDMDiagReport.html</td><td>Run as admin: <code>MDMDiagnosticsTool.exe -out C:\Temp\MDM</code></td><td>Applied policies, CSP errors, enrollment state — your first stop for any Windows MDM issue</td></tr>
+    <tr><td>Event Viewer MDM</td><td>DeviceManagement-Enterprise-Diagnostics-Provider → Admin</td><td>Error-level events with policy names and error codes</td></tr>
+    <tr><td>Registry check</td><td><code>HKLM\SOFTWARE\Microsoft\PolicyManager\current\device\</code></td><td>Verify settings were actually written to registry after policy applied</td></tr>
+    <tr><td>Intune Troubleshoot blade</td><td>Intune → Troubleshoot &amp; Support → Search user</td><td>All device/policy/app status in one view — fastest for L1/L2 tickets</td></tr>
+    <tr><td>dsregcmd /status</td><td>Command Prompt as admin</td><td>MDM enrollment state, AAD join state, token validity</td></tr>
+  </tbody></table></div>
+  <div class="sh2">Common "Profile Not Applying" Scenarios</div>
+  <div class="ib ir"><div class="bt">🚨 Scenario: Pending for 24+ Hours</div><p><strong>Cause:</strong> Device is offline, MDM agent is unhealthy, or device recently unenrolled/re-enrolled. <strong>Check:</strong> Is device online? In Intune → device → try Sync button. On device: Settings → sync manually. If still pending, run MDMDiagReport and check MDM channel health errors in Event Viewer.</p></div>
+  <div class="ib io"><div class="bt">⚠️ Scenario: Succeeded Status But Setting Not Applied</div><p><strong>Cause 1:</strong> Another profile with different value is overriding (check for conflicts). <strong>Cause 2:</strong> Setting requires a device restart to take effect — reboot the device. <strong>Cause 3:</strong> CSP path changed in a newer OS version. <strong>Check:</strong> Verify the registry key directly on device. Check MDMDiagReport for the actual CSP value stored.</p></div>
+  <div class="ib io"><div class="bt">⚠️ Scenario: Not Applicable Unexpectedly</div><p><strong>Cause 1:</strong> An Assignment Filter is excluding this device — review filter rules. <strong>Cause 2:</strong> Profile platform mismatch (Windows profile assigned via group containing Android devices). <strong>Cause 3:</strong> Device OS version below the setting's minimum requirement. Always check platform requirements and filter configuration.</p></div>
+  <div class="rw"><div class="rwh"><div class="rwi">🔧</div><div class="rwl">Real Troubleshooting Case — Wi-Fi Fails After Adding Certificate Profile</div></div>
+    <p><strong>Ticket:</strong> "Our Wi-Fi profile worked fine, but after adding a new SCEP certificate profile, devices stopped auto-connecting to corporate Wi-Fi."<br/>
+    <strong>Investigation:</strong> Wi-Fi profile status = Failed. Error: "Certificate not found." SCEP certificate profile status = Pending on same devices.<br/>
+    <strong>Root cause:</strong> Both profiles assigned to a device group. Dynamic group membership took 18 hours to populate — devices got the Wi-Fi profile before receiving the SCEP certificate it depends on. Wi-Fi requires the cert but the cert hadn't arrived yet → authentication fails.<br/>
+    <strong>Fix:</strong> Wait for SCEP profile to show Succeeded → Wi-Fi auto-succeeds on next check-in. Future prevention: Use Assignment Filters (instant evaluation) instead of dynamic groups for Autopilot/certificate-dependent scenarios, ensuring cert arrives before Wi-Fi profile triggers.</p>
+  </div>
+  <div class="iq"><div class="iqh">🎤 Interview Questions — Topic 42</div>
+    <div class="qa"><div class="qq">Walk me through troubleshooting a Wi-Fi profile that isn't connecting devices to corporate Wi-Fi.</div><div class="qa2">Confirm the device is enrolled. Check the Wi-Fi profile assignment — is the device/user's group included, not excluded? Check the profile's per-device status in Intune — Succeeded/Failed/Conflict? If Failed, examine the error detail. If the profile uses 802.1X certificates, verify the Trusted Root and SCEP profiles also show Succeeded — certificate failures cascade to Wi-Fi failures. On Windows, run MDMDiagnosticsTool and check Event Viewer MDM logs. Trigger a manual sync and recheck.</div></div>
+    <div class="qa"><div class="qq">What does "Not Applicable" mean for a Configuration Profile and what are common causes?</div><div class="qa2">Not Applicable means Intune determined the profile was assigned to the device but correctly doesn't apply it. Common causes: an Assignment Filter is excluding this specific device based on its attributes, the device OS is below the profile's minimum requirement, or there's a platform mismatch (e.g., a Windows-only profile somehow reaching an Android device's group). It's not an error — it's Intune correctly not applying an inapplicable policy.</div></div>
+    <div class="qa"><div class="qq">Where in Intune do you check all profiles applied to a specific device?</div><div class="qa2">Devices → All Devices → Find and click the device → Device configuration tab. Shows every assigned profile with its status. Also use Troubleshoot &amp; Support → search the user → see all their devices and profile states from one screen. The per-device view in Device configuration also shows which specific settings within a profile succeeded or failed.</div></div>
+  </div>
+</section>
+
+<!-- Completion Banner -->
+<div style="background:linear-gradient(135deg,rgba(249,115,22,.07),rgba(251,191,36,.05));border:1px solid rgba(249,115,22,.22);border-radius:15px;padding:28px;margin-top:44px;text-align:center;">
+  <div style="font-size:28px;margin-bottom:10px">🎉</div>
+  <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--h);margin-bottom:9px">Block 4 Complete!</div>
+  <div style="color:var(--t2);font-size:13.5px;max-width:580px;margin:0 auto 17px;line-height:1.7">You've mastered every Configuration Profile type — Settings Catalog, ADMX templates, Wi-Fi, VPN, certificates, kiosk mode, device restrictions, conflict resolution, and deep troubleshooting. You can now design, deploy, and debug any Intune configuration policy.</div>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+    <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--g);font-family:'IBM Plex Mono',monospace">✅ Blocks 1–4 Done — 42 Topics</div>
+    <div style="background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--a2);font-family:'IBM Plex Mono',monospace">⬡ Block 5 Next: Compliance Policies</div>
+    <div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--pu);font-family:'IBM Plex Mono',monospace">📋 87 Topics Remaining</div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<a href="#" class="stup">↑</a>
+
+<script>
+const secs=document.querySelectorAll('.ts');
+const navs=document.querySelectorAll('.ni[href^="#"]');
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;navs.forEach(n=>{n.classList.remove('active');if(n.getAttribute('href')==='#'+id)n.classList.add('active');});}});},{rootMargin:'-20% 0px -60% 0px'});
+secs.forEach(s=>obs.observe(s));
+navs.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(n.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});
+}));
+</script>
+</body>
+</html>

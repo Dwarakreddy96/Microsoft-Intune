@@ -1,0 +1,1757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 1: Foundations</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #0f1525;
+    --bg3: #151c30;
+    --sidebar-bg: #0c1120;
+    --border: #1e2d4a;
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --accent3: #8b5cf6;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --heading: #f8fafc;
+    --card: #111827;
+    --card2: #0f1729;
+    --glow: rgba(59,130,246,0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    display: flex;
+    min-height: 100vh;
+    line-height: 1.7;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: 290px;
+    min-width: 290px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .sidebar-header {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #0c1120 0%, #111827 100%);
+  }
+  .sidebar-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--heading);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 0 20px rgba(59,130,246,0.3);
+  }
+  .sidebar-subtitle {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 6px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .block-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2));
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--accent2);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 12px;
+    letter-spacing: 0.5px;
+  }
+
+  .sidebar-nav { padding: 16px 0; flex:1; }
+  .nav-section-label {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+    padding: 8px 24px 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .nav-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    text-decoration: none;
+    color: var(--text2);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+  .nav-item:hover {
+    background: rgba(59,130,246,0.06);
+    color: var(--text);
+    border-left-color: var(--accent);
+  }
+  .nav-item.active {
+    background: rgba(59,130,246,0.1);
+    color: var(--accent2);
+    border-left-color: var(--accent);
+  }
+  .nav-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    min-width: 20px;
+    margin-top: 1px;
+  }
+  .nav-item.active .nav-num { color: var(--accent); }
+
+  .sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 7%; /* block 1 of 14 */
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    animation: progressGlow 2s ease-in-out infinite alternate;
+  }
+  @keyframes progressGlow {
+    from { box-shadow: 0 0 4px var(--accent); }
+    to { box-shadow: 0 0 12px var(--accent2); }
+  }
+
+  /* ── MAIN CONTENT ── */
+  #main {
+    margin-left: 290px;
+    flex: 1;
+    min-height: 100vh;
+  }
+
+  .top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(10,14,26,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .breadcrumb {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .breadcrumb span { color: var(--accent); }
+  .topic-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+  }
+
+  .content { padding: 56px 48px 80px; max-width: 960px; }
+
+  /* Hero */
+  .block-hero {
+    margin-bottom: 64px;
+    position: relative;
+    padding: 48px;
+    background: linear-gradient(135deg, var(--bg2) 0%, var(--bg3) 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .block-hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .block-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    color: var(--accent2);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+  }
+  .hero-title span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-desc {
+    font-size: 16px;
+    color: var(--text2);
+    max-width: 600px;
+    line-height: 1.7;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+  .hero-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text2);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .hero-meta-item .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .hero-meta-item .dot.green { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .hero-meta-item .dot.purple { background: var(--accent3); box-shadow: 0 0 8px var(--accent3); }
+
+  /* Topic sections */
+  .topic-section {
+    margin-bottom: 72px;
+    scroll-margin-top: 70px;
+  }
+  .topic-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topic-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    white-space: nowrap;
+    margin-top: 4px;
+  }
+  .topic-title-wrap {}
+  .topic-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--heading);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+  .topic-subtitle {
+    font-size: 13px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* Content blocks */
+  .section-heading {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--heading);
+    margin: 32px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-heading::before {
+    content: '';
+    width: 3px;
+    height: 18px;
+    background: linear-gradient(180deg, var(--accent), var(--accent3));
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  p {
+    color: var(--text2);
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+  p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Cards */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .card:hover {
+    border-color: rgba(59,130,246,0.4);
+    transform: translateY(-2px);
+  }
+  .card-icon { font-size: 24px; margin-bottom: 10px; }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--heading);
+    margin-bottom: 8px;
+  }
+  .card-body { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* Comparison table */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead tr {
+    background: linear-gradient(135deg, var(--bg3), var(--bg2));
+  }
+  th {
+    padding: 14px 18px;
+    text-align: left;
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--heading);
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 12px 18px;
+    color: var(--text2);
+    border-bottom: 1px solid rgba(30,45,74,0.5);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(59,130,246,0.03); }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .tag-blue { background: rgba(59,130,246,0.15); color: var(--accent2); border: 1px solid rgba(59,130,246,0.2); }
+  .tag-green { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.2); }
+  .tag-orange { background: rgba(245,158,11,0.15); color: var(--orange); border: 1px solid rgba(245,158,11,0.2); }
+  .tag-purple { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); }
+  .tag-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+
+  /* Info boxes */
+  .info-box {
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    border-left: 3px solid;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .info-box .box-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .info-box p { margin: 0; font-size: 14px; }
+  .info-blue { background: rgba(59,130,246,0.06); border-color: var(--accent); }
+  .info-blue .box-title { color: var(--accent2); }
+  .info-green { background: rgba(16,185,129,0.06); border-color: var(--green); }
+  .info-green .box-title { color: var(--green); }
+  .info-orange { background: rgba(245,158,11,0.06); border-color: var(--orange); }
+  .info-orange .box-title { color: var(--orange); }
+  .info-purple { background: rgba(139,92,246,0.06); border-color: var(--accent3); }
+  .info-purple .box-title { color: #a78bfa; }
+  .info-red { background: rgba(239,68,68,0.06); border-color: var(--red); }
+  .info-red .box-title { color: var(--red); }
+
+  /* Code block */
+  .code-block {
+    background: #060b14;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: #7dd3fc;
+    overflow-x: auto;
+    line-height: 1.7;
+    position: relative;
+  }
+  .code-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .code-block .comment { color: var(--text3); }
+  .code-block .keyword { color: #c084fc; }
+  .code-block .string { color: #86efac; }
+
+  /* Step list */
+  .steps {
+    list-style: none;
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .steps li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .step-num {
+    min-width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    font-family: 'IBM Plex Mono', monospace;
+    flex-shrink: 0;
+  }
+  .steps li strong { color: var(--text); }
+
+  /* Bullet list */
+  .bullet-list {
+    list-style: none;
+    margin: 12px 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .bullet-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .bullet-list li::before {
+    content: '▹';
+    color: var(--accent);
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .bullet-list li strong { color: var(--text); }
+
+  /* Real world box */
+  .realworld {
+    background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(6,182,212,0.05));
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 12px;
+    padding: 22px;
+    margin: 24px 0;
+  }
+  .realworld-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .realworld-icon { font-size: 20px; }
+  .realworld-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--green);
+    letter-spacing: 0.3px;
+  }
+  .realworld p { color: var(--text2); font-size: 14px; margin: 0; }
+
+  /* Interview Q&A */
+  .interview-section {
+    background: linear-gradient(135deg, rgba(139,92,246,0.05), rgba(59,130,246,0.05));
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 14px;
+    padding: 24px;
+    margin: 28px 0;
+  }
+  .interview-header {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: #a78bfa;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .qa-item { margin-bottom: 18px; }
+  .qa-item:last-child { margin-bottom: 0; }
+  .qa-q {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: flex;
+    gap: 8px;
+  }
+  .qa-q::before { content: 'Q.'; color: #a78bfa; font-family: 'IBM Plex Mono', monospace; flex-shrink: 0; }
+  .qa-a {
+    font-size: 13px;
+    color: var(--text2);
+    padding-left: 24px;
+    line-height: 1.6;
+    display: flex;
+    gap: 8px;
+  }
+  .qa-a::before { content: 'A.'; color: var(--accent2); font-family: 'IBM Plex Mono', monospace; flex-shrink: 0; }
+
+  /* Tip block */
+  .tip-block {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: rgba(245,158,11,0.05);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+  .tip-icon { font-size: 18px; flex-shrink: 0; }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 48px 0;
+  }
+
+  /* Portal menu */
+  .portal-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+  }
+  .portal-item:hover { border-color: rgba(59,130,246,0.3); }
+  .portal-icon { font-size: 22px; flex-shrink: 0; }
+  .portal-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--heading);
+    margin-bottom: 4px;
+  }
+  .portal-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .portal-url {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  /* Scroll to top */
+  .scroll-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, var(--accent), var(--accent3));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+    border: none;
+    color: white;
+    z-index: 200;
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+  .scroll-top:hover { transform: translateY(-2px); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    #sidebar { transform: translateX(-100%); }
+    #main { margin-left: 0; }
+    .content { padding: 32px 20px; }
+    .hero-title { font-size: 28px; }
+    .top-bar { padding: 12px 20px; }
+  }
+
+  /* Animations */
+  .topic-section { opacity: 0; animation: fadeUp 0.5s ease forwards; }
+  .topic-section:nth-child(1) { animation-delay: 0.1s; }
+  .topic-section:nth-child(2) { animation-delay: 0.2s; }
+  .topic-section:nth-child(3) { animation-delay: 0.3s; }
+  .topic-section:nth-child(4) { animation-delay: 0.4s; }
+  .topic-section:nth-child(5) { animation-delay: 0.5s; }
+  .topic-section:nth-child(6) { animation-delay: 0.6s; }
+  .topic-section:nth-child(7) { animation-delay: 0.7s; }
+  .topic-section:nth-child(8) { animation-delay: 0.8s; }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(20px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+  .block-hero { animation: fadeUp 0.4s ease forwards; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo-icon">🛡️</div>
+      Intune Mastery
+    </div>
+    <div class="sidebar-subtitle">Complete Learning Series</div>
+    <div class="block-badge">⬡ Block 1 of 14 — Foundations</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="nav-section-label">Block 1 Topics</div>
+    <a href="#topic1" class="nav-item active"><span class="nav-num">01</span>What is MDM and MAM</a>
+    <a href="#topic2" class="nav-item"><span class="nav-num">02</span>What is Microsoft Intune</a>
+    <a href="#topic3" class="nav-item"><span class="nav-num">03</span>Intune vs SCCM vs Group Policy</a>
+    <a href="#topic4" class="nav-item"><span class="nav-num">04</span>Microsoft 365 & Azure AD Relationship</a>
+    <a href="#topic5" class="nav-item"><span class="nav-num">05</span>Intune Licensing — P1, P2, E3, E5</a>
+    <a href="#topic6" class="nav-item"><span class="nav-num">06</span>Intune Portal Walkthrough</a>
+    <a href="#topic7" class="nav-item"><span class="nav-num">07</span>Tenant Setup — DNS, Domain, Roles</a>
+    <a href="#topic8" class="nav-item"><span class="nav-num">08</span>Azure AD Roles vs Intune Roles</a>
+
+    <div class="nav-section-label" style="margin-top:16px;">Coming Next</div>
+    <div class="nav-item" style="opacity:0.4;cursor:default;"><span class="nav-num">→</span>Block 2: Azure AD Essentials</div>
+    <div class="nav-item" style="opacity:0.4;cursor:default;"><span class="nav-num">→</span>Block 3: Device Enrollment</div>
+    <div class="nav-item" style="opacity:0.4;cursor:default;"><span class="nav-num">→</span>Block 4–14: Coming Soon</div>
+  </div>
+  <div class="sidebar-footer">
+    <div>Overall Progress</div>
+    <div style="color:var(--accent);margin:2px 0;">Block 1 / 14 Complete</div>
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+  </div>
+</nav>
+
+<!-- TOP BAR -->
+<div id="main">
+<div class="top-bar">
+  <div class="breadcrumb">Intune Mastery <span>›</span> Block 1 <span>›</span> Foundations</div>
+  <div class="topic-count">8 Topics · ~3 Hours</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- Hero -->
+  <div class="block-hero">
+    <div class="hero-tag">📘 BLOCK 1 · FOUNDATIONS</div>
+    <h1 class="hero-title">Building Your<br/><span>Intune Foundation</span></h1>
+    <p class="hero-desc">Before touching a single policy or enrolling a device, you need to understand the WHY behind Intune. This block covers the core concepts that everything else builds upon — MDM, MAM, licensing, portal navigation, and how it all fits together in the Microsoft ecosystem.</p>
+    <div class="hero-meta">
+      <div class="hero-meta-item"><div class="dot"></div>8 Core Topics</div>
+      <div class="hero-meta-item"><div class="dot green"></div>Real-World Examples</div>
+      <div class="hero-meta-item"><div class="dot purple"></div>Interview Q&A Included</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOPIC 1: MDM and MAM -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="topic-section" id="topic1">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 01</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">What is MDM and MAM?</div>
+        <div class="topic-subtitle">Mobile Device Management vs Mobile Application Management</div>
+      </div>
+    </div>
+
+    <div class="section-heading">The Core Problem They Solve</div>
+    <p>Imagine you're an IT admin at a 500-person company. Your employees use laptops, phones, tablets — some company-owned, some personal. They access company email, SharePoint, Teams. What happens when someone loses their phone? What if an employee installs a malicious app? What if they leave the company with all the data on their personal phone?</p>
+    <p><strong>MDM and MAM are the two solutions Microsoft (and the industry) came up with to handle this.</strong></p>
+
+    <div class="section-heading">MDM — Mobile Device Management</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">📱</div>
+        <div class="card-title">What It Is</div>
+        <div class="card-body">MDM gives your IT team complete control over an enrolled device — the whole device, not just apps. You can push policies, wipe the device, see what's installed, enforce encryption.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <div class="card-title">Best Used For</div>
+        <div class="card-body">Company-owned devices — laptops, phones, tablets. When the company owns the hardware, MDM is the right tool because you have legal and technical authority over the full device.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">What You Can Do</div>
+        <div class="card-body">Wipe the entire device, enforce BitLocker, push Wi-Fi/VPN settings, control which apps can be installed, set password requirements, block USB ports.</div>
+      </div>
+    </div>
+
+    <div class="info-box info-blue">
+      <div class="box-title">🔑 Key Concept</div>
+      <p>When a device is MDM-enrolled, it gets a certificate and an MDM agent installed. This agent constantly checks in with Intune (every 8 hours by default, or when triggered) to receive and apply policies. Think of it like a remote control for the device.</p>
+    </div>
+
+    <div class="section-heading">MAM — Mobile Application Management</div>
+    <p>MAM works at the <strong>app level</strong>, not the device level. You don't need to enroll the entire device — you just wrap certain apps (like Outlook, Teams, OneDrive) with policies that protect corporate data inside those apps.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🔒</div>
+        <div class="card-title">What It Controls</div>
+        <div class="card-body">Copy/paste between apps, save-to-personal-storage, screenshot restrictions, PIN for app access, selective wipe of only corporate data in the app.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">👤</div>
+        <div class="card-title">BYOD Scenarios</div>
+        <div class="card-body">Employees use personal phones. Company can't touch the personal phone — but CAN protect data inside the Outlook/Teams app. MAM makes this possible.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🗑️</div>
+        <div class="card-title">Selective Wipe</div>
+        <div class="card-body">When an employee leaves, IT does a selective wipe — only company data in those managed apps is removed. Personal photos, WhatsApp etc. are untouched.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">MDM vs MAM — Side by Side</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Factor</th>
+            <th>MDM</th>
+            <th>MAM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Scope</strong></td><td>Entire device</td><td>Specific apps only</td></tr>
+          <tr><td><strong>Enrollment</strong></td><td>Device must be enrolled</td><td>No device enrollment needed (MAM-WE)</td></tr>
+          <tr><td><strong>Best for</strong></td><td>Company-owned devices</td><td>BYOD (personal devices)</td></tr>
+          <tr><td><strong>Wipe capability</strong></td><td>Full device wipe</td><td>Selective wipe (apps only)</td></tr>
+          <tr><td><strong>Privacy</strong></td><td>Low — IT can see full device</td><td>High — IT sees only app data</td></tr>
+          <tr><td><strong>Control level</strong></td><td>High</td><td>Medium</td></tr>
+          <tr><td><strong>User experience</strong></td><td>More restricted</td><td>Less intrusive</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">MAM-WE — The Game Changer</div>
+    <p><strong>MAM Without Enrollment (MAM-WE)</strong> is one of the most powerful concepts in Intune. It means you can apply app protection policies to personal devices WITHOUT enrolling them into MDM. The user just signs into the Outlook app with their company account, and your MAM policies automatically apply.</p>
+
+    <div class="realworld">
+      <div class="realworld-header">
+        <div class="realworld-icon">🏢</div>
+        <div class="realworld-label">Real-World Scenario</div>
+      </div>
+      <p><strong>Company:</strong> TCS India, 5,000 employees.<br/>
+      <strong>Problem:</strong> Employees want to check work email on personal phones. IT doesn't want to enroll personal phones (privacy concerns, employee resistance).<br/>
+      <strong>Solution:</strong> Deploy MAM-WE. Employees install Outlook from the app store, sign in with their TCS account. Intune applies MAM policies — they can't copy company email to WhatsApp, can't save attachments to their personal Google Drive, app requires PIN. When employee resigns, IT selectively wipes only the Outlook app data. The employee's personal photos, contacts — untouched.<br/>
+      <strong>Result:</strong> Company data protected. Employee privacy respected. Zero device enrollment needed.</p>
+    </div>
+
+    <div class="section-heading">When to Use Which (Decision Guide)</div>
+    <ul class="bullet-list">
+      <li><strong>Company laptop/desktop:</strong> Always MDM. You own it, you control it.</li>
+      <li><strong>Company-issued mobile:</strong> MDM (full control) + MAM (app-level DLP on top)</li>
+      <li><strong>Employee personal phone (BYOD):</strong> MAM-WE only. Never force MDM on personal devices — legal and ethical issues.</li>
+      <li><strong>Contractor/vendor device:</strong> MAM-WE — they have their own device management, just protect your apps.</li>
+      <li><strong>Shared kiosk device:</strong> MDM with kiosk mode configuration.</li>
+    </ul>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 1</div>
+      <div class="qa-item">
+        <div class="qa-q">What is the difference between MDM and MAM?</div>
+        <div class="qa-a">MDM manages the entire device and requires enrollment. MAM manages only specific apps and their data. MDM is for company-owned devices; MAM is ideal for BYOD scenarios where we can't enroll the full device.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is MAM without enrollment (MAM-WE) and when would you use it?</div>
+        <div class="qa-a">MAM-WE applies app protection policies to devices that are not enrolled in MDM. I would use it for BYOD scenarios — employees use personal phones to access company apps like Outlook, but IT only controls data within those apps without managing the whole device.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Can you use both MDM and MAM together?</div>
+        <div class="qa-a">Yes. For company-owned devices, you'd use MDM for device-level control AND add MAM policies on top for additional app-level data protection. This gives you the highest level of security.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What happens when you do a selective wipe vs a full wipe?</div>
+        <div class="qa-a">Full wipe (MDM) resets the entire device to factory settings — all data is gone. Selective wipe (MAM) only removes company data from managed apps — the user's personal data stays intact.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOPIC 2: What is Microsoft Intune -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="topic-section" id="topic2">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 02</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">What is Microsoft Intune?</div>
+        <div class="topic-subtitle">Purpose, History, Architecture & Licensing Overview</div>
+      </div>
+    </div>
+
+    <div class="section-heading">The Simple Definition</div>
+    <p>Microsoft Intune is a <strong>cloud-based endpoint management solution</strong> that lets IT administrators manage and secure devices, apps, and data across an organization — without needing any on-premises infrastructure.</p>
+    <p>Think of it as the <strong>remote control center</strong> for all your company's devices. From a web browser at portal.intune.microsoft.com, an admin can manage thousands of Windows laptops, iPhones, Android phones, and Macs — all from one place.</p>
+
+    <div class="section-heading">A Brief History</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Year</th><th>Event</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tag-blue">2011</span></td><td>Microsoft launches Windows Intune as a subscription PC management service</td></tr>
+          <tr><td><span class="tag tag-blue">2013</span></td><td>Rebranded to Microsoft Intune; adds iOS and Android device management</td></tr>
+          <tr><td><span class="tag tag-blue">2016</span></td><td>Intune integrates with Azure Active Directory; major cloud expansion</td></tr>
+          <tr><td><span class="tag tag-blue">2019</span></td><td>Co-management with SCCM announced; Microsoft Endpoint Manager brand introduced</td></tr>
+          <tr><td><span class="tag tag-blue">2022</span></td><td>Microsoft Endpoint Manager split back; Intune gets its own dedicated portal</td></tr>
+          <tr><td><span class="tag tag-blue">2023+</span></td><td>Intune Suite launched — advanced features like Remote Help, Endpoint Privilege Management</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">What Exactly Can Intune Do?</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">💻</div>
+        <div class="card-title">Device Management</div>
+        <div class="card-body">Enroll, configure, monitor, and wipe Windows, macOS, iOS, Android devices. Push settings to thousands of devices at once.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📦</div>
+        <div class="card-title">App Deployment</div>
+        <div class="card-body">Push apps to devices silently. Deploy Microsoft 365 Apps, Win32 apps, store apps. Remove apps when needed.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <div class="card-title">Security Policies</div>
+        <div class="card-body">Enforce BitLocker, require passwords, configure Defender Antivirus, set firewall rules — all from the cloud.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">✅</div>
+        <div class="card-title">Compliance</div>
+        <div class="card-body">Mark devices as compliant or non-compliant. Block non-compliant devices from accessing company resources via Conditional Access.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📊</div>
+        <div class="card-title">Reporting</div>
+        <div class="card-body">See which devices are compliant, which apps failed to install, enrollment status, security posture — all in built-in reports.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <div class="card-title">Automation</div>
+        <div class="card-body">Run PowerShell scripts, use Proactive Remediation to detect and fix issues automatically on devices without IT intervention.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">The Intune Architecture</div>
+    <p>Intune is a <strong>SaaS (Software as a Service)</strong> product hosted entirely on Microsoft Azure. Here's how it works at a high level:</p>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div><strong>Admin configures policies</strong> in the Intune portal (portal.intune.microsoft.com) — this is stored in Microsoft's cloud.</div></li>
+      <li><div class="step-num">2</div><div><strong>Devices check in</strong> with Intune periodically (or on-demand). The MDM agent on the device contacts the Intune service.</div></li>
+      <li><div class="step-num">3</div><div><strong>Policies are delivered</strong> to the device. Intune sends configuration, compliance rules, app assignments, scripts.</div></li>
+      <li><div class="step-num">4</div><div><strong>Device reports back</strong> — compliance status, installed apps, last check-in time — all visible to admin in real-time.</div></li>
+      <li><div class="step-num">5</div><div><strong>Conditional Access</strong> acts as a gatekeeper — only compliant, managed devices can access Microsoft 365 resources.</div></li>
+    </ol>
+
+    <div class="info-box info-orange">
+      <div class="box-title">⚡ Why This Matters</div>
+      <p>Because Intune is cloud-based, it works for devices anywhere in the world — office, home, coffee shop, another country. Traditional on-premises tools like SCCM require VPN or direct network connectivity. Intune doesn't. This is why it became critical during COVID when everyone went remote.</p>
+    </div>
+
+    <div class="realworld">
+      <div class="realworld-header">
+        <div class="realworld-icon">🌍</div>
+        <div class="realworld-label">Real-World Scenario</div>
+      </div>
+      <p><strong>Situation:</strong> A 300-person company deploys new Windows 11 laptops to employees across 5 cities. Previously, IT had to either ship the laptop pre-imaged, or have someone on-site configure each machine.<br/>
+      <strong>With Intune:</strong> Laptop arrives at employee's home. Employee turns it on, connects to internet, logs in with company credentials. Windows Autopilot (powered by Intune) automatically enrolls the device, renames it, installs all required apps, applies security policies, joins Azure AD — all without IT touching the device. Employee is productive within 1–2 hours. IT never touched the machine physically.</p>
+    </div>
+
+    <div class="section-heading">Intune Portals — Where to Access</div>
+    <div class="portal-item">
+      <div class="portal-icon">🌐</div>
+      <div>
+        <div class="portal-name">Main Intune Admin Center</div>
+        <div class="portal-desc">The primary portal for all Intune management — devices, apps, policies, reports, users.</div>
+        <div class="portal-url">portal.intune.microsoft.com (or endpoint.microsoft.com)</div>
+      </div>
+    </div>
+    <div class="portal-item">
+      <div class="portal-icon">☁️</div>
+      <div>
+        <div class="portal-name">Azure Portal (Azure AD part)</div>
+        <div class="portal-desc">Where you manage users, groups, licenses, Conditional Access. Intune deeply integrates here.</div>
+        <div class="portal-url">portal.azure.com</div>
+      </div>
+    </div>
+    <div class="portal-item">
+      <div class="portal-icon">🔧</div>
+      <div>
+        <div class="portal-name">Microsoft 365 Admin Center</div>
+        <div class="portal-desc">For license assignment, user management, and accessing Intune settings at a higher level.</div>
+        <div class="portal-url">admin.microsoft.com</div>
+      </div>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 2</div>
+      <div class="qa-item">
+        <div class="qa-q">What is Microsoft Intune and what problem does it solve?</div>
+        <div class="qa-a">Intune is a cloud-based MDM and MAM solution from Microsoft. It solves the problem of managing and securing devices, apps, and corporate data across a distributed workforce — especially important for remote work scenarios where traditional on-prem tools fall short.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Is Intune on-premises or cloud-based?</div>
+        <div class="qa-a">Intune is entirely cloud-based, hosted on Microsoft Azure. There's no server to install or maintain. You access it through a web portal, and devices communicate with Microsoft's cloud over the internet.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What operating systems does Intune support?</div>
+        <div class="qa-a">Intune supports Windows 10/11, macOS, iOS/iPadOS, Android, and Android Enterprise. It also has limited support for Linux. It's truly cross-platform.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOPIC 3: Intune vs SCCM vs Group Policy -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="topic-section" id="topic3">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 03</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Intune vs SCCM vs Group Policy</div>
+        <div class="topic-subtitle">Understanding When to Use Each Tool — and Why</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Why There Are Three Tools</div>
+    <p>Microsoft didn't create these three tools to confuse you. Each was built for a different era and a different problem. Understanding their origins helps you understand why they exist and when to use which.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">📜</div>
+        <div class="card-title">Group Policy (GPO)</div>
+        <div class="card-body">Born in 1999 with Windows 2000. Built for on-premises, domain-joined Windows PCs. It's the oldest and most mature — over 4,000 settings out of the box. But requires domain join and network connectivity.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏗️</div>
+        <div class="card-title">SCCM / MECM</div>
+        <div class="card-body">Built in 2007 as an on-premises enterprise management suite. Extremely powerful for large enterprises — OS deployment, patching, software deployment, inventory. Requires significant infrastructure.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">☁️</div>
+        <div class="card-title">Microsoft Intune</div>
+        <div class="card-body">Born for the cloud era (2011). No infrastructure, works anywhere, manages non-Windows devices too. The modern replacement — but not always a full replacement for SCCM in complex enterprises.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Detailed Comparison</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Group Policy</th>
+            <th>SCCM</th>
+            <th>Intune</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Infrastructure needed</td><td>Domain Controller</td><td>Multiple servers, SQL</td><td>None (cloud)</td></tr>
+          <tr><td>Device types</td><td>Windows only</td><td>Mostly Windows</td><td>Windows, Mac, iOS, Android</td></tr>
+          <tr><td>Works remotely</td><td>❌ Needs VPN/domain</td><td>⚠️ Needs VPN/CMG</td><td>✅ Works anywhere</td></tr>
+          <tr><td>OS Deployment</td><td>❌</td><td>✅ Excellent</td><td>⚠️ Autopilot only</td></tr>
+          <tr><td>App deployment</td><td>⚠️ Limited</td><td>✅ Very powerful</td><td>✅ Good (Win32 support)</td></tr>
+          <tr><td>Patch management</td><td>⚠️ Via WSUS only</td><td>✅ Best in class</td><td>✅ Windows Update for Business</td></tr>
+          <tr><td>Mobile devices</td><td>❌</td><td>❌</td><td>✅ Native support</td></tr>
+          <tr><td>Cost</td><td>Free with Windows Server</td><td>High (licensing + infra)</td><td>Included in M365/EMS</td></tr>
+          <tr><td>Settings granularity</td><td>4,000+ settings</td><td>Moderate</td><td>Growing (Settings Catalog)</td></tr>
+          <tr><td>Reporting</td><td>❌ Very basic</td><td>✅ Excellent (SSRS)</td><td>✅ Good (built-in + Log Analytics)</td></tr>
+          <tr><td>Learning curve</td><td>Medium</td><td>Very High</td><td>Medium</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">The Decision Framework — Which to Use?</div>
+    <ul class="bullet-list">
+      <li><strong>Pure cloud organization (new startup, no AD):</strong> Intune only. No need for GPO or SCCM.</li>
+      <li><strong>Traditional enterprise, all on-prem:</strong> SCCM + GPO. Intune would add complexity without clear benefit.</li>
+      <li><strong>Hybrid enterprise (most common):</strong> SCCM + Intune Co-management. Gradually move workloads to cloud.</li>
+      <li><strong>Remote/global workforce:</strong> Intune essential. SCCM alone can't reach remote workers without Cloud Management Gateway (complex).</li>
+      <li><strong>Multi-platform (Windows + Mac + Mobile):</strong> Intune is the only tool that manages all platforms natively.</li>
+      <li><strong>Complex OS imaging needs:</strong> Keep SCCM. Intune's Autopilot doesn't replace traditional imaging for all scenarios.</li>
+    </ul>
+
+    <div class="info-box info-green">
+      <div class="box-title">✅ Industry Trend</div>
+      <p>The industry is clearly moving toward Intune. Microsoft's investment in SCCM has slowed — new features are coming to Intune. Most enterprises are on a journey: SCCM today → Co-management tomorrow → Intune-only eventually. As a new admin, mastering Intune is the right bet for your career.</p>
+    </div>
+
+    <div class="realworld">
+      <div class="realworld-header">
+        <div class="realworld-icon">🏦</div>
+        <div class="realworld-label">Real-World Scenario</div>
+      </div>
+      <p><strong>Company:</strong> A large bank with 10,000 employees.<br/>
+      <strong>Current state:</strong> Uses SCCM for everything — OS deployment, patching, software. Has 2,000 branch employees using old Windows 7 machines, now upgrading to Windows 11. Also now has 500 mobile workers using iPhones.<br/>
+      <strong>Decision:</strong> Keep SCCM for the 10,000 desktop machines (too complex to migrate fully). Add Intune for the 500 iPhone users (SCCM can't manage iOS). Enable Co-management so both tools work together. Eventually migrate compliance and update policies to Intune in the cloud so remote workers don't need VPN just to get patches.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 3</div>
+      <div class="qa-item">
+        <div class="qa-q">When would you choose Intune over SCCM?</div>
+        <div class="qa-a">I'd choose Intune when the environment has remote/mobile workers, BYOD requirements, non-Windows devices like iPhones or Macs, or when the organization wants to reduce on-premises infrastructure. Intune is also better for modern provisioning scenarios like Autopilot.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Can Group Policy settings be replicated in Intune?</div>
+        <div class="qa-a">Many GPO settings can be replicated using Intune's Settings Catalog and Administrative Templates (ADMX). Microsoft has a Group Policy Analytics tool in Intune that imports your existing GPOs and tells you which settings are supported in Intune. However, not all 4,000+ GPO settings have Intune equivalents yet.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is Co-management?</div>
+        <div class="qa-a">Co-management is the ability to manage a Windows device with both SCCM and Intune simultaneously. You can split workloads — for example, keep software deployment in SCCM but move compliance policies and Windows Update to Intune. It's the bridge between on-prem and cloud management.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOPIC 4: Microsoft 365 & Azure AD Relationship -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="topic-section" id="topic4">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 04</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Microsoft 365 & Azure AD Relationship with Intune</div>
+        <div class="topic-subtitle">Understanding the Microsoft Ecosystem — How Everything Connects</div>
+      </div>
+    </div>
+
+    <div class="section-heading">The Microsoft Cloud Ecosystem</div>
+    <p>Intune doesn't exist in isolation. It's one part of a much larger Microsoft cloud ecosystem. Understanding how the pieces connect is critical because in the real world, you'll configure things across multiple portals and services.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🔵</div>
+        <div class="card-title">Azure Active Directory (Azure AD / Entra ID)</div>
+        <div class="card-body">The identity backbone. Every user account, every device object, every group lives in Azure AD. Intune reads users and groups from Azure AD to target policies. Think of it as the directory that everyone else depends on.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🟢</div>
+        <div class="card-title">Microsoft Intune</div>
+        <div class="card-body">The device and app management layer. Uses Azure AD identity to know WHO a device belongs to and WHAT groups they're in — then delivers the right policies.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🟠</div>
+        <div class="card-title">Microsoft 365 (M365)</div>
+        <div class="card-body">The productivity suite — Exchange Online (email), SharePoint, Teams, OneDrive. Intune protects access to M365 resources through Compliance + Conditional Access integration.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">How They Work Together — The Flow</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div><strong>User exists in Azure AD.</strong> Created manually or synced from on-prem Active Directory via Azure AD Connect.</div></li>
+      <li><div class="step-num">2</div><div><strong>User is assigned a license</strong> in Azure AD (e.g., Microsoft 365 Business Premium) — this license includes Intune.</div></li>
+      <li><div class="step-num">3</div><div><strong>User enrolls their device</strong> in Intune. The device registers in Azure AD as an Azure AD Joined (or Hybrid joined) device.</div></li>
+      <li><div class="step-num">4</div><div><strong>Intune assigns policies</strong> to the device based on the user's Azure AD group membership.</div></li>
+      <li><div class="step-num">5</div><div><strong>Device reports compliance</strong> back to Intune. Azure AD reads this compliance status.</div></li>
+      <li><div class="step-num">6</div><div><strong>Conditional Access policy</strong> in Azure AD checks: Is the user authenticated? Is the device compliant? If yes → allow access to Teams/Exchange/SharePoint. If no → block or prompt MFA.</div></li>
+    </ol>
+
+    <div class="info-box info-purple">
+      <div class="box-title">💡 The Key Insight</div>
+      <p>Azure AD is the GLUE. Intune needs Azure AD for user identities and group targeting. M365 needs Azure AD for authentication. Conditional Access lives in Azure AD but reads compliance data from Intune. That's why every Intune environment requires Azure AD — you can't run Intune without it.</p>
+    </div>
+
+    <div class="section-heading">Azure AD Connect — Bridging On-Prem and Cloud</div>
+    <p>Most traditional enterprises have an on-premises <strong>Active Directory (AD DS)</strong> — the Windows Server domain controller that has existed for decades. Azure AD Connect is a tool that syncs user accounts from on-prem AD to Azure AD, allowing those users to access cloud services like Intune and M365.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scenario</th><th>What's Used</th></tr></thead>
+        <tbody>
+          <tr><td>New cloud-native company (no on-prem AD)</td><td>Azure AD only. Users created directly in the cloud.</td></tr>
+          <tr><td>Traditional enterprise with on-prem AD</td><td>AD on-prem + Azure AD Connect + Azure AD (hybrid). Users sync from on-prem to cloud.</td></tr>
+          <tr><td>Hybrid enterprise moving to cloud</td><td>Both AD on-prem and Azure AD. Devices can be Hybrid Azure AD Joined.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="realworld">
+      <div class="realworld-header">
+        <div class="realworld-icon">🏪</div>
+        <div class="realworld-label">Real-World Scenario</div>
+      </div>
+      <p><strong>Company:</strong> A retail chain with 2,000 employees.<br/>
+      <strong>Setup:</strong> Has on-prem Windows Server AD (used for 10 years). Now deploying M365 and Intune.<br/>
+      <strong>Solution:</strong> Install Azure AD Connect on their domain controller. This syncs all 2,000 employee accounts to Azure AD. Now those accounts can get M365 licenses assigned. Devices are Hybrid Azure AD Joined — they're still in the on-prem domain AND registered in Azure AD. Intune manages these devices. When an employee accesses SharePoint from their laptop, Conditional Access checks: is this device compliant in Intune? Is the user MFA-verified? If yes → access granted. The whole stack works together seamlessly.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 4</div>
+      <div class="qa-item">
+        <div class="qa-q">Can Intune work without Azure AD?</div>
+        <div class="qa-a">No. Azure AD is a prerequisite for Intune. Every device enrolled in Intune must have an Azure AD identity. Intune uses Azure AD groups to target policies, and Conditional Access (an Azure AD feature) enforces access based on Intune compliance data.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is the relationship between Intune compliance and Conditional Access?</div>
+        <div class="qa-a">Intune evaluates devices against compliance policies and marks them compliant or non-compliant. Conditional Access in Azure AD uses that compliance status as a condition. If a device is non-compliant, Conditional Access can block access to Exchange, SharePoint, Teams — even if the user has valid credentials.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is Azure AD Connect and why is it important for Intune?</div>
+        <div class="qa-a">Azure AD Connect syncs user accounts from on-premises Active Directory to Azure AD. This is important for Intune because organizations with existing on-prem AD need their users in Azure AD to be licensed and managed by Intune. Without sync, on-prem users wouldn't exist in the cloud.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOPIC 5: Intune Licensing -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="topic-section" id="topic5">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 05</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Intune Licensing — P1, P2, E3, E5 Explained</div>
+        <div class="topic-subtitle">Understanding Which License Gets You What Features</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Why Licensing Matters for an Admin</div>
+    <p>As an L1/L2 admin, you won't buy licenses — but you WILL get tickets saying "this feature isn't working" and the root cause will often be the wrong or missing license. You need to know what's included in what license.</p>
+
+    <div class="section-heading">How Intune is Licensed</div>
+    <p>Intune is NOT a standalone product in most cases. It's included in several Microsoft subscription bundles. Here's the licensing landscape:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>License</th>
+            <th>Includes Intune?</th>
+            <th>AAD P1?</th>
+            <th>AAD P2?</th>
+            <th>Defender?</th>
+            <th>Best For</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-blue">M365 Business Basic</span></td>
+            <td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+            <td>Small biz, email + Teams only</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-green">M365 Business Premium</span></td>
+            <td>✅</td><td>✅</td><td>❌</td><td>✅ Basic</td>
+            <td>SMB with security needs</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-blue">M365 E3</span></td>
+            <td>✅</td><td>✅</td><td>❌</td><td>❌</td>
+            <td>Enterprise — productivity + compliance</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-purple">M365 E5</span></td>
+            <td>✅</td><td>✅</td><td>✅</td><td>✅ Full</td>
+            <td>Enterprise — maximum security</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-orange">EMS E3</span></td>
+            <td>✅</td><td>✅</td><td>❌</td><td>❌</td>
+            <td>Add-on for enterprise management</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-orange">EMS E5</span></td>
+            <td>✅</td><td>✅</td><td>✅</td><td>❌</td>
+            <td>Add-on with advanced identity</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-green">Intune Plan 1 (standalone)</span></td>
+            <td>✅ Core only</td><td>❌</td><td>❌</td><td>❌</td>
+            <td>Pure device management add-on</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-purple">Intune Plan 2 / Suite</span></td>
+            <td>✅ Advanced</td><td>❌</td><td>❌</td><td>❌</td>
+            <td>Advanced features add-on</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">Azure AD P1 vs P2 — What Changes?</div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-icon">🔑</div>
+        <div class="card-title">Azure AD P1 Gives You</div>
+        <div class="card-body">Conditional Access policies, dynamic groups (auto-membership based on rules), self-service password reset, hybrid identity (Azure AD Connect), MFA. Required for most Intune enterprise features.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🛡️</div>
+        <div class="card-title">Azure AD P2 Adds</div>
+        <div class="card-body">Identity Protection (risk-based Conditional Access), Privileged Identity Management (PIM — just-in-time admin access), Access Reviews. Advanced security features for high-compliance environments.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Intune Suite — Advanced Add-ons</div>
+    <p>Microsoft introduced the <strong>Intune Suite</strong> as premium add-ons beyond Plan 1:</p>
+    <ul class="bullet-list">
+      <li><strong>Remote Help:</strong> IT can remotely assist users directly through Intune portal. No third-party remote tools needed.</li>
+      <li><strong>Endpoint Privilege Management (EPM):</strong> Allow standard users to run specific apps with admin rights — without giving them full admin access.</li>
+      <li><strong>Advanced Endpoint Analytics:</strong> Deeper device performance and anomaly insights.</li>
+      <li><strong>Microsoft Tunnel:</strong> VPN gateway for mobile devices to access on-prem resources.</li>
+      <li><strong>Cloud PKI:</strong> Cloud-hosted certificate authority for Intune certificate deployment.</li>
+    </ul>
+
+    <div class="info-box info-orange">
+      <div class="box-title">⚠️ Common Real-World Issue</div>
+      <p>You configure a Conditional Access policy requiring device compliance, but some users are being blocked even on managed devices. Root cause: their accounts don't have Azure AD P1 license assigned. Without P1, Conditional Access doesn't evaluate for that user. Always check license assignment when Conditional Access behaves unexpectedly.</p>
+    </div>
+
+    <div class="section-heading">How to Assign Intune Licenses</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div>Go to <strong>admin.microsoft.com</strong> → Users → Active Users</div></li>
+      <li><div class="step-num">2</div><div>Select the user → Click <strong>Licenses and apps</strong></div></li>
+      <li><div class="step-num">3</div><div>Check the appropriate license (e.g., Microsoft 365 Business Premium)</div></li>
+      <li><div class="step-num">4</div><div>Save. License takes effect within minutes.</div></li>
+    </ol>
+    <div class="tip-block">
+      <div class="tip-icon">💡</div>
+      <div><strong>Pro Tip:</strong> Use group-based licensing in Azure AD for large organizations. Assign the license to a group, and every member of that group automatically gets the license. As users join/leave the group, licenses are assigned/removed automatically. Far better than manual assignment for 500+ users.</div>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 5</div>
+      <div class="qa-item">
+        <div class="qa-q">What license is required to use Microsoft Intune?</div>
+        <div class="qa-a">Intune is included in Microsoft 365 Business Premium, M365 E3, M365 E5, EMS E3, and EMS E5. It can also be purchased as a standalone Intune Plan 1 license. The specific features available depend on the license tier.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What features require Azure AD P2?</div>
+        <div class="qa-a">Azure AD P2 is needed for Identity Protection (risk-based Conditional Access), Privileged Identity Management (PIM for just-in-time admin roles), and Access Reviews. Basic Conditional Access only needs P1.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">A user says they can't enroll their device in Intune. What's the first thing you check?</div>
+        <div class="qa-a">I'd first check if the user has an Intune license assigned. Go to admin.microsoft.com or Azure AD, find the user, check their assigned licenses. Without an Intune license, device enrollment will fail with a "license not found" type error.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOPIC 6: Intune Portal Walkthrough -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="topic-section" id="topic6">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 06</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Intune Portal Walkthrough</div>
+        <div class="topic-subtitle">Every Menu, Every Section — Explained with Purpose</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Accessing the Portal</div>
+    <p>Go to <strong>portal.intune.microsoft.com</strong> (or intune.microsoft.com, or endpoint.microsoft.com — they all redirect). Sign in with your Global Admin or Intune Admin account. You'll land on the Home dashboard.</p>
+
+    <div class="info-box info-blue">
+      <div class="box-title">🔑 What You See on First Login</div>
+      <p>The portal has a left navigation panel with all major sections. A top bar shows your tenant name, notifications, and settings. The main area shows a dashboard with widgets. The portal is organized around the core management tasks: managing devices, managing apps, managing users, configuring policies, and viewing reports.</p>
+    </div>
+
+    <div class="section-heading">Left Navigation — Every Section Explained</div>
+
+    <div class="portal-item">
+      <div class="portal-icon">🏠</div>
+      <div>
+        <div class="portal-name">Home / Dashboard</div>
+        <div class="portal-desc">Your landing page. Shows summary widgets — device enrollment counts, compliance status, app installation status, recent alerts. Customizable. Good for a quick health check each morning.</div>
+      </div>
+    </div>
+
+    <div class="portal-item">
+      <div class="portal-icon">💻</div>
+      <div>
+        <div class="portal-name">Devices</div>
+        <div class="portal-desc">The heart of Intune. View all enrolled devices. Filter by platform (Windows, iOS, Android, macOS). See device details: enrollment date, last check-in, compliance status, assigned policies. You can remote wipe, sync, restart, and run remote actions from here. Sub-sections: All Devices, Monitor, Configuration, Compliance, Enrollment, Windows 365.</div>
+      </div>
+    </div>
+
+    <div class="portal-item">
+      <div class="portal-icon">📦</div>
+      <div>
+        <div class="portal-name">Apps</div>
+        <div class="portal-desc">Manage all application deployment. Add apps (Win32, Store, LOB, Web apps, M365 Apps). Assign apps to users or device groups with Required/Available/Uninstall intent. Monitor deployment status. Configure App Protection Policies (MAM) and App Configuration Policies here.</div>
+      </div>
+    </div>
+
+    <div class="portal-item">
+      <div class="portal-icon">👥</div>
+      <div>
+        <div class="portal-name">Groups</div>
+        <div class="portal-desc">This actually links to Azure AD Groups. All Intune policy targeting is done through Azure AD groups. Static groups (manual membership) and dynamic groups (auto-membership based on rules like device OS or user department).</div>
+      </div>
+    </div>
+
+    <div class="portal-item">
+      <div class="portal-icon">🔐</div>
+      <div>
+        <div class="portal-name">Endpoint Security</div>
+        <div class="portal-desc">Security-focused policies: Antivirus (Defender), Disk Encryption (BitLocker), Firewall, Endpoint Detection & Response (EDR), Attack Surface Reduction (ASR). Also: Security Baselines — pre-configured settings from Microsoft's security team. Critical for hardening devices.</div>
+      </div>
+    </div>
+
+    <div class="portal-item">
+      <div class="portal-icon">📊</div>
+      <div>
+        <div class="portal-name">Reports</div>
+        <div class="portal-desc">All reporting lives here. Device compliance reports, app deployment reports, enrollment status, update compliance, Endpoint Analytics (startup performance, reliability scores). Can export to CSV or connect to Log Analytics for advanced reporting in Azure Monitor or Power BI.</div>
+      </div>
+    </div>
+
+    <div class="portal-item">
+      <div class="portal-icon">👤</div>
+      <div>
+        <div class="portal-name">Users</div>
+        <div class="portal-desc">Links to Azure AD Users. View users, see their enrolled devices, assigned licenses, group memberships. Troubleshooting often starts here — find the user, see their devices and policy assignments.</div>
+      </div>
+    </div>
+
+    <div class="portal-item">
+      <div class="portal-icon">⚙️</div>
+      <div>
+        <div class="portal-name">Tenant Administration</div>
+        <div class="portal-desc">Intune-wide settings: Tenant enrollment settings, connector setup (Apple APNs, Google Play, JAMF, telecom), roles and scope tags, audit logs, Intune Data Warehouse, customization (company branding in Company Portal app), Terms of Use.</div>
+      </div>
+    </div>
+
+    <div class="portal-item">
+      <div class="portal-icon">🛠️</div>
+      <div>
+        <div class="portal-name">Troubleshooting + Support</div>
+        <div class="portal-desc">The most useful section for L1/L2. Enter any user's name to see their device enrollment status, policy assignment status, app assignment status — all in one view. This is your first stop for any user complaint. Also submit Microsoft support tickets from here.</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Key Sub-Sections Under Devices</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Sub-Section</th><th>What It Does</th></tr></thead>
+        <tbody>
+          <tr><td>All Devices</td><td>Master list of every enrolled device. Filter, search, click into individual device details.</td></tr>
+          <tr><td>Monitor</td><td>Enrollment failures, noncompliant devices, devices without compliance policy.</td></tr>
+          <tr><td>Configuration</td><td>Create and manage Configuration Profiles — the policies that configure device settings.</td></tr>
+          <tr><td>Compliance</td><td>Create compliance policies per platform. View compliance status across your fleet.</td></tr>
+          <tr><td>Enrollment</td><td>Configure enrollment methods — Autopilot, Apple ADE, Android Enterprise, enrollment restrictions.</td></tr>
+          <tr><td>Scripts</td><td>Deploy PowerShell scripts (Windows) or Shell scripts (macOS) to devices.</td></tr>
+          <tr><td>Remediations</td><td>Proactive Remediation — detect and fix issues automatically on Windows devices.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tip-block">
+      <div class="tip-icon">🚀</div>
+      <div><strong>Lab Action:</strong> Sign up for a free Microsoft 365 Developer Program account at developer.microsoft.com/microsoft-365/dev-program — this gives you a free 90-day M365 E5 tenant with Intune included. Spend 30 minutes just clicking through every section of the portal. Reading about it is one thing, seeing it is another. This is the most important lab exercise in Block 1.</div>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 6</div>
+      <div class="qa-item">
+        <div class="qa-q">A user calls saying their device isn't getting policies. Where in the Intune portal do you start troubleshooting?</div>
+        <div class="qa-a">I'd go to Troubleshooting + Support, search for the user, and review their device enrollment status, policy assignment, and compliance status — all on one screen. This gives me a complete picture without having to dig through multiple menus.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What's the difference between Endpoint Security policies and Configuration Profiles?</div>
+        <div class="qa-a">Configuration Profiles are general-purpose — they configure device settings like Wi-Fi, VPN, device restrictions, certificates. Endpoint Security policies are security-specific — Defender AV, BitLocker, Firewall, ASR rules. There's overlap, but Endpoint Security profiles are tuned for security scenarios with more focused settings.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOPIC 7: Tenant Setup -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="topic-section" id="topic7">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 07</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Tenant Setup — DNS, Domain, Admin Roles</div>
+        <div class="topic-subtitle">Setting Up Your Microsoft 365 Tenant for Intune</div>
+      </div>
+    </div>
+
+    <div class="section-heading">What is a Tenant?</div>
+    <p>A <strong>tenant</strong> is your organization's dedicated instance of Microsoft's cloud services. When your company subscribes to Microsoft 365, Microsoft creates a tenant — an isolated environment with your users, devices, data, and configurations. No other company can see or access your tenant.</p>
+    <p>Every tenant gets a default domain: <strong>yourcompanyname.onmicrosoft.com</strong>. But you'll want to add your real company domain (e.g., contoso.com) so users sign in with their real email addresses.</p>
+
+    <div class="section-heading">Step-by-Step Tenant Setup for Intune</div>
+    <ol class="steps">
+      <li><div class="step-num">1</div><div><strong>Purchase M365 Subscription</strong> — through Microsoft directly, a partner, or CSP. This creates your tenant. You'll get a Global Admin account with yourname@tenantname.onmicrosoft.com.</div></li>
+      <li><div class="step-num">2</div><div><strong>Add Custom Domain</strong> — Go to admin.microsoft.com → Settings → Domains → Add domain. Enter your company domain (e.g., contoso.com).</div></li>
+      <li><div class="step-num">3</div><div><strong>Verify Domain via DNS</strong> — Microsoft gives you a TXT record to add to your domain's DNS (at GoDaddy, Cloudflare, etc.). This proves you own the domain. Microsoft then verifies it automatically.</div></li>
+      <li><div class="step-num">4</div><div><strong>Add MX and other DNS Records</strong> — For Exchange Online email to work, add MX, CNAME, and SPF records that Microsoft provides. Users can then receive email at name@contoso.com.</div></li>
+      <li><div class="step-num">5</div><div><strong>Assign Licenses</strong> — Assign M365 licenses to users so they get access to Intune, Exchange, etc.</div></li>
+      <li><div class="step-num">6</div><div><strong>Configure Intune</strong> — Go to portal.intune.microsoft.com. Set MDM Authority to Intune (this was a manual step in older tenants; now auto-configured). Set up enrollment restrictions, company branding, etc.</div></li>
+      <li><div class="step-num">7</div><div><strong>Set MDM Scope</strong> — In Azure AD → Mobility (MDM and MAM) → Microsoft Intune — set the MDM User scope to All or a specific group. This controls which users can enroll devices.</div></li>
+    </ol>
+
+    <div class="section-heading">DNS Records You Need to Know</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Record Type</th><th>Purpose</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tag-blue">TXT</span></td><td>Domain verification — proves you own the domain</td><td>MS=ms12345678</td></tr>
+          <tr><td><span class="tag tag-green">MX</span></td><td>Email routing — tells internet where to deliver email for your domain</td><td>contoso-com.mail.protection.outlook.com</td></tr>
+          <tr><td><span class="tag tag-orange">CNAME</span></td><td>Autodiscover — helps Outlook auto-configure email settings</td><td>autodiscover → autodiscover.outlook.com</td></tr>
+          <tr><td><span class="tag tag-purple">TXT (SPF)</span></td><td>Email security — prevents email spoofing from your domain</td><td>v=spf1 include:spf.protection.outlook.com -all</td></tr>
+          <tr><td><span class="tag tag-blue">CNAME (Intune)</span></td><td>Simplifies enrollment — EnterpriseEnrollment CNAME for Windows</td><td>enterpriseenrollment → enterpriseenrollment.manage.microsoft.com</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box info-blue">
+      <div class="box-title">📋 Intune CNAME Records for Auto-Enrollment</div>
+      <p>For Windows devices to auto-detect and enroll in Intune when a user enters their email during OOBE (Out-of-Box Experience), you need to create CNAME DNS records: <br/>
+      <strong>enterpriseenrollment.yourdomain.com</strong> → enterpriseenrollment.manage.microsoft.com<br/>
+      <strong>enterpriseregistration.yourdomain.com</strong> → enterpriseregistration.windows.net<br/>
+      Without these, users need to manually enter the Intune server URL during enrollment — not a great experience.</p>
+    </div>
+
+    <div class="section-heading">MDM Authority — Critical Setting</div>
+    <p>The <strong>MDM Authority</strong> tells the tenant which MDM solution is in charge. Options are Intune or SCCM (for co-management). You cannot easily switch this after devices are enrolled, so getting it right from day one matters.</p>
+    <ul class="bullet-list">
+      <li><strong>Intune MDM Authority:</strong> For Intune-only environments.</li>
+      <li><strong>SCCM MDM Authority:</strong> For co-management (SCCM manages, Intune assists).</li>
+      <li><strong>New tenants:</strong> Auto-set to Intune. No action needed.</li>
+    </ul>
+
+    <div class="realworld">
+      <div class="realworld-header">
+        <div class="realworld-icon">🔧</div>
+        <div class="realworld-label">Real-World Scenario</div>
+      </div>
+      <p><strong>Problem:</strong> Users at a newly onboarded company complain that when they try to enroll their Windows PCs, they have to manually type a long server URL. Other users can't figure out how to do it and give up.<br/>
+      <strong>Root cause:</strong> Missing EnterpriseEnrollment CNAME DNS record. Without it, Windows can't auto-discover the Intune enrollment server.<br/>
+      <strong>Fix:</strong> Go to your domain's DNS registrar → add CNAME record → enterpriseenrollment → enterpriseenrollment.manage.microsoft.com → wait 24-48hrs for DNS propagation. Enrollment is now seamless — users just enter their email, Windows does the rest.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 7</div>
+      <div class="qa-item">
+        <div class="qa-q">What DNS records are needed for Intune to work properly?</div>
+        <div class="qa-a">For domain verification: a TXT record. For email: MX and CNAME autodiscover records. For seamless Windows enrollment: CNAME records for enterpriseenrollment and enterpriseregistration pointing to Microsoft's enrollment service. For email security: SPF TXT record.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What is MDM Authority and why does it matter?</div>
+        <div class="qa-a">MDM Authority determines which management platform is in charge of device management — Intune or SCCM. It's a critical tenant-level setting that can't easily be changed after devices are enrolled. For Intune-only environments, it should be set to Intune. For co-management, it's more nuanced.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- TOPIC 8: Azure AD Roles vs Intune Roles -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="topic-section" id="topic8">
+    <div class="topic-header">
+      <div class="topic-number">TOPIC 08</div>
+      <div class="topic-title-wrap">
+        <div class="topic-title">Azure AD Roles vs Intune Roles</div>
+        <div class="topic-subtitle">Understanding Access Control — Who Can Do What</div>
+      </div>
+    </div>
+
+    <div class="section-heading">Why Two Role Systems?</div>
+    <p>Intune runs on top of Azure AD. Azure AD has its own role system (RBAC) for managing the Azure AD service and tenant. Intune has a separate RBAC system for managing device and app management tasks. They're different systems that overlap in some areas — which confuses many new admins.</p>
+
+    <div class="section-heading">Azure AD Roles (That Affect Intune)</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Azure AD Role</th><th>What It Can Do in Intune Context</th><th>Use Case</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-red">Global Administrator</span></td>
+            <td>Full access to everything — Azure AD, Intune, M365, billing. Can assign all roles.</td>
+            <td>Break-glass emergency account only. Never use for daily work.</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-orange">Intune Administrator</span></td>
+            <td>Full Intune access. Cannot manage Azure AD itself (users, groups, Conditional Access).</td>
+            <td>Your dedicated Intune admin. Best fit for most endpoint admins.</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-blue">Conditional Access Administrator</span></td>
+            <td>Create/modify Conditional Access policies in Azure AD. Works with Intune compliance data.</td>
+            <td>Security team member who manages access control policies.</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-blue">Security Reader</span></td>
+            <td>Read-only view of Intune security data, Defender data, compliance reports.</td>
+            <td>SOC analysts who need visibility without making changes.</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-green">Help Desk Administrator</span></td>
+            <td>Can reset passwords, unlock accounts, view user details. Limited Intune device actions.</td>
+            <td>L1 helpdesk staff handling basic user issues.</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-purple">Cloud Device Administrator</span></td>
+            <td>Can enable/disable devices, delete devices, read BitLocker keys.</td>
+            <td>Admins managing device states without full Intune access.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">Intune-Specific RBAC Roles</div>
+    <p>Within Intune, there's a separate RBAC system. These roles control what someone can do <em>inside</em> Intune — regardless of their Azure AD role (except Global Admin and Intune Admin, which bypass Intune RBAC).</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Intune Role</th><th>Permissions</th><th>Who Gets This</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Intune Role Administrator</strong></td><td>Create and assign Intune roles and scope tags</td><td>Senior admin managing role assignments</td></tr>
+          <tr><td><strong>Application Manager</strong></td><td>Manage apps, app policies, app configs. Cannot manage devices or policies.</td><td>App deployment team</td></tr>
+          <tr><td><strong>Policy and Profile Manager</strong></td><td>Create configuration profiles, compliance policies, scripts</td><td>Config management team</td></tr>
+          <tr><td><strong>Read Only Operator</strong></td><td>View everything, change nothing</td><td>Auditors, managers, NOC staff</td></tr>
+          <tr><td><strong>Help Desk Operator</strong></td><td>View device info, run remote actions (wipe, restart, sync). Cannot create policies.</td><td>L1 support staff</td></tr>
+          <tr><td><strong>Endpoint Security Manager</strong></td><td>Manage security baselines, Defender, BitLocker, Conditional Access (in Intune context)</td><td>Security-focused admin</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section-heading">Scope Tags — Restricting by Geography or Group</div>
+    <p><strong>Scope Tags</strong> are one of the most important and underutilized Intune RBAC features. They let you limit what an admin can SEE and MANAGE to a specific subset of devices/users.</p>
+    <div class="realworld">
+      <div class="realworld-header">
+        <div class="realworld-icon">🌏</div>
+        <div class="realworld-label">Real-World Example of Scope Tags</div>
+      </div>
+      <p><strong>Company:</strong> Global organization with offices in India, USA, and UK.<br/>
+      <strong>Problem:</strong> The India IT team should only manage India devices. The USA team should only manage USA devices. But everyone shares the same Intune tenant.<br/>
+      <strong>Solution:</strong> Create scope tags: "India", "USA", "UK". Tag all India devices with the "India" scope tag. Assign the India IT team the Intune Policy and Profile Manager role scoped to the "India" scope tag. Now when the India admin logs into Intune, they only see India devices. They can't accidentally wipe or modify a USA device.<br/>
+      <strong>Result:</strong> Delegated administration with data isolation — without creating separate tenants.</p>
+    </div>
+
+    <div class="section-heading">Key Differences Summary</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Aspect</th><th>Azure AD Roles</th><th>Intune RBAC Roles</th></tr></thead>
+        <tbody>
+          <tr><td>Where assigned</td><td>Azure AD portal (portal.azure.com)</td><td>Intune portal (portal.intune.microsoft.com)</td></tr>
+          <tr><td>Scope</td><td>Tenant-wide (all Azure AD resources)</td><td>Can be scoped with Scope Tags to subsets of devices/policies</td></tr>
+          <tr><td>Granularity</td><td>Less granular (predefined roles)</td><td>More granular (custom roles possible)</td></tr>
+          <tr><td>Override</td><td>Global Admin and Intune Admin bypass Intune RBAC</td><td>Only applies to non-admin Azure AD roles</td></tr>
+          <tr><td>Who manages</td><td>Azure AD admins, usually Global Admin</td><td>Intune Role Administrator or Global Admin</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box info-green">
+      <div class="box-title">✅ Best Practice</div>
+      <p>Follow the <strong>Principle of Least Privilege</strong>. Don't give everyone Global Admin. L1 helpdesk gets Intune Help Desk Operator. L2 gets Policy and Profile Manager. Senior admin gets Intune Administrator (Azure AD role). Create custom Intune roles for teams with specific needs. Use scope tags to prevent cross-regional accidents. This is what interviewers want to hear when they ask about access control.</p>
+    </div>
+
+    <div class="interview-section">
+      <div class="interview-header">🎤 Interview Questions — Topic 8</div>
+      <div class="qa-item">
+        <div class="qa-q">What's the difference between the Global Administrator role and the Intune Administrator role?</div>
+        <div class="qa-a">Global Admin has unrestricted access to everything in the tenant — Azure AD, M365, billing, Intune. Intune Administrator has full Intune access but cannot manage Azure AD itself (users, groups, Conditional Access). For daily Intune administration, Intune Administrator is the appropriate role — Global Admin is too powerful and a security risk for routine use.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What are Scope Tags in Intune and when would you use them?</div>
+        <div class="qa-a">Scope Tags restrict what an Intune admin can see and manage to a specific subset of devices and policies. I'd use them in multi-region or multi-department environments to ensure each IT team can only manage their own devices — preventing accidental changes to other regions' configurations.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">Can you create custom roles in Intune?</div>
+        <div class="qa-a">Yes. Intune allows creating custom roles with specific permissions tailored to your organization's needs. For example, you could create a "App Deployment Only" role that lets someone push apps but not touch device configuration policies. Custom roles are scoped using Scope Tags.</div>
+      </div>
+      <div class="qa-item">
+        <div class="qa-q">What role would you give a helpdesk technician who needs to wipe lost devices?</div>
+        <div class="qa-a">I'd give them the Intune Help Desk Operator role. This allows them to view device information and perform remote actions like wipe, restart, and sync — but they can't create or modify policies. Combined with appropriate Scope Tags to limit them to their region's devices.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Block Complete Banner -->
+  <div style="background: linear-gradient(135deg, rgba(16,185,129,0.08), rgba(6,182,212,0.08)); border: 1px solid rgba(16,185,129,0.25); border-radius: 16px; padding: 32px; margin-top: 48px; text-align: center;">
+    <div style="font-size: 32px; margin-bottom: 12px;">🎉</div>
+    <div style="font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--heading); margin-bottom: 10px;">Block 1 Complete!</div>
+    <div style="color: var(--text2); font-size: 14px; max-width: 500px; margin: 0 auto 20px; line-height: 1.6;">You've covered all 8 foundational topics. You now understand WHY Intune exists, how it fits into Microsoft's ecosystem, what licensing you need, and how to navigate the portal.</div>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <div style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 8px 16px; font-size: 13px; color: var(--accent2); font-family: 'IBM Plex Mono', monospace;">✅ 8 Topics Done</div>
+      <div style="background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.2); border-radius: 8px; padding: 8px 16px; font-size: 13px; color: #a78bfa; font-family: 'IBM Plex Mono', monospace;">⬡ Block 2 Next: Azure AD Essentials</div>
+      <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); border-radius: 8px; padding: 8px 16px; font-size: 13px; color: var(--green); font-family: 'IBM Plex Mono', monospace;">📋 121 Topics Remaining</div>
+    </div>
+  </div>
+
+</div><!-- end .content -->
+</div><!-- end #main -->
+
+<!-- Scroll to top -->
+<a href="#" class="scroll-top" title="Back to top">↑</a>
+
+<script>
+// Highlight active nav item on scroll
+const sections = document.querySelectorAll('.topic-section');
+const navItems = document.querySelectorAll('.nav-item[href]');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      navItems.forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + id) {
+          item.classList.add('active');
+        }
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -60% 0px' });
+
+sections.forEach(s => observer.observe(s));
+
+// Smooth scroll for nav items
+navItems.forEach(item => {
+  item.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(item.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 8: RBAC, Scope Tags &amp; Audit Logs</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#060a0e;--bg2:#090e18;--bg3:#0c1220;
+    --sb:#050912;--border:#131d30;
+    --acc:#0ea5e9;--acc2:#38bdf8;--acc3:#7dd3fc;
+    --green:#22c55e;--purple:#a78bfa;--orange:#f97316;
+    --red:#ef4444;--yellow:#eab308;--teal:#14b8a6;--pink:#ec4899;
+    --text:#e0f2fe;--text2:#64748b;--text3:#334155;
+    --h:#f0f9ff;--card:#070c14;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:300;display:flex;min-height:100vh;line-height:1.75;}
+  #sb{width:285px;min-width:285px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+  #sb::-webkit-scrollbar{width:3px;}
+  #sb::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .shd{padding:23px 20px 15px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#050912,#08101e);}
+  .slo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--h);letter-spacing:-.5px;display:flex;align-items:center;gap:10px;}
+  .lic{width:34px;height:34px;background:linear-gradient(135deg,var(--acc),var(--teal));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(14,165,233,.35);}
+  .ssu{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .bbg{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(20,184,166,.1));border:1px solid rgba(14,165,233,.28);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-top:10px;letter-spacing:.5px;}
+  .snv{padding:12px 0;flex:1;}
+  .nlb{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 20px 4px;font-family:'IBM Plex Mono',monospace;}
+  .ni{display:flex;align-items:flex-start;gap:9px;padding:8px 20px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none;color:var(--text2);font-size:12.5px;line-height:1.4;}
+  .ni:hover{background:rgba(14,165,233,.07);color:var(--text);border-left-color:var(--acc);}
+  .ni.active{background:rgba(14,165,233,.11);color:var(--acc2);border-left-color:var(--acc);}
+  .nn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;margin-top:1px;}
+  .ni.active .nn{color:var(--acc);}
+  .plk{display:flex;align-items:center;gap:7px;padding:7px 11px;font-size:11px;color:var(--text3);text-decoration:none;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;margin:0 12px 4px;transition:all .2s;}
+  .plk:hover{color:var(--text2);border-color:rgba(14,165,233,.22);}
+  .sft{padding:13px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .pbar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .pfill{height:100%;width:57%;background:linear-gradient(90deg,var(--acc),var(--teal));border-radius:2px;animation:pg 2s ease-in-out infinite alternate;}
+  @keyframes pg{from{box-shadow:0 0 4px var(--acc);}to{box-shadow:0 0 14px var(--teal);}}
+  #main{margin-left:285px;flex:1;min-height:100vh;}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(6,10,14,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 46px;display:flex;align-items:center;justify-content:space-between;}
+  .bcrumb{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:7px;}
+  .bcrumb span{color:var(--acc2);}
+  .tcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 13px;}
+  .cont{padding:50px 46px 80px;max-width:980px;}
+  /* Hero */
+  .hero{margin-bottom:56px;position:relative;padding:44px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(14,165,233,.12) 0%,transparent 70%);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(20,184,166,.08) 0%,transparent 70%);border-radius:50%;}
+  .htag{display:inline-flex;align-items:center;gap:6px;background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.25);border-radius:20px;padding:5px 14px;font-size:10.5px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;letter-spacing:1px;}
+  .htitle{font-family:'Syne',sans-serif;font-size:39px;font-weight:800;color:var(--h);line-height:1.1;letter-spacing:-1px;margin-bottom:13px;}
+  .htitle span{background:linear-gradient(135deg,var(--acc),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hdesc{font-size:14.5px;color:var(--text2);max-width:620px;line-height:1.8;}
+  .hmeta{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .hmi{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);}
+  .dot.g{background:var(--green);box-shadow:0 0 8px var(--green);}
+  .dot.p{background:var(--purple);box-shadow:0 0 8px var(--purple);}
+  /* Topic */
+  .ts{margin-bottom:68px;scroll-margin-top:66px;opacity:0;animation:fu .5s ease forwards;}
+  .ts:nth-child(1){animation-delay:.05s;}.ts:nth-child(2){animation-delay:.1s;}.ts:nth-child(3){animation-delay:.15s;}.ts:nth-child(4){animation-delay:.2s;}.ts:nth-child(5){animation-delay:.25s;}
+  @keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .th{display:flex;align-items:flex-start;gap:15px;margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--border);}
+  .tnum{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--acc);background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.2);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+  .ttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--h);letter-spacing:-.5px;line-height:1.2;margin-bottom:4px;}
+  .tsub{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .sh{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--h);margin:28px 0 10px;display:flex;align-items:center;gap:10px;}
+  .sh::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,var(--acc),var(--teal));border-radius:2px;flex-shrink:0;}
+  p{color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:12px;}
+  p strong{color:var(--text);font-weight:500;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(14,165,233,.1);color:var(--acc2);padding:2px 6px;border-radius:4px;border:1px solid rgba(14,165,233,.18);}
+  /* Cards */
+  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:17px;transition:border-color .2s,transform .2s;}
+  .card:hover{border-color:rgba(14,165,233,.3);transform:translateY(-2px);}
+  .cico{font-size:21px;margin-bottom:8px;}
+  .ctit{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:var(--h);margin-bottom:6px;}
+  .cbod{font-size:12.5px;color:var(--text2);line-height:1.6;}
+  /* Table */
+  .tw{overflow-x:auto;margin:16px 0;border-radius:11px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+  th{padding:12px 15px;text-align:left;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--h);letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 15px;color:var(--text2);border-bottom:1px solid rgba(19,29,48,.5);vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(14,165,233,.02);}
+  /* Tags */
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+  .ts2{background:rgba(14,165,233,.15);color:var(--acc2);border:1px solid rgba(14,165,233,.2);}
+  .tg{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.2);}
+  .tp{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.2);}
+  .to{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.2);}
+  .tr{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.2);}
+  .ty{background:rgba(234,179,8,.15);color:var(--yellow);border:1px solid rgba(234,179,8,.2);}
+  .ttl2{background:rgba(20,184,166,.15);color:var(--teal);border:1px solid rgba(20,184,166,.2);}
+  /* Info boxes */
+  .ib{border-radius:10px;padding:16px 18px;margin:16px 0;border-left:3px solid;}
+  .ib .bt{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:6px;}
+  .ib p{margin:0;font-size:13.5px;color:var(--text2);}
+  .ibs{background:rgba(14,165,233,.06);border-color:var(--acc);}
+  .ibs .bt{color:var(--acc2);}
+  .ibg{background:rgba(34,197,94,.06);border-color:var(--green);}
+  .ibg .bt{color:var(--green);}
+  .ibp{background:rgba(167,139,250,.06);border-color:var(--purple);}
+  .ibp .bt{color:var(--purple);}
+  .ibo{background:rgba(249,115,22,.06);border-color:var(--orange);}
+  .ibo .bt{color:var(--orange);}
+  .ibr{background:rgba(239,68,68,.06);border-color:var(--red);}
+  .ibr .bt{color:var(--red);}
+  .ibt{background:rgba(20,184,166,.06);border-color:var(--teal);}
+  .ibt .bt{color:var(--teal);}
+  /* Steps */
+  .steps{list-style:none;margin:13px 0;display:flex;flex-direction:column;gap:10px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .sn{min-width:25px;height:25px;background:linear-gradient(135deg,var(--acc),var(--teal));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .steps li strong{color:var(--text);}
+  /* Bullets */
+  .bl{list-style:none;margin:10px 0 13px;display:flex;flex-direction:column;gap:7px;}
+  .bl li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .bl li::before{content:'▹';color:var(--acc);font-size:13px;flex-shrink:0;margin-top:2px;}
+  .bl li strong{color:var(--text);}
+  /* Realworld */
+  .rw{background:linear-gradient(135deg,rgba(34,197,94,.04),rgba(14,165,233,.04));border:1px solid rgba(34,197,94,.18);border-radius:12px;padding:19px;margin:20px 0;}
+  .rwh{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .rwi{font-size:18px;}
+  .rwl{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--green);}
+  .rw p{color:var(--text2);font-size:13px;margin:0;line-height:1.7;}
+  .rw p+p{margin-top:8px;}
+  /* Interview */
+  .iq{background:linear-gradient(135deg,rgba(167,139,250,.04),rgba(14,165,233,.04));border:1px solid rgba(167,139,250,.18);border-radius:13px;padding:21px;margin:24px 0;}
+  .iqh{font-family:'Syne',sans-serif;font-weight:700;font-size:14.5px;color:var(--purple);margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+  .qa{margin-bottom:14px;}
+  .qa:last-child{margin-bottom:0;}
+  .qq{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:4px;display:flex;gap:8px;}
+  .qq::before{content:'Q.';color:var(--purple);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .qans{font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.65;display:flex;gap:8px;}
+  .qans::before{content:'A.';color:var(--acc2);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  /* Tip */
+  .tip{display:flex;gap:12px;align-items:flex-start;background:rgba(234,179,8,.05);border:1px solid rgba(234,179,8,.18);border-radius:9px;padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.65;}
+  .tpic{font-size:16px;flex-shrink:0;}
+  /* Code */
+  .code{background:#030609;border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#7dd3fc;overflow-x:auto;line-height:1.75;}
+  .cm{color:var(--text3);}
+  .kw{color:#f472b6;}
+  .st{color:#86efac;}
+  .hl{color:var(--acc2);}
+  .vl{color:#fcd34d;}
+  /* RBAC permission grid */
+  .perm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:11px;margin:16px 0;}
+  .perm-card{border-radius:10px;padding:14px;border:1px solid var(--border);background:var(--card);}
+  .perm-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--h);margin-bottom:7px;display:flex;align-items:center;gap:8px;}
+  .perm-level{font-size:10px;font-family:'IBM Plex Mono',monospace;padding:2px 6px;border-radius:4px;}
+  .pl-high{background:rgba(239,68,68,.15);color:var(--red);}
+  .pl-med{background:rgba(234,179,8,.15);color:var(--yellow);}
+  .pl-low{background:rgba(34,197,94,.15);color:var(--green);}
+  .perm-body{font-size:12px;color:var(--text2);line-height:1.6;}
+  /* Scope tag visual */
+  .scope-visual{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0;}
+  .scope-region{border-radius:10px;padding:15px;border:1px solid;}
+  .sr-india{background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.22);}
+  .sr-us{background:rgba(14,165,233,.05);border-color:rgba(14,165,233,.22);}
+  .sr-uk{background:rgba(167,139,250,.05);border-color:rgba(167,139,250,.22);}
+  .sr-global{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.22);}
+  .sr-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--h);margin-bottom:6px;}
+  .sr-body{font-size:12px;color:var(--text2);line-height:1.6;}
+  /* Audit log visual */
+  .audit-entry{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:14px;margin-bottom:10px;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+  .ae-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+  .ae-time{color:var(--text3);font-size:11px;}
+  .ae-user{color:var(--acc2);}
+  .ae-action{color:var(--green);}
+  .ae-resource{color:var(--orange);}
+  .ae-body{font-size:11.5px;color:var(--text2);line-height:1.6;}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0;}
+  .stup{position:fixed;bottom:26px;right:26px;width:40px;height:40px;background:linear-gradient(135deg,var(--acc),var(--teal));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;box-shadow:0 4px 18px rgba(14,165,233,.3);border:none;color:white;z-index:200;text-decoration:none;transition:transform .2s;}
+  .stup:hover{transform:translateY(-3px);}
+  @media(max-width:768px){#sb{transform:translateX(-100%);}#main{margin-left:0;}.cont{padding:26px 16px;}.topbar{padding:11px 16px;}.htitle{font-size:26px;}}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="shd">
+    <div class="slo"><div class="lic">🛡️</div>Intune Mastery</div>
+    <div class="ssu">Complete Learning Series</div>
+    <div class="bbg">⬡ Block 8 of 14 — RBAC &amp; Audit</div>
+  </div>
+  <div class="snv">
+    <div class="nlb">Block 8 Topics</div>
+    <a href="#t76" class="ni active"><span class="nn">76</span>Intune RBAC — Built-in Roles</a>
+    <a href="#t77" class="ni"><span class="nn">77</span>Custom Roles — Creating &amp; Assigning</a>
+    <a href="#t78" class="ni"><span class="nn">78</span>Scope Tags — Delegated Administration</a>
+    <a href="#t79" class="ni"><span class="nn">79</span>Delegated Administration Scenarios</a>
+    <a href="#t80" class="ni"><span class="nn">80</span>Audit Logs — Who Did What &amp; When</a>
+    <div class="nlb" style="margin-top:12px;">Previous Blocks</div>
+    <a href="intune-block1-foundations.html" class="plk">← Block 1: Foundations</a>
+    <a href="intune-block2-azuread.html" class="plk">← Block 2: Azure AD</a>
+    <a href="intune-block3-enrollment.html" class="plk">← Block 3: Enrollment</a>
+    <a href="intune-block4-configprofiles.html" class="plk">← Block 4: Config Profiles</a>
+    <a href="intune-block5-compliance.html" class="plk">← Block 5: Compliance</a>
+    <a href="intune-block6-appmanagement.html" class="plk">← Block 6: App Management</a>
+    <a href="intune-block7-endpointsecurity.html" class="plk">← Block 7: Endpoint Security</a>
+    <div class="ni" style="opacity:.4;cursor:default;font-size:11.5px;"><span class="nn">→</span>Block 9: Windows Autopatch (Next)</div>
+  </div>
+  <div class="sft">
+    <div>Overall Progress</div>
+    <div style="color:var(--acc2);margin:2px 0;">Block 8 / 14 — 80 Topics Done</div>
+    <div class="pbar"><div class="pfill"></div></div>
+  </div>
+</nav>
+
+<div id="main">
+<div class="topbar">
+  <div class="bcrumb">Intune Mastery <span>›</span> Block 8 <span>›</span> RBAC, Scope Tags &amp; Audit Logs</div>
+  <div class="tcount">5 Topics · ~2 Hours</div>
+</div>
+<div class="cont">
+
+  <div class="hero">
+    <div class="htag">🔑 BLOCK 8 · RBAC, SCOPE TAGS &amp; AUDIT</div>
+    <h1 class="htitle">Who Can Do<br/><span>What to Which Devices</span></h1>
+    <p class="hdesc">Role-Based Access Control (RBAC) in Intune determines who can manage what — from full Intune admins down to read-only helpdesk staff. Scope Tags add a geographic or departmental isolation layer so admins in one region can't accidentally touch devices in another. And Audit Logs give you the full paper trail of every action taken in your tenant. This block is critical for enterprise governance and compliance.</p>
+    <div class="hmeta">
+      <div class="hmi"><div class="dot"></div>5 Deep Topics</div>
+      <div class="hmi"><div class="dot g"></div>Custom Role Workshop</div>
+      <div class="hmi"><div class="dot p"></div>Real Delegation Scenarios</div>
+    </div>
+  </div>
+
+  <!-- T76 -->
+  <section class="ts" id="t76">
+    <div class="th"><div class="tnum">TOPIC 76</div>
+      <div><div class="ttl">Intune RBAC — Built-in Roles Explained</div>
+      <div class="tsub">The right access for the right people — understanding every built-in role</div></div>
+    </div>
+
+    <div class="sh">What Is RBAC in Intune?</div>
+    <p><strong>Role-Based Access Control (RBAC)</strong> in Intune determines what actions a signed-in admin can perform and which objects they can see in the Intune portal. Without RBAC, every admin would need to be a Global Admin — a serious security risk. RBAC lets you give people exactly the permissions they need and nothing more — the <strong>Principle of Least Privilege</strong>.</p>
+    <p>Intune RBAC works independently from Azure AD roles. A user needs both: an <strong>Azure AD role</strong> (like Intune Administrator) to access Intune at all, and an <strong>Intune RBAC role assignment</strong> to control what they can do once inside. Exception: Global Admin and Intune Administrator (Azure AD roles) bypass all Intune RBAC restrictions and have full access.</p>
+
+    <div class="sh">Built-in Intune Roles — Complete Reference</div>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr><th>Role Name</th><th>What They Can Do</th><th>What They Cannot Do</th><th>Who Gets This</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Intune Role Administrator</strong></td>
+            <td>Create, modify, delete, and assign Intune roles. Manage scope tags. View all Intune configuration.</td>
+            <td>Cannot manage devices, apps, or policies directly.</td>
+            <td>Senior IT admin responsible for role governance. Usually just 1–2 people.</td>
+          </tr>
+          <tr>
+            <td><strong>Help Desk Operator</strong></td>
+            <td>View device/user details. Perform device remote actions: wipe, retire, sync, remote lock, reset passcode, restart. View app install status. View compliance status.</td>
+            <td>Cannot create or modify policies, compliance rules, apps, or enrollment configurations. Cannot view BitLocker keys (without additional permission).</td>
+            <td>L1/L2 helpdesk staff who handle day-to-day user support tickets.</td>
+          </tr>
+          <tr>
+            <td><strong>Application Manager</strong></td>
+            <td>Create, modify, assign, and delete apps. Manage app configuration policies. Manage app protection policies (MAM). View device and user information (read-only).</td>
+            <td>Cannot manage device compliance, configuration profiles, enrollment settings, or endpoint security policies.</td>
+            <td>App deployment team — manages the app catalog without access to device policy management.</td>
+          </tr>
+          <tr>
+            <td><strong>Policy and Profile Manager</strong></td>
+            <td>Create, modify, assign, and delete configuration profiles, compliance policies, terms of use. Run scripts. View device and user information.</td>
+            <td>Cannot manage apps, endpoint security (Defender, BitLocker, ASR), or enrollment configurations. Cannot perform device remote actions.</td>
+            <td>Configuration management team — handles policy deployment but not apps or security hardening.</td>
+          </tr>
+          <tr>
+            <td><strong>Endpoint Security Manager</strong></td>
+            <td>Manage all Endpoint Security policies (AV, BitLocker, Firewall, ASR, EDR, Account Protection). Manage Security Baselines. View Secure Score. Manage Conditional Access in Intune context.</td>
+            <td>Cannot manage general configuration profiles, apps, or enrollment settings.</td>
+            <td>Security team / SOC analyst who focuses on hardening without touching general device management.</td>
+          </tr>
+          <tr>
+            <td><strong>Read Only Operator</strong></td>
+            <td>View everything in Intune — all devices, apps, policies, reports, compliance status. Cannot modify anything.</td>
+            <td>Cannot create, modify, or delete any Intune object. Cannot perform remote actions on devices.</td>
+            <td>Auditors, managers, NOC staff, compliance officers who need visibility without change capability.</td>
+          </tr>
+          <tr>
+            <td><strong>School Administrator</strong></td>
+            <td>Manage groups, apps, and devices within Intune for Education context.</td>
+            <td>Cannot manage enterprise Intune features outside the education scope.</td>
+            <td>Education-specific — IT staff in schools using Intune for Education.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">RBAC Permission Categories</div>
+    <p>Each Intune role is built from a combination of permissions across these categories:</p>
+    <div class="perm-grid">
+      <div class="perm-card">
+        <div class="perm-title"><span class="perm-level pl-high">HIGH</span> Device Actions</div>
+        <div class="perm-body">Remote wipe, factory reset, retire, remote lock, reset passcode, BitLocker key rotation, collect diagnostics. High impact — can destroy data or lock users out.</div>
+      </div>
+      <div class="perm-card">
+        <div class="perm-title"><span class="perm-level pl-high">HIGH</span> Policy Management</div>
+        <div class="perm-body">Create/edit/delete configuration profiles, compliance policies, endpoint security policies, scripts. Changes affect thousands of devices.</div>
+      </div>
+      <div class="perm-card">
+        <div class="perm-title"><span class="perm-level pl-med">MED</span> App Management</div>
+        <div class="perm-body">Deploy and remove apps, manage app protection policies, app configuration. Can install or remove software across the fleet.</div>
+      </div>
+      <div class="perm-card">
+        <div class="perm-title"><span class="perm-level pl-med">MED</span> Enrollment</div>
+        <div class="perm-body">Configure enrollment methods, enrollment restrictions, Autopilot profiles, CNAME settings. Controls how new devices join Intune.</div>
+      </div>
+      <div class="perm-card">
+        <div class="perm-title"><span class="perm-level pl-low">LOW</span> Read Permissions</div>
+        <div class="perm-body">View devices, users, policies, reports, app status, compliance. No change capability. Safe to grant broadly for monitoring and troubleshooting.</div>
+      </div>
+      <div class="perm-card">
+        <div class="perm-title"><span class="perm-level pl-low">LOW</span> Remote Sync</div>
+        <div class="perm-body">Trigger device sync to refresh policies. Low risk — just accelerates the normal check-in cycle. Good to grant helpdesk for troubleshooting.</div>
+      </div>
+    </div>
+
+    <div class="sh">How RBAC Assignment Works</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>A <strong>Role</strong> defines what actions are allowed (the permission set).</div></li>
+      <li><div class="sn">2</div><div>A <strong>Role Assignment</strong> links that role to specific <strong>members</strong> (who has the role) and specific <strong>scope groups</strong> (which devices/users they can manage).</div></li>
+      <li><div class="sn">3</div><div>The <strong>Members</strong> are Azure AD groups containing the admin users (e.g., "HelpDesk Staff" group).</div></li>
+      <li><div class="sn">4</div><div>The <strong>Scope (Groups)</strong> are Azure AD groups of devices or users that this role assignment can manage (e.g., "India Devices" group).</div></li>
+      <li><div class="sn">5</div><div><strong>Scope Tags</strong> further restrict visibility — the admin only sees Intune objects tagged with their scope tag (covered in Topic 78).</div></li>
+    </ol>
+
+    <div class="ib ibs">
+      <div class="bt">💡 Role Assignment vs Scope Tags — Two Layers</div>
+      <p>Role Assignment scope groups control which <strong>devices and users</strong> the admin can take action on (e.g., can only wipe India devices).<br/>
+      Scope Tags control which <strong>Intune objects</strong> (policies, apps, profiles) the admin can see and manage.<br/>
+      Both work together — an admin scoped to India can only: (a) act on India devices, AND (b) see India-tagged policies. Full isolation requires configuring both correctly.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 76</div>
+      <div class="qa"><div class="qq">What is the difference between the Help Desk Operator and Policy and Profile Manager roles in Intune?</div>
+      <div class="qans">Help Desk Operator can perform device remote actions (wipe, sync, remote lock, restart) and view device/user information, but cannot create or modify policies. Policy and Profile Manager can create and manage configuration profiles, compliance policies, and scripts, but cannot perform device remote actions or manage apps. Helpdesk handles day-to-day user support; Policy Manager handles configuration management.</div></div>
+      <div class="qa"><div class="qq">Does a user with the Intune Role Administrator role in Intune bypass all RBAC restrictions?</div>
+      <div class="qans">No. The Intune Role Administrator is a built-in Intune RBAC role that only allows managing roles and scope tags — it doesn't bypass other restrictions. What bypasses Intune RBAC entirely is having the Global Administrator or Intune Administrator Azure AD role — these Azure AD roles have full Intune access regardless of Intune RBAC assignments. The Intune Role Administrator role is specifically for governing who can assign roles within Intune.</div></div>
+      <div class="qa"><div class="qq">An auditor needs to review all Intune configurations but must not be able to change anything. Which role do you assign?</div>
+      <div class="qans">Read Only Operator. This built-in role provides full read access to all Intune objects — devices, apps, policies, compliance reports, enrollment configurations — with absolutely no ability to create, modify, delete, or perform remote actions. It's the ideal role for auditors, compliance officers, and managers who need visibility without change capability.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T77 -->
+  <section class="ts" id="t77">
+    <div class="th"><div class="tnum">TOPIC 77</div>
+      <div><div class="ttl">Custom Roles — Creating &amp; Assigning</div>
+      <div class="tsub">When built-in roles don't fit — building purpose-built permission sets</div></div>
+    </div>
+
+    <div class="sh">When Built-in Roles Aren't Enough</div>
+    <p>Built-in roles cover common scenarios well, but real enterprise IT teams often have specialized needs that don't map cleanly to built-in roles. Custom roles let you combine <strong>exactly the permissions you need</strong> — no more, no less — for specific teams or workflows.</p>
+
+    <div class="sh">Real Scenarios Where Custom Roles Are Needed</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🚑</div>
+        <div class="ctit">Healthcare IT Helpdesk</div>
+        <div class="cbod">Needs: view device details, remote lock lost tablets, collect diagnostics, view compliance. Does NOT need: wipe (HIPAA concern — accidental wipe of clinical device is catastrophic), create policies, manage apps. Built-in Help Desk Operator has wipe permission — too dangerous. Custom role removes wipe, retains everything else.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📊</div>
+        <div class="ctit">Security Compliance Reporter</div>
+        <div class="cbod">Needs: read all compliance reports, read endpoint security policy status, view BitLocker recovery keys for audit. Does NOT need: create/modify anything. Read Only Operator doesn't include BitLocker key viewing. Custom role: Read Only + BitLocker key read permission.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔄</div>
+        <div class="ctit">Autopilot Deployment Team</div>
+        <div class="cbod">Needs: manage Autopilot device registrations, create enrollment profiles, manage device categories. Does NOT need: access to compliance policies, endpoint security, apps. A narrow custom role focused only on enrollment/provisioning tasks.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📱</div>
+        <div class="ctit">Mobile App Deployer</div>
+        <div class="cbod">Needs: deploy iOS and Android apps via Managed Google Play and VPP. View mobile device status. Does NOT need: Windows management, policy creation, compliance configuration. A mobile-only App Manager custom role.</div>
+      </div>
+    </div>
+
+    <div class="sh">Creating a Custom Role — Step by Step</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>Intune → Tenant Administration → Roles → All roles → <strong>Create</strong></div></li>
+      <li><div class="sn">2</div><div>Enter a <strong>Name</strong> (descriptive: "Healthcare Helpdesk - No Wipe") and <strong>Description</strong> (explain what this role is for and why — helps future admins understand the intent).</div></li>
+      <li><div class="sn">3</div><div>Under <strong>Permissions</strong>, browse the permission categories:<br/>
+        <ul class="bl" style="margin-top:6px;">
+          <li>Check each permission category (e.g., "Managed Devices")</li>
+          <li>For each category, enable specific permissions: Read, Create, Update, Delete, or action-specific (Wipe, Retire, Sync, etc.)</li>
+          <li>Grant only what's needed — review each permission description carefully</li>
+        </ul>
+      </div></li>
+      <li><div class="sn">4</div><div>Click <strong>Next</strong> → Scope Tags tab: assign scope tags to restrict the role to specific administrative units (covered in Topic 78).</div></li>
+      <li><div class="sn">5</div><div>Review and <strong>Create</strong> the role.</div></li>
+      <li><div class="sn">6</div><div><strong>Assign the role:</strong> Find the new role in All Roles → Assignments → Add assignment → Specify members (Azure AD group of admin users) and scope groups (Azure AD group of devices/users they'll manage).</div></li>
+    </ol>
+
+    <div class="sh">Intune Permission Categories — Key Ones</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Permission Category</th><th>Key Permissions Within It</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Managed Devices</strong></td><td>Read, Update, Delete, Wipe, Retire, Remote Lock, Reset Passcode, Sync, Restart, Collect Diagnostics, Rotate BitLocker Keys</td><td>Most granular device action control — enable/disable individual actions</td></tr>
+          <tr><td><strong>Mobile Apps</strong></td><td>Read, Create, Update, Delete, Assign, Relate (dependencies)</td><td>Controls app management capabilities</td></tr>
+          <tr><td><strong>Device Configurations</strong></td><td>Read, Create, Update, Delete, Assign</td><td>For configuration profile management</td></tr>
+          <tr><td><strong>Device Compliance Policies</strong></td><td>Read, Create, Update, Delete, Assign</td><td>For compliance policy management</td></tr>
+          <tr><td><strong>Enrollment Programs</strong></td><td>Read, Create, Update, Delete, Assign (Autopilot, ADE, etc.)</td><td>For enrollment configuration management</td></tr>
+          <tr><td><strong>Endpoint Security</strong></td><td>Read, Create, Update, Delete (AV, BitLocker, Firewall, EDR, ASR, Account Protection)</td><td>Security policy management — separate from Device Config</td></tr>
+          <tr><td><strong>Remote Tasks</strong></td><td>Rotate BitLocker Keys, Update Windows Defender, Collect Diagnostics, etc.</td><td>Device actions not covered in Managed Devices category</td></tr>
+          <tr><td><strong>Organization</strong></td><td>Read, Update (tenant settings)</td><td>For managing Intune tenant-wide settings</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Duplicating a Built-in Role</div>
+    <p>The fastest way to create a custom role is to <strong>duplicate a built-in role</strong> and then modify it. This way you start with a tested permission set and only adjust what needs changing.</p>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>Intune → Tenant Administration → Roles → Find the built-in role closest to what you need (e.g., Help Desk Operator)</div></li>
+      <li><div class="sn">2</div><div>Click on the role → <strong>Duplicate</strong></div></li>
+      <li><div class="sn">3</div><div>Rename the duplicate to your custom role name. Edit permissions to add or remove what's needed.</div></li>
+      <li><div class="sn">4</div><div>Save → Assign as normal.</div></li>
+    </ol>
+
+    <div class="tip">
+      <div class="tpic">💡</div>
+      <div><strong>Document Your Custom Roles:</strong> Create a role design document that lists every custom role, its purpose, which built-in role it was based on, what permissions were added/removed, and which groups it's assigned to. Without this documentation, the next admin to look at your tenant won't understand why the roles exist. Include a review date — custom roles should be audited annually to verify they still reflect the principle of least privilege.</div>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 77</div>
+      <div class="qa"><div class="qq">When would you create a custom Intune role instead of using a built-in role?</div>
+      <div class="qans">When no built-in role precisely matches the permission needs of a team. Common scenarios: a helpdesk that needs device remote actions but not wipe (remove wipe from Help Desk Operator), a security auditor who needs Read Only access plus BitLocker key viewing, an Autopilot team that only needs enrollment management, or any team whose responsibilities span multiple built-in roles in a way that combining them would grant too many permissions. Custom roles implement the principle of least privilege more precisely.</div></div>
+      <div class="qa"><div class="qq">Walk me through creating a custom role for a helpdesk team that can remote lock and sync devices but not wipe them.</div>
+      <div class="qans">Duplicate the Help Desk Operator role. Rename it "Helpdesk - No Wipe." In the Permissions tab, expand "Managed Devices" permissions. Remove the Wipe and Retire checkboxes while keeping Read, Remote Lock, Sync, and Restart. Save the role. Create a role assignment: assign the role to the "Helpdesk Staff" Azure AD group as members, and specify the "All Devices" (or relevant regional device group) as the scope group. Helpdesk can now remote lock and sync but cannot wipe or retire any device.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T78 -->
+  <section class="ts" id="t78">
+    <div class="th"><div class="tnum">TOPIC 78</div>
+      <div><div class="ttl">Scope Tags — What They Are &amp; How to Use Them</div>
+      <div class="tsub">Isolating Intune objects by region, department, or business unit</div></div>
+    </div>
+
+    <div class="sh">The Problem Scope Tags Solve</div>
+    <p>Imagine a global company with Intune managing devices in India, USA, and UK — all in one tenant. The India IT team should only see and manage India devices and India-specific policies. The US team should only see US objects. Without Scope Tags, every admin with Intune access sees and can accidentally modify ALL devices and ALL policies — regardless of geography or team. One fat-finger from the India admin can wipe a device in New York.</p>
+    <p><strong>Scope Tags</strong> are labels you attach to Intune objects (devices, policies, apps, enrollment profiles) and to role assignments. When an admin is scoped to a specific tag, they only see and manage objects carrying that tag. Objects without their tag are invisible to them.</p>
+
+    <div class="sh">How Scope Tags Work — The Mechanics</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Create Scope Tags:</strong> Intune → Tenant Administration → Roles → Scope tags → Create → Name: "India", "USA", "UK", "Finance", "Retail"</div></li>
+      <li><div class="sn">2</div><div><strong>Tag Intune objects:</strong> Each policy, app, configuration profile, enrollment profile, and device can be assigned one or more scope tags. You tag objects when creating or editing them — there's a "Scope tags" step in the creation wizard.</div></li>
+      <li><div class="sn">3</div><div><strong>Assign scope tags to role assignments:</strong> When assigning a role to a team, specify which scope tags that team can see. The India Helpdesk role assignment → select scope tag "India".</div></li>
+      <li><div class="sn">4</div><div><strong>Result:</strong> When the India Helpdesk admin logs into Intune, they only see devices, policies, and apps tagged "India". All USA and UK objects are completely invisible to them.</div></li>
+    </ol>
+
+    <div class="sh">Scope Tags — Regional Isolation Example</div>
+    <div class="scope-visual">
+      <div class="scope-region sr-india">
+        <div class="sr-title">🇮🇳 India Scope Tag</div>
+        <div class="sr-body">Tagged objects: India devices, India Wi-Fi profiles, India VPN config, India helpdesk enrollment profile, India-specific apps.<br/><br/>India IT team members: Can only see and manage these objects.</div>
+      </div>
+      <div class="scope-region sr-us">
+        <div class="sr-title">🇺🇸 USA Scope Tag</div>
+        <div class="sr-body">Tagged objects: USA devices, USA compliance policies, USA firewall rules, USA endpoint security configs.<br/><br/>USA IT team members: Can only see and manage these objects.</div>
+      </div>
+      <div class="scope-region sr-uk">
+        <div class="sr-title">🇬🇧 UK Scope Tag</div>
+        <div class="sr-body">Tagged objects: UK devices, UK GDPR-specific policies, UK app deployments.<br/><br/>UK IT team members: Can only see and manage these objects.</div>
+      </div>
+      <div class="scope-region sr-global">
+        <div class="sr-title">🌐 Default (No Tag / All)</div>
+        <div class="sr-body">Global admins (Intune Administrator Azure AD role) see ALL objects regardless of scope tags. Regional admins cannot see untagged objects unless explicitly assigned.</div>
+      </div>
+    </div>
+
+    <div class="sh">Scope Tags vs Role Assignment Scope Groups</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Mechanism</th><th>Controls</th><th>What Admin Sees/Does</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Role Assignment → Scope Groups</strong></td><td>Which USERS and DEVICES the admin can take action on</td><td>The India admin can only wipe/sync/view devices that are members of the "India Devices" Azure AD group</td></tr>
+          <tr><td><strong>Scope Tags</strong></td><td>Which INTUNE OBJECTS (policies, apps, profiles) the admin can see and manage</td><td>The India admin can only see policies, apps, and profiles that carry the "India" scope tag</td></tr>
+          <tr><td><strong>Both Together</strong></td><td>Complete isolation of both device management AND policy management</td><td>True administrative isolation — India admin manages India devices with India policies only</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Default Scope Tag</div>
+    <p>Every Intune tenant has a <strong>Default scope tag</strong>. Objects created without explicitly assigning a scope tag automatically get the Default tag. Admins with access to the Default scope tag can see all untagged objects. Global Admins and Intune Administrators always see everything — scope tags don't restrict Azure AD admin roles.</p>
+
+    <div class="ib ibo">
+      <div class="bt">⚠️ Common Scope Tag Mistake</div>
+      <p>Creating scope tags but forgetting to tag existing policies and devices. If you set up scope tags for a new regional admin and forget to tag the objects they need to manage, they'll see nothing in Intune and file a support ticket saying "I can't see any devices." Whenever you create a new scope tag for a new region/team, go through existing Intune objects and tag the relevant ones. Also tag new devices at enrollment using enrollment profiles or device categories.</p>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🌏</div><div class="rwl">Real-World Multi-Region Scope Tag Setup</div></div>
+      <p><strong>Company:</strong> IT outsourcing firm managing Intune for 3 clients — Client A (retail), Client B (finance), Client C (healthcare) — all in one Intune tenant (Multi-Tenant Management scenario using Lighthouse, or a shared tenant approach).<br/>
+      <strong>Setup:</strong><br/>
+      Create scope tags: "ClientA-Retail", "ClientB-Finance", "ClientC-Health"<br/>
+      Tag all Client A devices, policies, apps → "ClientA-Retail"<br/>
+      Create role assignments for each client's dedicated IT admin group → scoped to their respective tag<br/>
+      <strong>Result:</strong> Client A's IT admin sees only Client A devices and policies. Client B's admin sees only Client B. Zero cross-client visibility. A Client A admin cannot accidentally modify a compliance policy affecting Client B's financial devices. Regulatory segregation maintained within a single Intune tenant.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 78</div>
+      <div class="qa"><div class="qq">What are Scope Tags in Intune and what problem do they solve?</div>
+      <div class="qans">Scope Tags are labels assigned to Intune objects (devices, policies, apps) and role assignments to create administrative isolation within a single tenant. Without them, every Intune admin sees and can manage all objects across all regions and departments. With Scope Tags, an admin scoped to "India" only sees India-tagged devices and policies — USA and UK objects are completely invisible. This prevents accidental cross-region changes and supports multi-team, multi-region, or multi-client deployments in a single tenant.</div></div>
+      <div class="qa"><div class="qq">What is the difference between Scope Tags and Role Assignment Scope Groups?</div>
+      <div class="qans">Scope Groups in a role assignment control which users and devices the admin can take action on — they can only wipe, sync, or view devices that are in the specified Azure AD group. Scope Tags control which Intune objects (policies, apps, profiles) the admin can see and edit in the portal. Both are needed for complete isolation: scope groups restrict device actions, scope tags restrict object visibility. Using only scope groups means an admin can still see and modify all policies even if they can't apply them to out-of-scope devices.</div></div>
+      <div class="qa"><div class="qq">Can Scope Tags restrict what a Global Administrator can see in Intune?</div>
+      <div class="qans">No. Scope Tags do not restrict Global Administrators or users with the Intune Administrator Azure AD role. These Azure AD admin roles bypass all Intune RBAC controls including Scope Tags — they always see everything in the tenant. Scope Tags only restrict custom and built-in Intune RBAC roles. This is why Global Admin accounts should be used sparingly and only for break-glass scenarios — they bypass all administrative boundaries.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T79 -->
+  <section class="ts" id="t79">
+    <div class="th"><div class="tnum">TOPIC 79</div>
+      <div><div class="ttl">Delegated Administration Scenarios</div>
+      <div class="tsub">Real-world RBAC design patterns — putting it all together</div></div>
+    </div>
+
+    <div class="sh">Why Delegation Design Matters</div>
+    <p>RBAC theory is simple. Real enterprise delegation is complex. IT teams have sub-teams, third-party partners, contractors, outsourced helpdesks, and regional offices — all needing different levels of access. This topic covers the most common enterprise delegation patterns and how to implement them correctly using roles, scope groups, and scope tags together.</p>
+
+    <div class="sh">Delegation Pattern 1 — Tiered IT Support (L1/L2/L3)</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Tier</th><th>Role</th><th>Scope Groups</th><th>Scope Tags</th><th>What They Can Do</th></tr></thead>
+        <tbody>
+          <tr><td><strong>L1 Helpdesk</strong></td><td>Custom: "L1 Support" (Read + Sync + Remote Lock only)</td><td>All Devices</td><td>Default</td><td>View device info, trigger sync, remote lock lost devices. Cannot wipe, retire, or modify policies.</td></tr>
+          <tr><td><strong>L2 Helpdesk</strong></td><td>Help Desk Operator (built-in)</td><td>All Devices</td><td>Default</td><td>All L1 actions + wipe, retire, reset passcode, restart, collect diagnostics. Cannot create policies.</td></tr>
+          <tr><td><strong>L2 Config</strong></td><td>Policy and Profile Manager (built-in)</td><td>All Devices</td><td>Default</td><td>Create/modify configuration profiles, compliance policies, scripts. No device actions, no app management.</td></tr>
+          <tr><td><strong>L2 App</strong></td><td>Application Manager (built-in)</td><td>All Devices</td><td>Default</td><td>Deploy and manage apps, app protection policies. No config profiles, no compliance policies.</td></tr>
+          <tr><td><strong>L3 Senior / Endpoint Admin</strong></td><td>Intune Administrator (Azure AD role)</td><td>All (unrestricted)</td><td>All (unrestricted)</td><td>Full Intune access. Used for complex changes and escalations.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Delegation Pattern 2 — Geographic Isolation</div>
+    <p>For multi-region organizations where each region has its own IT team:</p>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Create Dynamic Device Groups</strong> per region: "India_Devices" → <code>device.country -eq "IN"</code> or based on device name prefix, enrollment profile, or device category.</div></li>
+      <li><div class="sn">2</div><div><strong>Create Scope Tags</strong> per region: "India", "USA", "UK"</div></li>
+      <li><div class="sn">3</div><div><strong>Tag all India objects</strong>: As India IT creates policies and apps, they tag them "India". Global admin ensures enrollment profiles for India devices automatically apply the "India" scope tag.</div></li>
+      <li><div class="sn">4</div><div><strong>Create Role Assignments</strong>: "India Helpdesk" role → Members: India IT group → Scope Groups: India_Devices → Scope Tags: India</div></li>
+      <li><div class="sn">5</div><div><strong>Test:</strong> Have an India IT admin log in → Verify they see only India devices in All Devices → Verify they can only see India-tagged policies → Verify they cannot see or act on US/UK devices.</div></li>
+    </ol>
+
+    <div class="sh">Delegation Pattern 3 — Third-Party Managed Service Provider (MSP)</div>
+    <p>Many organizations outsource Intune management to an MSP. The MSP needs enough access to manage devices but cannot see sensitive data or other clients' configurations:</p>
+    <ul class="bl">
+      <li><strong>Create an MSP scope tag:</strong> "MSP-Managed". Tag all devices and policies the MSP is responsible for.</li>
+      <li><strong>Create a custom "MSP Operations" role:</strong> Based on Help Desk Operator + Application Manager + Policy and Profile Manager, scoped to the MSP tag only.</li>
+      <li><strong>The MSP never gets Global Admin or Intune Administrator</strong> — they can't see other clients, billing information, or sensitive tenant settings.</li>
+      <li><strong>Audit log filtering:</strong> Set up audit log alerts for any changes made by the MSP accounts — you can verify their work without giving them self-audit capabilities.</li>
+    </ul>
+
+    <div class="sh">Delegation Pattern 4 — Department-Specific Admin</div>
+    <p>Finance department has its own GDPR-sensitive devices with strict compliance requirements. Finance IT manages their own devices within the corporate tenant:</p>
+    <ul class="bl">
+      <li><strong>Finance Scope Tag:</strong> Applied to all Finance devices during enrollment (via enrollment profile → scope tag). Also applied to Finance-specific compliance policies.</li>
+      <li><strong>Finance IT Admin role:</strong> Policy and Profile Manager + Help Desk Operator scoped to Finance Scope Tag and Finance_Devices group.</li>
+      <li><strong>Finance IT can:</strong> Create Finance-specific compliance policies with stricter requirements, manage Finance devices, deploy Finance-approved apps.</li>
+      <li><strong>Finance IT cannot:</strong> See or manage HR, Engineering, or Sales devices. Cannot see global policies unless tagged Finance.</li>
+      <li><strong>Central IT can:</strong> See and manage everything (Global Admin). Apply a global baseline to Finance devices if needed (tagged both Default and Finance).</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🏦</div><div class="rwl">Enterprise RBAC Design — Banking Scenario</div></div>
+      <p><strong>Bank with 5,000 devices, 3 regions (Mumbai, Delhi, Hyderabad), outsourced L1 helpdesk, in-house L2/L3 team, security compliance team, and external auditors.</strong><br/><br/>
+      <strong>Roles designed:</strong><br/>
+      • "L1-Outsourced" (custom): Read + Sync only. No wipe. No policy access. Scoped to "All Devices" with Default tag. Members: Outsourced helpdesk team.<br/>
+      • "Mumbai-L2" (Help Desk Operator duplicate): Full device actions. Scoped to Mumbai_Devices group + Mumbai scope tag. Members: Mumbai IT team.<br/>
+      • "Delhi-L2" / "Hyderabad-L2": Same pattern for other regions.<br/>
+      • "App-Deployer" (Application Manager built-in): Scoped to All Devices + Default tag. Members: App team.<br/>
+      • "Security-Auditor" (custom: Read Only + BitLocker key view): All scope. Members: Internal audit team.<br/>
+      • "External-Auditor" (Read Only): Default scope, 30-day time-limited assignment via Azure AD PIM. Members: External audit firm account.<br/><br/>
+      <strong>Result:</strong> Mumbai helpdesk can only see Mumbai devices. Outsourced L1 cannot wipe anything. External auditors get temporary access for their quarterly audit. Zero privilege creep. Every action is logged in audit logs.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 79</div>
+      <div class="qa"><div class="qq">How would you set up Intune for a company with IT teams in India and the UK who should not be able to see each other's devices or policies?</div>
+      <div class="qans">Create two Scope Tags: "India" and "UK". Create dynamic Azure AD device groups based on region (device naming convention, enrollment profile, or country attribute). Tag all India-specific devices, policies, and apps with the India scope tag; do the same for UK. Create role assignments for each regional team — Help Desk Operator or custom role, with Members set to the regional IT group, Scope Groups set to the regional device group, and Scope Tags set to the regional tag. India IT admins now only see India-tagged objects; UK admins only see UK-tagged objects. Central Global Admins retain full visibility.</div></div>
+      <div class="qa"><div class="qq">How would you give an external auditing firm temporary read-only access to Intune for a compliance review?</div>
+      <div class="qans">Create guest accounts in Azure AD for the auditors (or use B2B collaboration). Assign the Read Only Operator role in Intune via a time-limited role assignment. For the most controlled approach, use Azure AD Privileged Identity Management (PIM) to create a time-limited eligible assignment — the auditors activate their access for specific days and it automatically expires after the review period. Scope the assignment appropriately — if they should only see certain regions, add scope tags. Monitor their activity via Intune Audit Logs during and after the review.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T80 -->
+  <section class="ts" id="t80">
+    <div class="th"><div class="tnum">TOPIC 80</div>
+      <div><div class="ttl">Audit Logs — Who Did What &amp; When</div>
+      <div class="tsub">The complete change history of your Intune tenant — compliance, forensics, and accountability</div></div>
+    </div>
+
+    <div class="sh">What Are Intune Audit Logs?</div>
+    <p>Every action taken in the Intune portal — creating a policy, deleting an app, wiping a device, changing a role assignment — generates an <strong>audit log entry</strong>. Audit logs are immutable, tamper-proof records of every change and action in your tenant. They answer the critical compliance questions: <em>Who changed this policy? When was this device wiped? Who viewed this BitLocker key? Did anyone modify enrollment settings last Tuesday?</em></p>
+
+    <div class="sh">Accessing Audit Logs</div>
+    <ul class="bl">
+      <li><strong>Primary location:</strong> Intune → Tenant Administration → Audit logs</li>
+      <li><strong>Per-resource logs:</strong> Many Intune sections have their own audit log view. E.g., Devices → Monitor → Audit logs shows device-specific actions only.</li>
+      <li><strong>Filtering:</strong> Filter by date range, activity type (Create/Delete/Action/Patch), category (Device/App/Policy), and specific user.</li>
+      <li><strong>Retention:</strong> Intune audit logs are retained for <strong>1 year</strong> by default in the portal.</li>
+      <li><strong>Long-term retention:</strong> Export to Azure Monitor Log Analytics or storage account for longer-term retention (required for many compliance frameworks like ISO 27001, SOC2 — which often require 3+ year retention).</li>
+    </ul>
+
+    <div class="sh">What an Audit Log Entry Contains</div>
+    <div class="audit-entry">
+      <div class="ae-header">
+        <span class="ae-time">2024-11-15 14:32:07 UTC</span>
+        <span class="ae-user">admin@contoso.com</span>
+        <span class="ae-action">Delete</span>
+        <span class="ae-resource">Win32App: Adobe Acrobat Reader 23.0</span>
+      </div>
+      <div class="ae-body">
+        Activity: <strong>Delete application</strong><br/>
+        Actor: admin@contoso.com (Object ID: a4b3c2d1-...)<br/>
+        Actor IP: 103.24.65.12 (Mumbai, IN)<br/>
+        Application: IntunePortal (MicrosoftIntune)<br/>
+        Target resource: Adobe Acrobat Reader 23.0 (App ID: e5f6g7h8-...)<br/>
+        Result: <strong style="color:var(--green);">Success</strong><br/>
+        Modified properties: [Deleted = true]
+      </div>
+    </div>
+    <div class="audit-entry">
+      <div class="ae-header">
+        <span class="ae-time">2024-11-15 09:15:43 UTC</span>
+        <span class="ae-user">priya.sharma@contoso.com</span>
+        <span class="ae-action">Update</span>
+        <span class="ae-resource">DeviceCompliancePolicy: Windows Baseline Compliance</span>
+      </div>
+      <div class="ae-body">
+        Activity: <strong>Update DeviceCompliancePolicy</strong><br/>
+        Actor: priya.sharma@contoso.com<br/>
+        Target resource: Windows Baseline Compliance (Policy ID: c3d4e5f6-...)<br/>
+        Result: <strong style="color:var(--green);">Success</strong><br/>
+        Modified properties: osMinimumVersion changed from "10.0.19041" to "10.0.22621"
+      </div>
+    </div>
+
+    <div class="sh">Audit Log Categories — What You Can Track</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Category</th><th>Tracked Activities</th><th>Common Audit Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Device</strong></td><td>Wipe, retire, sync, remote lock, reset passcode, rename, delete, collect diagnostics, BitLocker key view/rotation</td><td>"Which admin wiped device CORP-042 on Monday?" "Who viewed the BitLocker key for this device?"</td></tr>
+          <tr><td><strong>Application</strong></td><td>App created, modified, deleted, assigned, unassigned, App Protection Policy changes</td><td>"Who removed the Teams app assignment from the Finance group?"</td></tr>
+          <tr><td><strong>Compliance Policy</strong></td><td>Policy created, modified, deleted, assigned</td><td>"Who changed the minimum OS version requirement in our Windows compliance policy?"</td></tr>
+          <tr><td><strong>Configuration Profile</strong></td><td>Profile created, modified, deleted, assigned, group changes</td><td>"When was the Wi-Fi profile last modified and by whom?"</td></tr>
+          <tr><td><strong>Enrollment</strong></td><td>Autopilot device import, enrollment profile changes, enrollment restrictions modified</td><td>"Who changed the iOS enrollment restrictions to block personal devices?"</td></tr>
+          <tr><td><strong>Role</strong></td><td>Role created, modified, deleted, role assignment changes, scope tag changes</td><td>"When was the MSP given access and what role were they assigned?"</td></tr>
+          <tr><td><strong>Endpoint Security</strong></td><td>Security Baseline changes, Defender AV policy changes, BitLocker policy changes</td><td>"Who disabled Tamper Protection in the Defender AV policy?"</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Using Audit Logs for Security Investigations</div>
+    <p>Audit logs are invaluable during security incidents. Common investigation scenarios:</p>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🔍</div>
+        <div class="ctit">Unauthorized Policy Change</div>
+        <div class="cbod">A compliance policy was modified without a change ticket. Filter audit logs by the policy name and date range. See exactly who changed it, what was changed (old vs new value), their IP address, and the exact timestamp. Correlate with HR records if the account belongs to a former employee.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📱</div>
+        <div class="ctit">Unexplained Device Wipe</div>
+        <div class="cbod">An employee reports their device was wiped unexpectedly. Filter audit logs by device name and "Wipe" activity. Identify which admin account triggered the wipe, from what IP, at what time. If it wasn't an authorized action, investigate the admin account for compromise.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔑</div>
+        <div class="ctit">BitLocker Key Access Audit</div>
+        <div class="cbod">For GDPR or internal audit requirements, you need to demonstrate who accessed BitLocker recovery keys and when. Filter by "Get BitLocker Key" activity. Every key retrieval is logged with the admin's identity, the device, and timestamp — providing a full chain of custody for the encryption key.</div>
+      </div>
+      <div class="card">
+        <div class="cico">👤</div>
+        <div class="ctit">Insider Threat Detection</div>
+        <div class="cbod">A disgruntled employee with helpdesk access is suspected of unauthorized device actions. Pull all audit log entries for that specific user account across a date range. Review every action they took — what devices they accessed, what they changed, what remote actions they performed.</div>
+      </div>
+    </div>
+
+    <div class="sh">Exporting and Long-Term Audit Log Storage</div>
+    <p>The Intune portal retains audit logs for 1 year. Many compliance frameworks require longer retention. Options:</p>
+    <ul class="bl">
+      <li><strong>CSV Export:</strong> Filter the logs as needed → Export to CSV. Manual, point-in-time. Not suitable for ongoing retention.</li>
+      <li><strong>Azure Monitor / Log Analytics:</strong> Configure Intune Diagnostic Settings to stream audit logs continuously to an Azure Log Analytics Workspace. Query with KQL. Retain for 90 days to 2 years in Log Analytics.</li>
+      <li><strong>Azure Storage Account:</strong> Archive logs to blob storage for long-term, low-cost retention (years). Not directly queryable but meets retention requirements.</li>
+      <li><strong>Azure Event Hub → SIEM:</strong> Stream Intune logs to a SIEM (Sentinel, Splunk, QRadar) for real-time alerting and correlation with other security events. The enterprise standard for security operations.</li>
+    </ul>
+
+    <div class="sh">Setting Up Azure Monitor Integration</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>Go to <strong>Intune → Tenant Administration → Diagnostic settings</strong> → Add diagnostic setting</div></li>
+      <li><div class="sn">2</div><div>Select log categories to stream: AuditLogs, OperationalLogs, DeviceComplianceOrg, Intune events, etc.</div></li>
+      <li><div class="sn">3</div><div>Select destination: Log Analytics Workspace (for querying), Storage Account (for archiving), Event Hub (for SIEM integration), or all three.</div></li>
+      <li><div class="sn">4</div><div>Save. Logs begin streaming within minutes.</div></li>
+      <li><div class="sn">5</div><div>In Log Analytics: query with KQL. Example: <code>IntuneAuditLogs | where ActivityResultStatus == "Success" | where OperationName contains "Wipe" | project TimeGenerated, Identity, ResultDescription</code></div></li>
+    </ol>
+
+    <div class="sh">Creating Audit Alerts</div>
+    <p>Don't just store audit logs — alert on critical actions in real-time. Via Azure Monitor Alerts or Microsoft Sentinel, create alert rules for:</p>
+    <ul class="bl">
+      <li><strong>Device wipe triggered outside business hours</strong> → immediate alert to security team</li>
+      <li><strong>Compliance policy modified</strong> → alert to change management team (verify against change ticket)</li>
+      <li><strong>New admin role assigned</strong> → alert to CISO (privilege escalation detection)</li>
+      <li><strong>Enrollment restriction changed</strong> → alert to IT manager (could open door to unauthorized device enrollment)</li>
+      <li><strong>ASR rules disabled or weakened</strong> → security team alert (potential attack preparation)</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔍</div><div class="rwl">Real Audit Log Investigation</div></div>
+      <p><strong>Incident:</strong> Monday morning, 3 users report their company iPhones were wiped over the weekend. No wipe was scheduled. IT management is alarmed.<br/>
+      <strong>Investigation using Audit Logs:</strong><br/>
+      Step 1: Intune → Tenant Administration → Audit logs → Filter: Activity type = "Wipe", Date = Saturday 00:00 – Sunday 23:59.<br/>
+      Step 2: Three wipe events found at 02:15, 02:17, 02:19 on Saturday night.<br/>
+      Step 3: Actor: svc-intune-automation@contoso.com — a service account.<br/>
+      Step 4: Actor IP: 185.234.219.x — an IP outside the company's known ranges.<br/>
+      Step 5: Check Azure AD Sign-in logs for the service account → this account signed in from that foreign IP using a password spray attack at 02:10 — 5 minutes before the wipes.<br/>
+      <strong>Root Cause:</strong> Service account was compromised via password spray. The attacker used the service account's Intune permissions to wipe 3 iPhones as a destructive act.<br/>
+      <strong>Remediation:</strong> Reset service account credentials. Add MFA. Restrict service account to specific IP ranges. Audit all service account permissions. Implement alert rule for wipes outside business hours.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 80</div>
+      <div class="qa"><div class="qq">What information is captured in an Intune audit log entry?</div>
+      <div class="qans">Each audit log entry captures: the timestamp (UTC), the actor (user or service account that performed the action and their Object ID), the actor's IP address and application used, the activity type (Create, Update, Delete, Action), the target resource name and ID, the result (Success/Failure), and the modified properties (what changed, showing old and new values). This provides complete accountability for every action in the Intune tenant.</div></div>
+      <div class="qa"><div class="qq">How long does Intune retain audit logs and what do you do for longer retention requirements?</div>
+      <div class="qans">Intune retains audit logs for 1 year in the portal. For longer retention (required by many compliance frameworks like ISO 27001, SOC2, HIPAA): configure Diagnostic Settings in Intune to stream logs to Azure Log Analytics (up to 2 years, queryable), Azure Storage Account (years, low-cost archival), or Azure Event Hub (for SIEM integration like Microsoft Sentinel or Splunk). For real-time security alerting, streaming to a SIEM is the enterprise standard, allowing correlation of Intune audit events with other security signals.</div></div>
+      <div class="qa"><div class="qq">You suspect an admin account was used to make unauthorized changes to Intune policies. What's your investigation process using audit logs?</div>
+      <div class="qans">Go to Intune → Tenant Administration → Audit logs. Filter by the suspected admin account's UPN as the actor. Set the date range covering the suspected period. Review all activities that account performed — note any Creates, Updates, or Deletes that were not expected. For each suspicious entry, check the modified properties field to see what changed (old vs new values), the timestamp, and the IP address. Cross-reference the IP with Azure AD Sign-in logs to verify if there were any suspicious sign-in patterns (unusual location, risky sign-in). If the account was compromised, escalate to the security incident response process.</div></div>
+      <div class="qa"><div class="qq">What critical actions would you set up alerts for in Intune audit logs?</div>
+      <div class="qans">High-priority alerts: device wipe triggered outside business hours (potential insider threat or compromised account), new admin role assigned to any user (privilege escalation), compliance or ASR policies modified (security weakening), enrollment restrictions changed (opens enrollment to unauthorized devices), and any action performed by service accounts from unexpected IPs. These alerts are configured via Azure Monitor alert rules on the Log Analytics workspace receiving the streamed audit logs, or via Microsoft Sentinel analytics rules for SIEM integration.</div></div>
+    </div>
+  </section>
+
+  <!-- Block Complete -->
+  <div style="background:linear-gradient(135deg,rgba(14,165,233,.07),rgba(20,184,166,.05));border:1px solid rgba(14,165,233,.22);border-radius:16px;padding:30px;margin-top:48px;text-align:center;">
+    <div style="font-size:30px;margin-bottom:11px;">🎉</div>
+    <div style="font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--h);margin-bottom:9px;">Block 8 Complete!</div>
+    <div style="color:var(--text2);font-size:13.5px;max-width:600px;margin:0 auto 18px;line-height:1.7;">You've mastered RBAC, Scope Tags, and Audit Logs — the governance and accountability layer of Intune. You can now design least-privilege access for any team, isolate regions with scope tags, delegate administration safely, and investigate any change in your tenant using audit logs.</div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap;">
+      <div style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--green);font-family:'IBM Plex Mono',monospace;">✅ Blocks 1–8 Done — 80 Topics</div>
+      <div style="background:rgba(14,165,233,.1);border:1px solid rgba(14,165,233,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;">⬡ Block 9 Next: Windows Autopatch</div>
+      <div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--purple);font-family:'IBM Plex Mono',monospace;">📋 49 Topics Remaining</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<a href="#" class="stup">↑</a>
+<script>
+  const secs=document.querySelectorAll('.ts');
+  const navs=document.querySelectorAll('.ni[href^="#"]');
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;navs.forEach(n=>{n.classList.remove('active');if(n.getAttribute('href')==='#'+id)n.classList.add('active');});}});},{rootMargin:'-20% 0px -60% 0px'});
+  secs.forEach(s=>obs.observe(s));
+  navs.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(n.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});}));
+</script>
+</body>
+</html>

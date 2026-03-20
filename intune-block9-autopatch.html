@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 9: Windows Autopatch</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#060d0a;--bg2:#091410;--bg3:#0c1a14;
+    --sb:#050e0a;--border:#122018;
+    --acc:#10b981;--acc2:#34d399;--acc3:#6ee7b7;
+    --blue:#38bdf8;--purple:#a78bfa;--orange:#f97316;
+    --red:#f87171;--yellow:#fbbf24;--pink:#f472b6;--sky:#7dd3fc;
+    --text:#d1fae5;--text2:#6b7f74;--text3:#2d4037;
+    --h:#f0fff8;--card:#070f0a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Figtree',sans-serif;font-weight:300;display:flex;min-height:100vh;line-height:1.75;}
+  #sb{width:285px;min-width:285px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+  #sb::-webkit-scrollbar{width:3px;}
+  #sb::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .shd{padding:23px 20px 15px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#050e0a,#081410);}
+  .slo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--h);letter-spacing:-.5px;display:flex;align-items:center;gap:10px;}
+  .lic{width:34px;height:34px;background:linear-gradient(135deg,var(--acc),var(--blue));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(16,185,129,.35);}
+  .ssu{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .bbg{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(56,189,248,.1));border:1px solid rgba(16,185,129,.28);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-top:10px;letter-spacing:.5px;}
+  .snv{padding:12px 0;flex:1;}
+  .nlb{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 20px 4px;font-family:'IBM Plex Mono',monospace;}
+  .ni{display:flex;align-items:flex-start;gap:9px;padding:8px 20px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none;color:var(--text2);font-size:12.5px;line-height:1.4;}
+  .ni:hover{background:rgba(16,185,129,.07);color:var(--text);border-left-color:var(--acc);}
+  .ni.active{background:rgba(16,185,129,.11);color:var(--acc2);border-left-color:var(--acc);}
+  .nn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;margin-top:1px;}
+  .ni.active .nn{color:var(--acc);}
+  .plk{display:flex;align-items:center;gap:7px;padding:7px 11px;font-size:11px;color:var(--text3);text-decoration:none;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;margin:0 12px 4px;transition:all .2s;}
+  .plk:hover{color:var(--text2);border-color:rgba(16,185,129,.22);}
+  .sft{padding:13px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .pbar{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .pfill{height:100%;width:64%;background:linear-gradient(90deg,var(--acc),var(--blue));border-radius:2px;animation:pg 2s ease-in-out infinite alternate;}
+  @keyframes pg{from{box-shadow:0 0 4px var(--acc);}to{box-shadow:0 0 14px var(--blue);}}
+  #main{margin-left:285px;flex:1;min-height:100vh;}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(6,13,10,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 46px;display:flex;align-items:center;justify-content:space-between;}
+  .bcrumb{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:7px;}
+  .bcrumb span{color:var(--acc2);}
+  .tcount{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 13px;}
+  .cont{padding:50px 46px 80px;max-width:980px;}
+  /* Hero */
+  .hero{margin-bottom:56px;position:relative;padding:44px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(16,185,129,.13) 0%,transparent 70%);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(56,189,248,.08) 0%,transparent 70%);border-radius:50%;}
+  .htag{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:5px 14px;font-size:10.5px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;letter-spacing:1px;}
+  .htitle{font-family:'Syne',sans-serif;font-size:39px;font-weight:800;color:var(--h);line-height:1.1;letter-spacing:-1px;margin-bottom:13px;}
+  .htitle span{background:linear-gradient(135deg,var(--acc),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hdesc{font-size:14.5px;color:var(--text2);max-width:620px;line-height:1.8;}
+  .hmeta{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .hmi{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 8px var(--acc);}
+  .dot.b{background:var(--blue);box-shadow:0 0 8px var(--blue);}
+  .dot.p{background:var(--purple);box-shadow:0 0 8px var(--purple);}
+  /* Topic */
+  .ts{margin-bottom:68px;scroll-margin-top:66px;opacity:0;animation:fu .5s ease forwards;}
+  .ts:nth-child(1){animation-delay:.05s;}.ts:nth-child(2){animation-delay:.12s;}.ts:nth-child(3){animation-delay:.19s;}.ts:nth-child(4){animation-delay:.26s;}.ts:nth-child(5){animation-delay:.33s;}
+  @keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .th{display:flex;align-items:flex-start;gap:15px;margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--border);}
+  .tnum{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--acc);background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+  .ttl{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--h);letter-spacing:-.5px;line-height:1.2;margin-bottom:4px;}
+  .tsub{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .sh{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--h);margin:28px 0 10px;display:flex;align-items:center;gap:10px;}
+  .sh::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,var(--acc),var(--blue));border-radius:2px;flex-shrink:0;}
+  p{color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:12px;}
+  p strong{color:var(--text);font-weight:500;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(16,185,129,.1);color:var(--acc2);padding:2px 6px;border-radius:4px;border:1px solid rgba(16,185,129,.18);}
+  /* Cards */
+  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:17px;transition:border-color .2s,transform .2s;}
+  .card:hover{border-color:rgba(16,185,129,.3);transform:translateY(-2px);}
+  .cico{font-size:21px;margin-bottom:8px;}
+  .ctit{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:var(--h);margin-bottom:6px;}
+  .cbod{font-size:12.5px;color:var(--text2);line-height:1.6;}
+  /* Table */
+  .tw{overflow-x:auto;margin:16px 0;border-radius:11px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+  th{padding:12px 15px;text-align:left;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--h);letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 15px;color:var(--text2);border-bottom:1px solid rgba(18,32,24,.5);vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(16,185,129,.02);}
+  /* Tags */
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+  .tg{background:rgba(16,185,129,.15);color:var(--acc2);border:1px solid rgba(16,185,129,.2);}
+  .tb{background:rgba(56,189,248,.15);color:var(--blue);border:1px solid rgba(56,189,248,.2);}
+  .tp{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.2);}
+  .to{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.2);}
+  .tr{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.2);}
+  .ty{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+  /* Info boxes */
+  .ib{border-radius:10px;padding:16px 18px;margin:16px 0;border-left:3px solid;}
+  .ib .bt{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:6px;}
+  .ib p{margin:0;font-size:13.5px;color:var(--text2);}
+  .ibg{background:rgba(16,185,129,.06);border-color:var(--acc);}
+  .ibg .bt{color:var(--acc2);}
+  .ibb{background:rgba(56,189,248,.06);border-color:var(--blue);}
+  .ibb .bt{color:var(--blue);}
+  .ibp{background:rgba(167,139,250,.06);border-color:var(--purple);}
+  .ibp .bt{color:var(--purple);}
+  .ibo{background:rgba(249,115,22,.06);border-color:var(--orange);}
+  .ibo .bt{color:var(--orange);}
+  .ibr{background:rgba(248,113,113,.06);border-color:var(--red);}
+  .ibr .bt{color:var(--red);}
+  .iby{background:rgba(251,191,36,.06);border-color:var(--yellow);}
+  .iby .bt{color:var(--yellow);}
+  /* Steps */
+  .steps{list-style:none;margin:13px 0;display:flex;flex-direction:column;gap:10px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .sn{min-width:25px;height:25px;background:linear-gradient(135deg,var(--acc),var(--blue));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .steps li strong{color:var(--text);}
+  /* Bullets */
+  .bl{list-style:none;margin:10px 0 13px;display:flex;flex-direction:column;gap:7px;}
+  .bl li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .bl li::before{content:'▹';color:var(--acc);font-size:13px;flex-shrink:0;margin-top:2px;}
+  .bl li strong{color:var(--text);}
+  /* Realworld */
+  .rw{background:linear-gradient(135deg,rgba(16,185,129,.04),rgba(56,189,248,.04));border:1px solid rgba(16,185,129,.18);border-radius:12px;padding:19px;margin:20px 0;}
+  .rwh{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .rwi{font-size:18px;}
+  .rwl{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--acc);}
+  .rw p{color:var(--text2);font-size:13px;margin:0;line-height:1.7;}
+  .rw p+p{margin-top:8px;}
+  /* Interview */
+  .iq{background:linear-gradient(135deg,rgba(167,139,250,.04),rgba(16,185,129,.04));border:1px solid rgba(167,139,250,.18);border-radius:13px;padding:21px;margin:24px 0;}
+  .iqh{font-family:'Syne',sans-serif;font-weight:700;font-size:14.5px;color:var(--purple);margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+  .qa{margin-bottom:14px;}
+  .qa:last-child{margin-bottom:0;}
+  .qq{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:4px;display:flex;gap:8px;}
+  .qq::before{content:'Q.';color:var(--purple);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .qans{font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.65;display:flex;gap:8px;}
+  .qans::before{content:'A.';color:var(--acc2);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  /* Tip */
+  .tip{display:flex;gap:12px;align-items:flex-start;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:9px;padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.65;}
+  .tpic{font-size:16px;flex-shrink:0;}
+  /* Deployment ring timeline */
+  .ring-timeline{display:flex;flex-direction:column;gap:0;margin:18px 0;}
+  .ring-row{display:flex;gap:0;align-items:stretch;}
+  .ring-week{min-width:90px;padding:14px 12px;background:var(--bg3);border:1px solid var(--border);border-right:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .ring-week:first-child{border-radius:10px 0 0 0;}
+  .ring-row:last-child .ring-week{border-radius:0 0 0 10px;}
+  .rw-label{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;}
+  .rw-value{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--h);margin-top:2px;}
+  .ring-content{flex:1;padding:14px 16px;border:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;}
+  .ring-row:first-child .ring-content{border-radius:0 10px 0 0;}
+  .ring-row:last-child .ring-content{border-radius:0 0 10px 0;}
+  .rc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:13.5px;color:var(--h);margin-bottom:4px;}
+  .rc-desc{font-size:12.5px;color:var(--text2);line-height:1.55;}
+  .rc-size{font-size:11px;font-family:'IBM Plex Mono',monospace;margin-top:4px;}
+  /* Ring color coding */
+  .ring-test{border-left:3px solid var(--blue);}
+  .ring-first{border-left:3px solid var(--acc);}
+  .ring-fast{border-left:3px solid var(--yellow);}
+  .ring-broad{border-left:3px solid var(--orange);}
+  /* Status pill */
+  .spill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-family:'IBM Plex Mono',monospace;}
+  .sp-green{background:rgba(16,185,129,.12);color:var(--acc2);border:1px solid rgba(16,185,129,.2);}
+  .sp-blue{background:rgba(56,189,248,.12);color:var(--blue);border:1px solid rgba(56,189,248,.2);}
+  .sp-yellow{background:rgba(251,191,36,.12);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+  .sp-red{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.2);}
+  .sp-orange{background:rgba(249,115,22,.12);color:var(--orange);border:1px solid rgba(249,115,22,.2);}
+  /* Comparison boxes */
+  .compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  @media(max-width:600px){.compare-grid{grid-template-columns:1fr;}}
+  .compare-card{border-radius:11px;padding:18px;border:1px solid;}
+  .cc-autopatch{background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.25);}
+  .cc-wufb{background:rgba(56,189,248,.05);border-color:rgba(56,189,248,.25);}
+  .cc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--h);margin-bottom:10px;}
+  .cc-body{font-size:12.5px;color:var(--text2);line-height:1.65;}
+  .cc-body li{list-style:none;padding:3px 0;display:flex;gap:7px;}
+  .cc-body li::before{content:'•';flex-shrink:0;}
+  .cc-autopatch .cc-body li::before{color:var(--acc);}
+  .cc-wufb .cc-body li::before{color:var(--blue);}
+  /* Requirement checklist */
+  .req-list{display:flex;flex-direction:column;gap:8px;margin:14px 0;}
+  .req-item{display:flex;align-items:flex-start;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:12px 14px;}
+  .req-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+  .req-body{font-size:13px;color:var(--text2);line-height:1.6;}
+  .req-body strong{color:var(--text);}
+  .req-note{font-size:11px;font-family:'IBM Plex Mono',monospace;color:var(--text3);margin-top:3px;}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0;}
+  .stup{position:fixed;bottom:26px;right:26px;width:40px;height:40px;background:linear-gradient(135deg,var(--acc),var(--blue));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;box-shadow:0 4px 18px rgba(16,185,129,.3);border:none;color:white;z-index:200;text-decoration:none;transition:transform .2s;}
+  .stup:hover{transform:translateY(-3px);}
+  @media(max-width:768px){#sb{transform:translateX(-100%);}#main{margin-left:0;}.cont{padding:26px 16px;}.topbar{padding:11px 16px;}.htitle{font-size:26px;}}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="shd">
+    <div class="slo"><div class="lic">🛡️</div>Intune Mastery</div>
+    <div class="ssu">Complete Learning Series</div>
+    <div class="bbg">⬡ Block 9 of 14 — Windows Autopatch</div>
+  </div>
+  <div class="snv">
+    <div class="nlb">Block 9 Topics</div>
+    <a href="#t81" class="ni active"><span class="nn">81</span>What Is Windows Autopatch?</a>
+    <a href="#t82" class="ni"><span class="nn">82</span>Autopatch Groups &amp; Deployment Rings</a>
+    <a href="#t83" class="ni"><span class="nn">83</span>Autopatch Enrollment Requirements</a>
+    <a href="#t84" class="ni"><span class="nn">84</span>Monitoring Autopatch — Reports &amp; Alerts</a>
+    <a href="#t85" class="ni"><span class="nn">85</span>Autopatch vs Windows Update for Business</a>
+    <div class="nlb" style="margin-top:12px;">Previous Blocks</div>
+    <a href="intune-block1-foundations.html" class="plk">← Block 1: Foundations</a>
+    <a href="intune-block2-azuread.html" class="plk">← Block 2: Azure AD</a>
+    <a href="intune-block3-enrollment.html" class="plk">← Block 3: Enrollment</a>
+    <a href="intune-block4-configprofiles.html" class="plk">← Block 4: Config Profiles</a>
+    <a href="intune-block5-compliance.html" class="plk">← Block 5: Compliance</a>
+    <a href="intune-block6-appmanagement.html" class="plk">← Block 6: App Management</a>
+    <a href="intune-block7-endpointsecurity.html" class="plk">← Block 7: Endpoint Security</a>
+    <a href="intune-block8-rbac.html" class="plk">← Block 8: RBAC &amp; Audit</a>
+    <div class="ni" style="opacity:.4;cursor:default;font-size:11.5px;"><span class="nn">→</span>Block 10: Co-Management (Next)</div>
+  </div>
+  <div class="sft">
+    <div>Overall Progress</div>
+    <div style="color:var(--acc2);margin:2px 0;">Block 9 / 14 — 85 Topics Done</div>
+    <div class="pbar"><div class="pfill"></div></div>
+  </div>
+</nav>
+
+<div id="main">
+<div class="topbar">
+  <div class="bcrumb">Intune Mastery <span>›</span> Block 9 <span>›</span> Windows Autopatch</div>
+  <div class="tcount">5 Topics · ~2 Hours</div>
+</div>
+<div class="cont">
+
+  <div class="hero">
+    <div class="htag">🔄 BLOCK 9 · WINDOWS AUTOPATCH</div>
+    <h1 class="htitle">Zero-Touch<br/><span>Windows Patching</span></h1>
+    <p class="hdesc">Windows Autopatch is Microsoft's fully managed patch service that takes the burden of Windows Update management off your team entirely. It automatically deploys Windows quality updates, feature updates, Microsoft 365 Apps updates, and Microsoft Edge updates — through intelligent deployment rings, with built-in rollback logic, and real-time monitoring. This block covers everything from what it is, to enrollment, rings, monitoring, and how it compares to doing it yourself with Windows Update for Business.</p>
+    <div class="hmeta">
+      <div class="hmi"><div class="dot"></div>5 Topics</div>
+      <div class="hmi"><div class="dot b"></div>Deployment Ring Architecture</div>
+      <div class="hmi"><div class="dot p"></div>vs WUfB Deep Comparison</div>
+    </div>
+  </div>
+
+  <!-- T81 -->
+  <section class="ts" id="t81">
+    <div class="th"><div class="tnum">TOPIC 81</div>
+      <div><div class="ttl">What Is Windows Autopatch?</div>
+      <div class="tsub">The "managed patching service" — what it is, what it patches, and the problem it solves</div></div>
+    </div>
+
+    <div class="sh">The Patching Problem Autopatch Solves</div>
+    <p>Patch Tuesday happens every month. Microsoft releases security updates, cumulative updates, feature updates, Edge updates, and Microsoft 365 App updates — all on the same day. For a 1,000-device fleet, an IT team must test these updates, plan rollout schedules, create Update Rings in Intune, monitor deployment, investigate failures, and handle exceptions. It takes significant IT time every single month — and if patches are delayed, devices become vulnerable.</p>
+    <p><strong>Windows Autopatch</strong> is Microsoft's answer: hand the entire update management lifecycle to Microsoft. You enroll your devices, and Microsoft handles scheduling, deployment rings, monitoring, failure detection, and rollback — automatically. Your IT team goes from spending days per month on patch management to spending close to zero.</p>
+
+    <div class="sh">What Autopatch Manages</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🪟</div>
+        <div class="ctit">Windows Quality Updates</div>
+        <div class="cbod">Monthly cumulative security and quality patches (Patch Tuesday). Autopatch targets 95% of devices updated within 21 days of release. Devices are deployed in rings to catch issues before broad rollout.</div>
+      </div>
+      <div class="card">
+        <div class="cico">⬆️</div>
+        <div class="ctit">Windows Feature Updates</div>
+        <div class="cbod">Annual Windows version upgrades (e.g., Windows 11 22H2 → 23H2). Autopatch manages the gradual rollout across rings with automatic compatibility checking before deployment.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📊</div>
+        <div class="ctit">Microsoft 365 Apps Updates</div>
+        <div class="cbod">Office app updates (Word, Excel, Outlook, Teams). Autopatch aligns M365 Apps updates with the corresponding Windows update rings for coordinated, tested deployments.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🌐</div>
+        <div class="ctit">Microsoft Edge Updates</div>
+        <div class="cbod">Chromium-based Edge browser updates. Autopatch keeps Edge current across the fleet automatically, aligned with the same ring structure.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🔑</div>
+        <div class="ctit">Microsoft Teams Updates</div>
+        <div class="cbod">Teams desktop app updates managed alongside other Microsoft product updates through Autopatch.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🚫</div>
+        <div class="ctit">Does NOT Manage</div>
+        <div class="cbod">Third-party apps (Chrome, Adobe, Zoom), Windows Server, non-Microsoft software, BIOS/firmware updates. Autopatch is Microsoft-product-focused only.</div>
+      </div>
+    </div>
+
+    <div class="sh">The Traditional Patching Lifecycle vs Autopatch</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Activity</th><th>Traditional (IT-Managed)</th><th>With Autopatch</th></tr></thead>
+        <tbody>
+          <tr><td>Testing patches before deployment</td><td>IT tests in a lab environment — 1–2 weeks</td><td>Microsoft tests + ring structure catches issues automatically</td></tr>
+          <tr><td>Creating deployment rings</td><td>IT manually creates Update Rings in Intune, assigns groups</td><td>Autopatch creates and manages its own rings automatically</td></tr>
+          <tr><td>Scheduling deployments</td><td>IT sets deferral periods, maintenance windows, active hours</td><td>Autopatch manages scheduling — Microsoft decides optimal timing</td></tr>
+          <tr><td>Monitoring rollout</td><td>IT checks Update Compliance reports, investigates failures</td><td>Autopatch monitors automatically, raises issues to IT via Service Health</td></tr>
+          <tr><td>Pausing bad updates</td><td>IT manually pauses Update Ring when issues detected</td><td>Autopatch automatically pauses rollout when failure threshold exceeded</td></tr>
+          <tr><td>Rollback decisions</td><td>IT investigates and decides whether to roll back</td><td>Autopatch can automatically roll back problematic updates</td></tr>
+          <tr><td>IT time per month</td><td>8–20+ hours per patch cycle</td><td>~1 hour (review service health, handle exceptions)</td></tr>
+          <tr><td>SLA</td><td>IT-defined (often months delayed)</td><td>Microsoft SLA: 95% of devices patched within 21 days</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">How Autopatch Fits in the Microsoft SLA</div>
+    <p>Microsoft makes a <strong>formal Service Level Objective (SLO)</strong> with Autopatch: <strong>95% of devices will have Windows quality updates installed within 21 days of release</strong>. This is not a guarantee you can hold Microsoft contractually liable for, but it represents Microsoft's commitment and target. For many organizations, this SLO is better than what their internal IT team achieves with manual processes.</p>
+
+    <div class="ib ibg">
+      <div class="bt">✅ The Core Value Proposition</div>
+      <p>Autopatch shifts the update management SLA from "we'll get to it when we can" to a Microsoft-backed commitment. Security teams can point to Autopatch as their patch management control — satisfying auditors, cyber insurance requirements, and compliance frameworks that demand timely patching. The IT team is freed from Patch Tuesday firefighting to focus on higher-value work.</p>
+    </div>
+
+    <div class="sh">Licensing Requirements</div>
+    <ul class="bl">
+      <li><strong>Required:</strong> Windows 10/11 Enterprise or Professional with one of:<br/>
+        — Microsoft 365 E3 or higher<br/>
+        — Windows 10/11 Enterprise E3 or E5<br/>
+        — Microsoft 365 Business Premium</li>
+      <li><strong>Also required:</strong> Azure AD Premium P1 (for dynamic groups), Microsoft Intune (for device management)</li>
+      <li><strong>NOT available for:</strong> Windows Home edition, Windows Server, non-Windows platforms</li>
+    </ul>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 81</div>
+      <div class="qa"><div class="qq">What is Windows Autopatch and what problem does it solve?</div>
+      <div class="qans">Windows Autopatch is Microsoft's managed update service that automates the entire Windows patching lifecycle — scheduling, ring deployment, monitoring, failure detection, and rollback — for Windows quality updates, feature updates, Microsoft 365 Apps, Edge, and Teams. It solves the significant IT overhead of monthly patch management by handing control to Microsoft, who manages the deployment with built-in ring logic and a 95% patch coverage within 21 days SLO. IT teams go from spending 8-20 hours per patch cycle to roughly one hour of exception handling.</div></div>
+      <div class="qa"><div class="qq">What does Windows Autopatch manage and what does it NOT manage?</div>
+      <div class="qans">Autopatch manages: Windows quality updates (Patch Tuesday cumulative updates), Windows feature updates (annual version upgrades), Microsoft 365 Apps updates, Microsoft Edge updates, and Microsoft Teams updates. It does NOT manage: third-party applications (Chrome, Adobe, Zoom), Windows Server, non-Microsoft software, BIOS or firmware updates. Autopatch is specifically scoped to Microsoft products on Windows client devices.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T82 -->
+  <section class="ts" id="t82">
+    <div class="th"><div class="tnum">TOPIC 82</div>
+      <div><div class="ttl">Autopatch Groups &amp; Deployment Rings</div>
+      <div class="tsub">How Autopatch intelligently stages updates across your fleet</div></div>
+    </div>
+
+    <div class="sh">The Ring Architecture Concept</div>
+    <p>The core of Autopatch is a <strong>deployment ring architecture</strong> — devices are divided into groups that receive updates at different times. The earliest rings get updates first and act as canaries; if updates cause problems in early rings, Autopatch detects this and pauses rollout before it reaches the majority of devices. This prevents a bad update from impacting your entire fleet simultaneously.</p>
+
+    <div class="sh">The Four Default Autopatch Rings</div>
+    <div class="ring-timeline">
+      <div class="ring-row">
+        <div class="ring-week">
+          <div class="rw-label">Patch +</div>
+          <div class="rw-value">0 days</div>
+        </div>
+        <div class="ring-content ring-test">
+          <div class="rc-name">🧪 Test Ring</div>
+          <div class="rc-desc">First to receive every update. No deferral — patches immediately on release. Intentionally small. Used to catch immediate breaking issues before any production devices are affected.</div>
+          <div class="rc-size"><span class="spill sp-blue">1% of devices (min 1 device)</span></div>
+        </div>
+      </div>
+      <div class="ring-row">
+        <div class="ring-week">
+          <div class="rw-label">Patch +</div>
+          <div class="rw-value">1 day</div>
+        </div>
+        <div class="ring-content ring-first">
+          <div class="rc-name">🚀 First Ring</div>
+          <div class="rc-desc">Early adopters — tech-savvy users who can handle occasional update issues. Receives updates 1 day after Test Ring. Expands the validation surface before broader rollout.</div>
+          <div class="rc-size"><span class="spill sp-green">9% of devices</span></div>
+        </div>
+      </div>
+      <div class="ring-row">
+        <div class="ring-week">
+          <div class="rw-label">Patch +</div>
+          <div class="rw-value">6 days</div>
+        </div>
+        <div class="ring-content ring-fast">
+          <div class="rc-name">⚡ Fast Ring</div>
+          <div class="rc-desc">Significant portion of the fleet. By this point, Test and First ring results confirm the update is safe. Fast ring represents the "confident early majority" of your organization's devices.</div>
+          <div class="rc-size"><span class="spill sp-yellow">20% of devices</span></div>
+        </div>
+      </div>
+      <div class="ring-row">
+        <div class="ring-week">
+          <div class="rw-label">Patch +</div>
+          <div class="rw-value">9 days</div>
+        </div>
+        <div class="ring-content ring-broad">
+          <div class="rc-name">🌐 Broad Ring</div>
+          <div class="rc-desc">The majority of your fleet. Only receives updates after Test, First, and Fast rings have validated the update successfully. The most conservative ring — receives updates last but most confidently.</div>
+          <div class="rc-size"><span class="spill sp-orange">70% of devices</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh">Device Assignment to Rings</div>
+    <p>Autopatch automatically assigns devices to rings when they enroll. The default assignment uses a random distribution based on the ring percentages (1/9/20/70). You can manually move specific devices between rings:</p>
+    <ul class="bl">
+      <li><strong>Test Ring candidates:</strong> IT team's own devices, dedicated test machines, lab devices — people who can handle early-adoption issues.</li>
+      <li><strong>First Ring candidates:</strong> Tech-savvy early adopters, IT department members, developers who benefit from staying current.</li>
+      <li><strong>Fast Ring candidates:</strong> Flexible knowledge workers, departments with quick issue-reporting capability.</li>
+      <li><strong>Broad Ring candidates:</strong> Executives, critical business systems, operational staff, users who need maximum stability.</li>
+    </ul>
+
+    <div class="sh">Autopatch Groups (The New Model)</div>
+    <p>Microsoft introduced <strong>Autopatch Groups</strong> as an enhancement to the basic ring structure. Autopatch Groups let you create custom deployment groups with their own ring configurations — useful for organizations with multiple business units, subsidiaries, or compliance domains that need different update timing.</p>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">🏢</div>
+        <div class="ctit">Default Autopatch Group</div>
+        <div class="cbod">The standard group created automatically during enrollment. Uses the 4-ring model (Test/First/Fast/Broad) with Microsoft's default timing. Covers the majority of enrolled devices. Suitable for most organizations as-is.</div>
+      </div>
+      <div class="card">
+        <div class="cico">⚙️</div>
+        <div class="ctit">Custom Autopatch Groups</div>
+        <div class="cbod">Create separate deployment groups with custom ring timing. Example: a "Critical Systems" Autopatch Group with a 30-day deferral before Broad ring, separate from the standard Default Group. Each group has its own Test → Broad progression.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🏥</div>
+        <div class="ctit">Compliance Use Case</div>
+        <div class="cbod">Healthcare organization with clinical devices that must be updated within 7 days (compliance requirement) AND back-office devices where stability matters more. Two Autopatch Groups with different SLA timings, both monitored in one dashboard.</div>
+      </div>
+    </div>
+
+    <div class="sh">Automatic Pause Logic — How Autopatch Protects Your Fleet</div>
+    <p>One of Autopatch's most valuable capabilities: it automatically monitors deployment quality across rings and pauses rollout when issues are detected. The thresholds that trigger a pause:</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Scenario</th><th>Autopatch Response</th><th>Alert Sent?</th></tr></thead>
+        <tbody>
+          <tr><td>Device failure rate in a ring exceeds 5% within 2 days of update</td><td>Pause update rollout to next rings automatically</td><td>✅ Service Health advisory in Intune</td></tr>
+          <tr><td>Update causes Blue Screen of Death (BSOD) on multiple devices</td><td>Immediate pause + investigation flag</td><td>✅ Urgent Service Health incident</td></tr>
+          <tr><td>Update rollout stalls (devices not completing update within expected timeframe)</td><td>Investigation ticket raised</td><td>✅ Advisory notification</td></tr>
+          <tr><td>Microsoft pulls the update from Windows Update (KB retraction)</td><td>Autopatch immediately stops deployment and removes queued installs</td><td>✅ Notification with Microsoft advisory link</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Manual Pause and Rollback</div>
+    <p>IT administrators can also manually intervene:</p>
+    <ul class="bl">
+      <li><strong>Pause an update:</strong> Intune → Reports → Windows Updates → Autopatch → Find the specific update → Pause. Stops deployment to remaining rings until you resume.</li>
+      <li><strong>Resume deployment:</strong> After investigating and confirming the issue is resolved, resume the update rollout from where it stopped.</li>
+      <li><strong>Release a device from a ring:</strong> Move a specific troubled device to the Test ring for investigation without affecting other ring members.</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🛑</div><div class="rwl">Autopatch Auto-Pause Real Scenario</div></div>
+      <p><strong>Scenario:</strong> Microsoft releases October Patch Tuesday. Autopatch deploys to Test ring (5 devices) on Day 0 — no issues. Deploys to First ring (45 devices) on Day 1 — no issues. Deploys to Fast ring (100 devices) on Day 6.<br/>
+      <strong>Day 7:</strong> 8 of the 100 Fast ring devices report BSOD after update. Failure rate = 8% — exceeds the 5% threshold.<br/>
+      <strong>Autopatch action:</strong> Automatically pauses the Broad ring (350 devices) — they don't receive the update. Raises a Service Health advisory in the Intune portal: "Quality update deployment paused due to elevated device failure rate. Investigating."<br/>
+      <strong>Microsoft investigation:</strong> The update had a conflict with a specific driver version on HP EliteBook models.<br/>
+      <strong>Resolution:</strong> Microsoft releases an updated build (KB revision) that fixes the driver conflict. Autopatch automatically resumes the Broad ring deployment with the fixed build.<br/>
+      <strong>Protected:</strong> 350 devices never received the bad update. Zero IT intervention required — Autopatch handled everything.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 82</div>
+      <div class="qa"><div class="qq">Describe the four default Autopatch deployment rings and their timing.</div>
+      <div class="qans">Test ring (1% of devices): receives updates immediately on release day — zero deferral. First ring (9%): receives updates 1 day after Test, for early adopters. Fast ring (20%): receives updates 6 days after Patch Tuesday release, after Test and First have validated. Broad ring (70%): receives updates 9 days after release, after the majority of the fleet validation period. This staged approach catches issues in smaller populations before they affect the bulk of devices.</div></div>
+      <div class="qa"><div class="qq">What happens automatically when Autopatch detects an elevated failure rate in a deployment ring?</div>
+      <div class="qans">When the device failure rate in a ring exceeds 5% within 2 days of an update deploying, Autopatch automatically pauses the rollout to subsequent rings. For example, if 8% of Fast ring devices fail, Broad ring deployment is paused immediately — protecting 70% of devices from receiving the problematic update. A Service Health advisory appears in the Intune portal. Autopatch then investigates, and if Microsoft releases a fixed update, Autopatch automatically resumes deployment with the corrected build — all without IT intervention.</div></div>
+      <div class="qa"><div class="qq">What are Autopatch Groups and when would you create a custom one?</div>
+      <div class="qans">Autopatch Groups are deployment units with their own ring configuration and timing, beyond the single default four-ring model. You'd create a custom Autopatch Group when different parts of your organization need different update policies — for example, a "Critical Infrastructure" group with a 30-day deferral before Broad ring deployment (for servers or OT-adjacent PCs that need maximum stability testing), while the Default Group follows the standard 9-day timeline. Each group has independent monitoring and pause/resume controls.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T83 -->
+  <section class="ts" id="t83">
+    <div class="th"><div class="tnum">TOPIC 83</div>
+      <div><div class="ttl">Autopatch Enrollment Requirements</div>
+      <div class="tsub">What your environment needs to be ready for Autopatch — the full checklist</div></div>
+    </div>
+
+    <div class="sh">The Prerequisites Checklist</div>
+    <p>Autopatch doesn't work in every environment. Before enrolling, your environment must meet specific requirements. Microsoft provides a <strong>Readiness Assessment</strong> tool built into the enrollment flow that automatically checks most of these — but knowing them beforehand saves troubleshooting time.</p>
+
+    <div class="req-list">
+      <div class="req-item">
+        <div class="req-icon">🪪</div>
+        <div class="req-body">
+          <strong>Azure AD Join or Hybrid Azure AD Join</strong> — Autopatch requires devices to have an Azure AD identity. Pure on-premises AD joined devices (no Azure AD) are not supported.
+          <div class="req-note">Check: dsregcmd /status → AzureAdJoined: YES</div>
+        </div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">📱</div>
+        <div class="req-body">
+          <strong>Microsoft Intune enrollment</strong> — Devices must be enrolled in Intune (MDM). Autopatch uses Intune to deploy update policies and collect device status telemetry.
+          <div class="req-note">Check: Settings → Accounts → Access work or school → Info (MDM enrolled)</div>
+        </div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">🪟</div>
+        <div class="req-body">
+          <strong>Windows 10 1809+ or Windows 11 (any version)</strong> — Older Windows 10 versions are not supported. All editions must be Enterprise or Professional.
+          <div class="req-note">Windows Home edition is NOT supported by Autopatch</div>
+        </div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">🔑</div>
+        <div class="req-body">
+          <strong>Supported license</strong> — Microsoft 365 E3, E5, F3, Windows 10/11 Enterprise E3/E5, or Microsoft 365 Business Premium. The specific Intune + Azure AD P1 entitlements within these licenses are what enables Autopatch.
+          <div class="req-note">M365 Business Basic does NOT include Autopatch</div>
+        </div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">🌐</div>
+        <div class="req-body">
+          <strong>Windows Update accessible</strong> — Devices must be able to reach Windows Update (windowsupdate.microsoft.com) and related endpoints. If using a proxy or firewall, these URLs must be allowlisted.
+          <div class="req-note">If using WSUS, it must NOT be configured to replace Windows Update for Autopatch-managed devices</div>
+        </div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">🔄</div>
+        <div class="req-body">
+          <strong>No conflicting Windows Update policies</strong> — Existing Intune Update Rings or Configuration Profile settings that configure Windows Update settings will conflict with Autopatch. These must be removed from Autopatch-enrolled devices before or during enrollment.
+          <div class="req-note">Autopatch creates its own Update Ring policies — duplicates cause conflicts</div>
+        </div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">🔒</div>
+        <div class="req-body">
+          <strong>Windows Update for Business (WUfB) not conflicting</strong> — Existing WUfB policies (deferral settings, deployment rings) must not be applied to devices that will be enrolled in Autopatch.
+          <div class="req-note">Autopatch replaces WUfB management for enrolled devices</div>
+        </div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">📊</div>
+        <div class="req-body">
+          <strong>Windows Diagnostic Data</strong> — Devices must send Windows Diagnostic Data at Enhanced level or higher to Microsoft. Autopatch uses telemetry to determine update health and failure detection.
+          <div class="req-note">Required: Full telemetry (DiagTrack service running). Basic telemetry is insufficient for failure detection.</div>
+        </div>
+      </div>
+      <div class="req-item">
+        <div class="req-icon">👥</div>
+        <div class="req-body">
+          <strong>Azure AD groups available</strong> — Autopatch creates four Azure AD device groups during enrollment (Test, First, Fast, Broad rings). These groups must be manageable by Intune (not locked by policy).
+          <div class="req-note">Group names: Modern Workplace Devices - Windows Autopatch - Test/First/Fast/All</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh">The Readiness Assessment Tool</div>
+    <p>Before fully enrolling, run the <strong>Readiness Assessment</strong> which automatically checks your environment against all prerequisites:</p>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>Go to <strong>Intune → Devices → Windows Updates → Windows Autopatch</strong></div></li>
+      <li><div class="sn">2</div><div>Click <strong>"Enroll"</strong> or <strong>"Run Readiness Assessment"</strong></div></li>
+      <li><div class="sn">3</div><div>The tool checks: license validity, Azure AD configuration, Intune connectivity, existing policy conflicts, network requirements, and tenant health.</div></li>
+      <li><div class="sn">4</div><div>Review results: each check is marked <span class="spill sp-green">✅ Ready</span>, <span class="spill sp-yellow">⚠️ Advisory</span>, or <span class="spill sp-red">❌ Not Ready</span></div></li>
+      <li><div class="sn">5</div><div>Fix all "Not Ready" items. Advisory items are warnings — consider fixing but not blockers. When all critical checks pass, proceed with enrollment.</div></li>
+    </ol>
+
+    <div class="sh">Enrollment Steps</div>
+    <ol class="steps">
+      <li><div class="sn">1</div><div><strong>Fix existing Update Ring conflicts:</strong> Before enrolling, exclude the devices you want to enroll in Autopatch from any existing Intune Update Ring assignments. Autopatch will create its own rings.</div></li>
+      <li><div class="sn">2</div><div><strong>Run Readiness Assessment</strong> and resolve all blockers.</div></li>
+      <li><div class="sn">3</div><div><strong>Enroll the tenant:</strong> Click "Enroll" in the Autopatch blade. This creates the four Azure AD groups and four Intune Update Ring policies.</div></li>
+      <li><div class="sn">4</div><div><strong>Assign devices to rings:</strong> Add devices to the Autopatch device groups. Autopatch randomly distributes them per ring percentages, or you can manually assign to specific rings.</div></li>
+      <li><div class="sn">5</div><div><strong>Verify enrollment:</strong> Devices should appear in the Autopatch device registration report within 24 hours. Check for "Not ready" devices that need remediation.</div></li>
+    </ol>
+
+    <div class="ib ibo">
+      <div class="bt">⚠️ WSUS Conflict — Common Blocking Issue</div>
+      <p>Many enterprise environments use WSUS (Windows Server Update Services) to approve and distribute Windows updates. If your Intune-enrolled devices have WSUS configured (via Group Policy or Intune Settings Catalog), Autopatch cannot manage their updates — devices will only see WSUS-approved updates, not Windows Update directly.<br/><br/>
+      <strong>Fix:</strong> For Autopatch-enrolled devices, ensure the Windows Update source is set to <strong>Windows Update (the internet)</strong> — not WSUS. In Group Policy, remove any "Specify intranet Microsoft Update service location" setting for these devices. In Intune Settings Catalog, ensure no Update Source or WSUS server is configured for the Autopatch device groups.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 83</div>
+      <div class="qa"><div class="qq">What are the key prerequisites for enrolling devices in Windows Autopatch?</div>
+      <div class="qans">Devices must be Azure AD Joined or Hybrid Azure AD Joined, enrolled in Microsoft Intune MDM, running Windows 10 1809 or later (Enterprise or Professional edition — Home not supported), and licensed with M365 E3/E5, Windows Enterprise E3/E5, or M365 Business Premium. The device must be able to reach Windows Update directly on the internet. Existing Intune Update Ring policies or WSUS configuration that conflicts with Autopatch must be removed. Windows Diagnostic Data must be set to Enhanced or Full for failure detection to work.</div></div>
+      <div class="qa"><div class="qq">What does the Autopatch Readiness Assessment check and why should you run it before enrollment?</div>
+      <div class="qans">The Readiness Assessment automatically evaluates the environment against all Autopatch prerequisites — license validity, Azure AD configuration, Intune enrollment health, existing Update Ring conflicts, WSUS conflicts, network connectivity to Windows Update, and tenant configuration. Running it before enrollment surfaces blockers that would cause Autopatch to malfunction silently after enrollment — like conflicting Update Rings that would fight with Autopatch's own rings. Fixing blockers first ensures a clean, functional Autopatch deployment.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T84 -->
+  <section class="ts" id="t84">
+    <div class="th"><div class="tnum">TOPIC 84</div>
+      <div><div class="ttl">Monitoring Autopatch — Reports, Alerts &amp; Service Health</div>
+      <div class="tsub">Staying informed without micromanaging — the Autopatch monitoring toolkit</div></div>
+    </div>
+
+    <div class="sh">The Monitoring Philosophy</div>
+    <p>The promise of Autopatch is that you don't need to actively monitor patch deployment — Autopatch monitors itself and alerts you when action is needed. Your role shifts from <em>active manager</em> (checking every patch cycle) to <em>exception handler</em> (reviewing alerts and approving decisions). Understanding the monitoring tools lets you trust Autopatch while staying informed.</p>
+
+    <div class="sh">Key Reports in Autopatch</div>
+    <div class="cg">
+      <div class="card">
+        <div class="cico">📊</div>
+        <div class="ctit">Windows Quality Update Report</div>
+        <div class="cbod">The primary report — shows deployment status for the current month's quality update across all four rings. Per-ring breakdown: how many devices are Scheduled, In Progress, Up to date, or Failed. Track progress toward the 21-day SLO.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📅</div>
+        <div class="ctit">Feature Update Report</div>
+        <div class="cbod">Tracks Windows feature update (version upgrade) deployment progress. Shows which ring is being deployed, current success rate, devices pending, and any compatibility blocks preventing upgrade.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🩺</div>
+        <div class="ctit">Device Registration Report</div>
+        <div class="cbod">Health status of enrolled devices — Registered (healthy), Not Ready (prerequisites not met), Inactive (not checking in), or Paused (manually or automatically paused). Your daily enrollment health dashboard.</div>
+      </div>
+      <div class="card">
+        <div class="cico">📱</div>
+        <div class="ctit">Microsoft 365 Apps Update Report</div>
+        <div class="cbod">Deployment status of M365 Apps (Office) updates across rings. Version breakdown showing which devices are on which Office build and how many are current.</div>
+      </div>
+      <div class="card">
+        <div class="cico">🌐</div>
+        <div class="ctit">Edge Update Report</div>
+        <div class="cbod">Microsoft Edge version distribution across enrolled devices. Shows current version compliance and how quickly the fleet moved to the latest Edge build after Autopatch deployed it.</div>
+      </div>
+      <div class="card">
+        <div class="cico">⚠️</div>
+        <div class="ctit">Windows Quality Update Alerts</div>
+        <div class="cbod">Active alerts about problematic updates — paused deployments, devices failing to update, policy conflicts detected, devices not meeting the 21-day SLO threshold. Action items that need admin attention.</div>
+      </div>
+    </div>
+
+    <div class="sh">Device Status Definitions</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Status</th><th>Meaning</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td><span class="spill sp-green">✅ Up to Date</span></td><td>Device has the latest Autopatch-targeted update installed. All good.</td><td>None — this is the target state.</td></tr>
+          <tr><td><span class="spill sp-blue">🔄 In Progress</span></td><td>Update is downloading or installing on this device right now.</td><td>Wait — normal transient state. Check back in a few hours.</td></tr>
+          <tr><td><span class="spill sp-yellow">⏳ Scheduled</span></td><td>Update is queued for this device but hasn't started yet. May be waiting for its ring's deployment window.</td><td>Wait — will progress automatically according to ring schedule.</td></tr>
+          <tr><td><span class="spill sp-orange">⚠️ Not Ready</span></td><td>Device has a registration issue preventing Autopatch management — WSUS conflict, missing license, enrollment issue.</td><td>Review the readiness issue details. Remediate the specific blocking condition.</td></tr>
+          <tr><td><span class="spill sp-red">❌ Failed</span></td><td>Update installation failed on this device after multiple attempts. Needs IT intervention.</td><td>Check Windows Update logs on device. Review error code. May need manual update or device remediation.</td></tr>
+          <tr><td><span class="spill sp-yellow">⏸️ Paused</span></td><td>Update deployment to this device (or its ring) is paused — either by Autopatch automatic logic or by an admin.</td><td>Review the pause reason in Service Health. Resume when issue is resolved.</td></tr>
+          <tr><td><span class="spill sp-red">💤 Inactive</span></td><td>Device hasn't checked in with Intune in an extended period. May be offline, powered off, or lost.</td><td>Contact user to power on and connect to internet. If device is lost, consider retire/wipe.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">Service Health — The Alert Feed</div>
+    <p><strong>Service Health</strong> (also called Windows Autopatch Service Health in the Intune portal) is where Autopatch communicates issues that need your attention. Think of it as Autopatch's communication channel to IT:</p>
+    <ul class="bl">
+      <li><strong>Advisory:</strong> Low-priority informational items — minor deployment delays, devices at risk of missing SLO, optimization suggestions.</li>
+      <li><strong>Incident:</strong> Active issues requiring IT attention — automatic pause engaged, high failure rate detected, Microsoft asking IT to approve a remediation action.</li>
+      <li><strong>Post-Incident Review:</strong> After a resolved incident, a summary of what happened, why, and what changed.</li>
+    </ul>
+    <p>Access via: <strong>Intune → Reports → Windows Updates → Windows Autopatch → Service incidents and advisories</strong></p>
+
+    <div class="sh">Setting Up Autopatch Notifications</div>
+    <p>Don't miss critical Autopatch events — configure notifications so the right people are alerted:</p>
+    <ol class="steps">
+      <li><div class="sn">1</div><div>In the Autopatch Admin Center: <strong>Tenant Administration → Windows Autopatch → Tenant management</strong></div></li>
+      <li><div class="sn">2</div><div>Add <strong>Admin contact emails</strong> — these receive Autopatch service health notifications, incident reports, and advisory emails directly.</div></li>
+      <li><div class="sn">3</div><div>Optionally set up <strong>Azure Monitor Alerts</strong> → route Intune Autopatch events to a Microsoft Teams channel or email distribution list via Logic App or Action Group.</div></li>
+    </ol>
+
+    <div class="sh">The SLO Dashboard — 21-Day Target</div>
+    <p>Autopatch's quality update SLO targets 95% of devices updated within 21 days of release. You can see your progress toward this target in the Quality Update report:</p>
+    <ul class="bl">
+      <li><strong>Green zone:</strong> Current patch cycle coverage above 95% — SLO met.</li>
+      <li><strong>Yellow zone:</strong> 85–95% coverage — SLO at risk. Review devices in "Not Ready" or "Failed" state.</li>
+      <li><strong>Red zone:</strong> Below 85% — SLO breach. Autopatch will flag this and may create a Service Incident asking IT to investigate the gap.</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">📊</div><div class="rwl">Weekly Autopatch Review — What to Check</div></div>
+      <p><strong>Recommended weekly review (15 minutes):</strong><br/>
+      1. <strong>Device Registration Report:</strong> Any new "Not Ready" devices? Investigate and remediate.<br/>
+      2. <strong>Quality Update Report:</strong> What's the current month's patch coverage percentage? Are we trending toward the 21-day SLO?<br/>
+      3. <strong>Alerts/Service Health:</strong> Any active incidents or advisories? Any paused deployments needing admin approval to resume?<br/>
+      4. <strong>Failed devices count:</strong> More than 2–3% failure rate? Investigate the common error — may indicate a driver conflict or environmental issue specific to your fleet.<br/>
+      5. <strong>Inactive devices:</strong> Devices that haven't checked in for 7+ days. Reach out to users or escalate to asset management.<br/>
+      This 15-minute review replaces the 8-20 hours of traditional patch management work.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 84</div>
+      <div class="qa"><div class="qq">What does the "Not Ready" device status mean in Autopatch and how do you resolve it?</div>
+      <div class="qans">Not Ready means a device has a pre-enrollment or post-enrollment readiness issue preventing Autopatch from managing its updates. Common causes: WSUS configured on the device (overrides Windows Update), conflicting Intune Update Ring policy still assigned, device doesn't meet OS version requirements, Windows Diagnostic Data not set to Enhanced/Full, or a licensing issue. Resolution: click into the specific "Not Ready" device to see which readiness check is failing, then remediate that specific condition — remove the WSUS setting, remove the conflicting Update Ring policy, or fix the telemetry setting.</div></div>
+      <div class="qa"><div class="qq">What is the Autopatch quality update SLO and where do you monitor progress toward it?</div>
+      <div class="qans">The SLO targets 95% of enrolled devices having the latest quality update installed within 21 days of its release. Monitor progress in Intune → Reports → Windows Updates → Windows Autopatch → Quality updates report. This shows per-ring deployment progress, the percentage of devices currently "Up to Date," and highlights if the fleet is on track. Service Health alerts fire if progress falls below the threshold, requiring admin investigation into failed or inactive devices.</div></div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T85 -->
+  <section class="ts" id="t85">
+    <div class="th"><div class="tnum">TOPIC 85</div>
+      <div><div class="ttl">Autopatch vs Windows Update for Business (WUfB)</div>
+      <div class="tsub">Two approaches to patch management — when to use each</div></div>
+    </div>
+
+    <div class="sh">Understanding Both Tools</div>
+    <p><strong>Windows Update for Business (WUfB)</strong> is the traditional Intune-based approach to managing Windows Updates — you configure Update Rings (deferral periods, active hours, restart behavior) via Intune policies, and devices follow those configurations. IT controls and monitors everything manually.</p>
+    <p><strong>Windows Autopatch</strong> builds on top of WUfB and takes that management away from IT — Microsoft handles the ring configuration, timing, monitoring, and remediation automatically.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card cc-autopatch">
+        <div class="cc-title">🤖 Windows Autopatch</div>
+        <ul class="cc-body">
+          <li>Microsoft manages ring timing and deferral</li>
+          <li>Automatic pause when failure threshold exceeded</li>
+          <li>Microsoft-backed SLO (95% in 21 days)</li>
+          <li>Manages Windows + M365 Apps + Edge + Teams</li>
+          <li>Minimal IT configuration after enrollment</li>
+          <li>Less control over exact timing</li>
+          <li>Requires M365 E3+ license</li>
+          <li>Requires Windows Enterprise/Pro (not Home)</li>
+          <li>Readiness requirements must be met</li>
+          <li>IT monitors alerts + handles exceptions</li>
+        </ul>
+      </div>
+      <div class="compare-card cc-wufb">
+        <div class="cc-title">⚙️ Windows Update for Business</div>
+        <ul class="cc-body">
+          <li>IT fully controls ring timing and deferral</li>
+          <li>Manual pause — IT monitors and decides</li>
+          <li>No SLO — IT-defined timelines</li>
+          <li>Windows updates only (M365/Edge separate)</li>
+          <li>Requires creating and maintaining Update Rings</li>
+          <li>Full control over exact scheduling</li>
+          <li>Any Intune license supports it</li>
+          <li>Works on all Windows editions with Intune</li>
+          <li>No additional readiness requirements</li>
+          <li>IT monitors and manages actively</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="sh">Detailed Feature Comparison</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Feature</th><th>Windows Update for Business</th><th>Windows Autopatch</th></tr></thead>
+        <tbody>
+          <tr><td>Who manages ring timing?</td><td>IT admin (via Intune Update Rings)</td><td>Microsoft (Autopatch manages automatically)</td></tr>
+          <tr><td>Quality update deferral</td><td>IT-configured: 0–30 days per ring</td><td>Microsoft-managed: 0/1/6/9 days across rings</td></tr>
+          <tr><td>Feature update management</td><td>IT configures per Update Ring or Feature Update Policy</td><td>Autopatch manages annually with compatibility checking</td></tr>
+          <tr><td>M365 Apps updates</td><td>Separate M365 Apps Update Channel policy needed</td><td>✅ Managed by Autopatch alongside Windows updates</td></tr>
+          <tr><td>Edge updates</td><td>Separate Edge update policy needed</td><td>✅ Managed by Autopatch</td></tr>
+          <tr><td>Automatic pause on failure</td><td>❌ Manual — IT must notice and act</td><td>✅ Automatic at 5% failure threshold</td></tr>
+          <tr><td>Rollback capability</td><td>IT-managed — using Update Ring pause/resume</td><td>Autopatch manages — auto or admin-triggered</td></tr>
+          <tr><td>Monitoring</td><td>IT checks Windows Update Compliance reports</td><td>Autopatch dashboard + Service Health alerts to IT</td></tr>
+          <tr><td>IT time required/month</td><td>8–20 hours (active management)</td><td>~1 hour (exception handling)</td></tr>
+          <tr><td>Compliance SLO</td><td>None — IT-defined</td><td>95% devices updated within 21 days</td></tr>
+          <tr><td>Control level</td><td>High — IT controls everything</td><td>Low — Microsoft controls, IT handles exceptions</td></tr>
+          <tr><td>WSUS compatible?</td><td>✅ Yes — can use WSUS as update source</td><td>❌ No — requires direct Windows Update access</td></tr>
+          <tr><td>Minimum license</td><td>Any Intune license (M365 Business Basic+)</td><td>M365 E3, E5, Business Premium, or Windows E3/E5</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh">When to Choose Autopatch</div>
+    <ul class="bl">
+      <li><strong>IT team is small</strong> and patch management overhead is significant</li>
+      <li><strong>Security/compliance requires</strong> a documented, time-bound patching SLA</li>
+      <li><strong>Cyber insurance</strong> or audit requirements demand evidence of systematic patching</li>
+      <li><strong>You have M365 E3+</strong> licensing (Autopatch included at no additional cost)</li>
+      <li><strong>You want unified management</strong> of Windows + M365 Apps + Edge + Teams updates together</li>
+      <li><strong>You trust Microsoft</strong> to make good ring timing decisions for your fleet</li>
+    </ul>
+
+    <div class="sh">When to Keep WUfB</div>
+    <ul class="bl">
+      <li><strong>You need precise control</strong> over exactly when updates deploy (regulated environments, trading floors, manufacturing lines)</li>
+      <li><strong>You use WSUS</strong> and cannot move to direct Windows Update internet access</li>
+      <li><strong>You're on M365 Business Basic</strong> or licensing that doesn't include Autopatch</li>
+      <li><strong>You have specific Windows Home</strong> devices in your fleet that Autopatch can't manage</li>
+      <li><strong>You need custom deferral timing</strong> — e.g., 60-day deferral for critical infrastructure that Autopatch's fixed rings don't accommodate</li>
+      <li><strong>Your compliance framework requires</strong> specific patch approval processes (change management, CAB approval before deployment)</li>
+    </ul>
+
+    <div class="sh">Can You Use Both?</div>
+    <p>Yes — for different device populations. Some organizations use Autopatch for their standard employee laptop fleet while using WUfB manually for specialized devices (kiosks, OT-adjacent PCs, executive devices needing special care). The key is ensuring each device only has ONE update management approach — a device enrolled in Autopatch must not also have conflicting WUfB Update Ring policies assigned.</p>
+
+    <div class="tip">
+      <div class="tpic">💡</div>
+      <div><strong>Interview Positioning:</strong> When asked about patch management in an Intune interview, demonstrate awareness of BOTH approaches. Show you understand WUfB (which you've likely used if working with Intune for any time) AND Autopatch (which is the modern direction). Be able to articulate when you'd choose one over the other. This shows depth — not just knowing the tools exist, but understanding the decision criteria for each.</div>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🏢</div><div class="rwl">Real-World Decision — Autopatch or WUfB?</div></div>
+      <p><strong>Company A — 500-person SaaS company, M365 E5 licenses, 3-person IT team:</strong><br/>
+      Decision: <strong>Autopatch.</strong> Small IT team can't afford 15 hours/month on patching. M365 E5 includes Autopatch at no extra cost. Cyber insurance requires documented patching SLA — Autopatch provides it. No WSUS. All devices Azure AD Joined. Clear choice.<br/><br/>
+      <strong>Company B — Manufacturing company, 2,000 devices, mix of production floor PCs and office PCs, WSUS infrastructure in place:</strong><br/>
+      Decision: <strong>WUfB for production floor, evaluate Autopatch for office PCs.</strong> Production floor PCs cannot be updated during production hours — need precise scheduling control that Autopatch's fixed rings can't provide. WSUS is used for offline manufacturing environment. Office PCs could move to Autopatch. Hybrid approach.<br/><br/>
+      <strong>Company C — Bank, 1,500 devices, change management process requiring CAB approval before patches deploy:</strong><br/>
+      Decision: <strong>WUfB with manual rings.</strong> Banking CAB process requires human approval before patches deploy. Autopatch's automated deployment violates the change management policy. IT uses WUfB with extended deferrals to give CAB time to approve before each ring deployment.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 85</div>
+      <div class="qa"><div class="qq">What is the key difference between Windows Update for Business and Windows Autopatch?</div>
+      <div class="qans">Windows Update for Business is IT-managed — you configure Update Ring deferral periods, active hours, and restart policies via Intune, and IT monitors and manages the entire patch cycle manually. Windows Autopatch takes that management off IT — Microsoft manages the ring structure, timing, monitors for failures, automatically pauses on elevated failure rates, and alerts IT only when exceptions need attention. WUfB gives IT full control; Autopatch gives IT freedom from patch management overhead in exchange for less control over exact timing.</div></div>
+      <div class="qa"><div class="qq">Can you use both Autopatch and WUfB in the same Intune tenant?</div>
+      <div class="qans">Yes, for different device populations. Some devices can be enrolled in Autopatch (standard employee laptops) while others remain on manual WUfB Update Rings (specialized devices, production floor PCs). The critical rule is that each device can only have one approach — a device enrolled in Autopatch must not have conflicting WUfB Update Ring policies applied to it. Separate the device populations via Azure AD groups and ensure Autopatch-enrolled devices are excluded from WUfB Update Ring assignments.</div></div>
+      <div class="qa"><div class="qq">A security auditor asks for evidence that your organization patches within 30 days of release. Would you choose Autopatch or WUfB, and why?</div>
+      <div class="qans">Autopatch, if licensing allows. Autopatch provides a Microsoft-backed SLO of 95% of devices updated within 21 days — better than the 30-day requirement — with built-in reporting you can export as evidence. The Quality Update report shows percentage of devices updated with timestamps you can share with auditors. With WUfB, you'd need to configure rings to achieve similar timing and manually pull compliance reports from Windows Update Compliance. Autopatch provides both the enforcement mechanism and the documentation in one managed service.</div></div>
+      <div class="qa"><div class="qq">What is the main reason a company might NOT be able to use Windows Autopatch?</div>
+      <div class="qans">Several blockers can prevent Autopatch adoption: using WSUS as the update source (Autopatch requires direct Windows Update access), having a strict change management process requiring human CAB approval before patches deploy (Autopatch automates this), licensing below M365 E3 (Autopatch requires E3, E5, or Windows E3/E5), needing custom deferral periods beyond Autopatch's 9-day maximum for Broad ring, or devices running Windows Home edition (not supported). For any of these scenarios, Windows Update for Business remains the appropriate approach.</div></div>
+    </div>
+  </section>
+
+  <!-- Block Complete -->
+  <div style="background:linear-gradient(135deg,rgba(16,185,129,.07),rgba(56,189,248,.05));border:1px solid rgba(16,185,129,.22);border-radius:16px;padding:30px;margin-top:48px;text-align:center;">
+    <div style="font-size:30px;margin-bottom:11px;">🎉</div>
+    <div style="font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--h);margin-bottom:9px;">Block 9 Complete!</div>
+    <div style="color:var(--text2);font-size:13.5px;max-width:600px;margin:0 auto 18px;line-height:1.7;">You've mastered Windows Autopatch — from what it patches and its SLO promise, to the ring architecture with auto-pause logic, enrollment prerequisites and WSUS conflicts, the monitoring dashboard and service health, and the detailed decision framework for choosing Autopatch vs Windows Update for Business.</div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap;">
+      <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--acc2);font-family:'IBM Plex Mono',monospace;">✅ Blocks 1–9 Done — 85 Topics</div>
+      <div style="background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;">⬡ Block 10 Next: Co-Management</div>
+      <div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--purple);font-family:'IBM Plex Mono',monospace;">📋 44 Topics Remaining</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<a href="#" class="stup">↑</a>
+<script>
+  const secs=document.querySelectorAll('.ts');
+  const navs=document.querySelectorAll('.ni[href^="#"]');
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;navs.forEach(n=>{n.classList.remove('active');if(n.getAttribute('href')==='#'+id)n.classList.add('active');});}});},{rootMargin:'-20% 0px -60% 0px'});
+  secs.forEach(s=>obs.observe(s));
+  navs.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(n.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});}));
+</script>
+</body>
+</html>

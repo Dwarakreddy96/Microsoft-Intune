@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Intune Mastery — Block 5: Compliance Policies</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{
+    --bg:#06080f;--bg2:#090c18;--bg3:#0d1020;
+    --sb:#070a16;--border:#171e35;
+    --accent:#10b981;--accent2:#34d399;--accent3:#6ee7b7;
+    --blue:#38bdf8;--purple:#a78bfa;--orange:#fb923c;
+    --red:#f87171;--yellow:#fbbf24;--pink:#f472b6;
+    --text:#e2eeea;--text2:#7a9490;--text3:#3d5050;
+    --heading:#f0faf5;--card:#080c14;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-weight:300;display:flex;min-height:100vh;line-height:1.75;}
+
+  /* SIDEBAR */
+  #sb{width:285px;min-width:285px;background:var(--sb);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;display:flex;flex-direction:column;}
+  #sb::-webkit-scrollbar{width:3px;}
+  #sb::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  .sh{padding:23px 20px 15px;border-bottom:1px solid var(--border);background:linear-gradient(160deg,#070a16 0%,#0a0e1c 100%);}
+  .sl{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--heading);letter-spacing:-.5px;display:flex;align-items:center;gap:10px;}
+  .li{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--blue));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px rgba(16,185,129,.35);}
+  .ss{font-size:10px;color:var(--text3);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;}
+  .bb{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(56,189,248,.1));border:1px solid rgba(16,185,129,.28);border-radius:20px;padding:4px 12px;font-size:10px;color:var(--accent2);font-family:'IBM Plex Mono',monospace;margin-top:10px;letter-spacing:.5px;}
+  .sn{padding:12px 0;flex:1;}
+  .nl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:8px 20px 4px;font-family:'IBM Plex Mono',monospace;}
+  .ni{display:flex;align-items:flex-start;gap:9px;padding:8px 20px;cursor:pointer;transition:all .2s;border-left:2px solid transparent;text-decoration:none;color:var(--text2);font-size:12.5px;line-height:1.4;}
+  .ni:hover{background:rgba(16,185,129,.07);color:var(--text);border-left-color:var(--accent);}
+  .ni.active{background:rgba(16,185,129,.11);color:var(--accent2);border-left-color:var(--accent);}
+  .nn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--text3);min-width:20px;margin-top:1px;}
+  .ni.active .nn{color:var(--accent);}
+  .pl{display:flex;align-items:center;gap:7px;padding:7px 11px;font-size:11px;color:var(--text3);text-decoration:none;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:7px;margin:0 12px 4px;transition:all .2s;}
+  .pl:hover{color:var(--text2);border-color:rgba(16,185,129,.22);}
+  .sf{padding:13px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .pb{height:3px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden;}
+  .pf{height:100%;width:36%;background:linear-gradient(90deg,var(--accent),var(--blue));border-radius:2px;animation:pg 2s ease-in-out infinite alternate;}
+  @keyframes pg{from{box-shadow:0 0 4px var(--accent);}to{box-shadow:0 0 14px var(--blue);}}
+
+  /* MAIN */
+  #main{margin-left:285px;flex:1;min-height:100vh;}
+  .tb{position:sticky;top:0;z-index:50;background:rgba(6,8,15,.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:13px 46px;display:flex;align-items:center;justify-content:space-between;}
+  .bc{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:7px;}
+  .bc span{color:var(--accent2);}
+  .tc{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 13px;}
+  .ct{padding:50px 46px 80px;max-width:980px;}
+
+  /* Hero */
+  .hero{margin-bottom:56px;position:relative;padding:44px;background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-60px;right:-40px;width:220px;height:220px;background:radial-gradient(circle,rgba(16,185,129,.12) 0%,transparent 70%);border-radius:50%;}
+  .hero::after{content:'';position:absolute;bottom:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,rgba(56,189,248,.08) 0%,transparent 70%);border-radius:50%;}
+  .htag{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:5px 14px;font-size:10.5px;color:var(--accent2);font-family:'IBM Plex Mono',monospace;margin-bottom:16px;letter-spacing:1px;}
+  .ht{font-family:'Syne',sans-serif;font-size:39px;font-weight:800;color:var(--heading);line-height:1.1;letter-spacing:-1px;margin-bottom:13px;}
+  .ht span{background:linear-gradient(135deg,var(--accent),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .hd{font-size:14.5px;color:var(--text2);max-width:620px;line-height:1.8;}
+  .hm{display:flex;gap:20px;margin-top:24px;flex-wrap:wrap;}
+  .hmi{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);}
+  .dot.b{background:var(--blue);box-shadow:0 0 8px var(--blue);}
+  .dot.p{background:var(--purple);box-shadow:0 0 8px var(--purple);}
+
+  /* Topic */
+  .ts{margin-bottom:68px;scroll-margin-top:66px;opacity:0;animation:fu .5s ease forwards;}
+  .ts:nth-child(1){animation-delay:.05s;}.ts:nth-child(2){animation-delay:.1s;}.ts:nth-child(3){animation-delay:.15s;}.ts:nth-child(4){animation-delay:.2s;}.ts:nth-child(5){animation-delay:.25s;}.ts:nth-child(6){animation-delay:.3s;}.ts:nth-child(7){animation-delay:.35s;}.ts:nth-child(8){animation-delay:.4s;}
+  @keyframes fu{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  .th{display:flex;align-items:flex-start;gap:15px;margin-bottom:24px;padding-bottom:17px;border-bottom:1px solid var(--border);}
+  .tn{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--accent);background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:6px;padding:4px 10px;white-space:nowrap;margin-top:4px;}
+  .tt{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--heading);letter-spacing:-.5px;line-height:1.2;margin-bottom:4px;}
+  .tst{font-size:12px;color:var(--text3);font-family:'IBM Plex Mono',monospace;}
+  .sh2{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--heading);margin:28px 0 10px;display:flex;align-items:center;gap:10px;}
+  .sh2::before{content:'';width:3px;height:16px;background:linear-gradient(180deg,var(--accent),var(--blue));border-radius:2px;flex-shrink:0;}
+  p{color:var(--text2);font-size:14px;line-height:1.85;margin-bottom:12px;}
+  p strong{color:var(--text);font-weight:600;}
+  code{font-family:'IBM Plex Mono',monospace;font-size:12px;background:rgba(16,185,129,.1);color:var(--accent2);padding:2px 6px;border-radius:4px;border:1px solid rgba(16,185,129,.18);}
+
+  /* Cards */
+  .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin:16px 0;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:17px;transition:border-color .2s,transform .2s;}
+  .card:hover{border-color:rgba(16,185,129,.32);transform:translateY(-2px);}
+  .ci{font-size:21px;margin-bottom:8px;}
+  .ctit{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;color:var(--heading);margin-bottom:6px;}
+  .cb{font-size:12.5px;color:var(--text2);line-height:1.6;}
+
+  /* Table */
+  .tw{overflow-x:auto;margin:16px 0;border-radius:11px;border:1px solid var(--border);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead tr{background:linear-gradient(135deg,var(--bg3),var(--bg2));}
+  th{padding:12px 15px;text-align:left;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;color:var(--heading);letter-spacing:.4px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 15px;color:var(--text2);border-bottom:1px solid rgba(23,30,53,.5);vertical-align:top;line-height:1.5;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(16,185,129,.02);}
+
+  /* Tags */
+  .tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10.5px;font-family:'IBM Plex Mono',monospace;}
+  .tg{background:rgba(16,185,129,.15);color:var(--accent2);border:1px solid rgba(16,185,129,.2);}
+  .tb2{background:rgba(56,189,248,.15);color:var(--blue);border:1px solid rgba(56,189,248,.2);}
+  .tp{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.2);}
+  .to{background:rgba(251,146,60,.15);color:var(--orange);border:1px solid rgba(251,146,60,.2);}
+  .tr2{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.2);}
+  .ty{background:rgba(251,191,36,.15);color:var(--yellow);border:1px solid rgba(251,191,36,.2);}
+
+  /* Info boxes */
+  .ib{border-radius:10px;padding:16px 18px;margin:16px 0;border-left:3px solid;}
+  .ib .bt{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;margin-bottom:6px;}
+  .ib p{margin:0;font-size:13.5px;color:var(--text2);}
+  .ig{background:rgba(16,185,129,.06);border-color:var(--accent);}
+  .ig .bt{color:var(--accent2);}
+  .ib2{background:rgba(56,189,248,.06);border-color:var(--blue);}
+  .ib2 .bt{color:var(--blue);}
+  .ip{background:rgba(167,139,250,.06);border-color:var(--purple);}
+  .ip .bt{color:var(--purple);}
+  .io{background:rgba(251,146,60,.06);border-color:var(--orange);}
+  .io .bt{color:var(--orange);}
+  .ir{background:rgba(248,113,113,.06);border-color:var(--red);}
+  .ir .bt{color:var(--red);}
+  .iy{background:rgba(251,191,36,.06);border-color:var(--yellow);}
+  .iy .bt{color:var(--yellow);}
+
+  /* Steps */
+  .steps{list-style:none;margin:13px 0;display:flex;flex-direction:column;gap:10px;}
+  .steps li{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .sn2{min-width:25px;height:25px;background:linear-gradient(135deg,var(--accent),var(--blue));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .steps li strong{color:var(--text);}
+
+  /* Bullets */
+  .bl{list-style:none;margin:10px 0 13px;display:flex;flex-direction:column;gap:7px;}
+  .bl li{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;color:var(--text2);line-height:1.65;}
+  .bl li::before{content:'▹';color:var(--accent);font-size:13px;flex-shrink:0;margin-top:2px;}
+  .bl li strong{color:var(--text);}
+
+  /* Real world */
+  .rw{background:linear-gradient(135deg,rgba(16,185,129,.04),rgba(56,189,248,.04));border:1px solid rgba(16,185,129,.18);border-radius:12px;padding:19px;margin:20px 0;}
+  .rwh{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .rwi{font-size:18px;}
+  .rwl{font-family:'Syne',sans-serif;font-weight:700;font-size:12.5px;color:var(--accent);}
+  .rw p{color:var(--text2);font-size:13px;margin:0;line-height:1.7;}
+  .rw p+p{margin-top:8px;}
+
+  /* Interview */
+  .iq{background:linear-gradient(135deg,rgba(167,139,250,.04),rgba(16,185,129,.04));border:1px solid rgba(167,139,250,.18);border-radius:13px;padding:21px;margin:24px 0;}
+  .iqh{font-family:'Syne',sans-serif;font-weight:700;font-size:14.5px;color:var(--purple);margin-bottom:15px;display:flex;align-items:center;gap:9px;}
+  .qa{margin-bottom:14px;}
+  .qa:last-child{margin-bottom:0;}
+  .qq{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:4px;display:flex;gap:8px;}
+  .qq::before{content:'Q.';color:var(--purple);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+  .qa2{font-size:12.5px;color:var(--text2);padding-left:20px;line-height:1.65;display:flex;gap:8px;}
+  .qa2::before{content:'A.';color:var(--accent2);font-family:'IBM Plex Mono',monospace;flex-shrink:0;}
+
+  /* Tip */
+  .tip{display:flex;gap:12px;align-items:flex-start;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.18);border-radius:9px;padding:14px 16px;margin:14px 0;font-size:13px;color:var(--text2);line-height:1.65;}
+  .tpic{font-size:16px;flex-shrink:0;}
+
+  /* Flow diagram */
+  .flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:22px;margin:16px 0;}
+  .fn{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(56,189,248,.07));border:1px solid rgba(16,185,129,.22);border-radius:9px;padding:11px 15px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;color:var(--heading);text-align:center;min-width:110px;}
+  .fn.r{background:linear-gradient(135deg,rgba(248,113,113,.1),rgba(251,146,60,.07));border-color:rgba(248,113,113,.22);}
+  .fn.b{background:linear-gradient(135deg,rgba(56,189,248,.1),rgba(167,139,250,.07));border-color:rgba(56,189,248,.22);}
+  .fn.y{background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(251,146,60,.07));border-color:rgba(251,191,36,.22);}
+  .fn.p{background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(16,185,129,.07));border-color:rgba(167,139,250,.22);}
+  .fn sub{display:block;font-size:9px;color:var(--text3);font-weight:400;margin-top:2px;font-family:'IBM Plex Mono',monospace;}
+  .fa{color:var(--text3);font-size:20px;padding:0 8px;flex-shrink:0;}
+
+  /* Compliance meter visual */
+  .comp-visual{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0;}
+  .cv-card{border-radius:10px;padding:15px;border:1px solid;}
+  .cv-compliant{background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.22);}
+  .cv-noncompliant{background:rgba(248,113,113,.05);border-color:rgba(248,113,113,.22);}
+  .cv-grace{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.22);}
+  .cv-noteval{background:rgba(56,189,248,.05);border-color:rgba(56,189,248,.22);}
+  .cv-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--heading);margin-bottom:6px;}
+  .cv-body{font-size:12px;color:var(--text2);line-height:1.6;}
+
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:44px 0;}
+  .stup{position:fixed;bottom:26px;right:26px;width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--blue));border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:17px;box-shadow:0 4px 18px rgba(16,185,129,.3);border:none;color:white;z-index:200;text-decoration:none;transition:transform .2s;}
+  .stup:hover{transform:translateY(-3px);}
+  @media(max-width:768px){#sb{transform:translateX(-100%);}#main{margin-left:0;}.ct{padding:26px 16px;}.tb{padding:11px 16px;}.ht{font-size:26px;}}
+</style>
+</head>
+<body>
+
+<nav id="sb">
+  <div class="sh">
+    <div class="sl"><div class="li">🛡️</div>Intune Mastery</div>
+    <div class="ss">Complete Learning Series</div>
+    <div class="bb">⬡ Block 5 of 14 — Compliance Policies</div>
+  </div>
+  <div class="sn">
+    <div class="nl">Block 5 Topics</div>
+    <a href="#t43" class="ni active"><span class="nn">43</span>What Is Compliance in Intune?</a>
+    <a href="#t44" class="ni"><span class="nn">44</span>Compliance Policy Settings</a>
+    <a href="#t45" class="ni"><span class="nn">45</span>Compliance Assignment &amp; Evaluation</a>
+    <a href="#t46" class="ni"><span class="nn">46</span>Grace Period &amp; Actions for Non-Compliance</a>
+    <a href="#t47" class="ni"><span class="nn">47</span>Device Compliance Reports</a>
+    <a href="#t48" class="ni"><span class="nn">48</span>Compliance + Conditional Access Integration</a>
+    <a href="#t49" class="ni"><span class="nn">49</span>Per-Platform Compliance</a>
+    <a href="#t50" class="ni"><span class="nn">50</span>Troubleshooting Compliance Issues</a>
+    <div class="nl" style="margin-top:12px;">Previous Blocks</div>
+    <a href="intune-block1-foundations.html" class="pl">← Block 1: Foundations</a>
+    <a href="intune-block2-azuread.html" class="pl">← Block 2: Azure AD Essentials</a>
+    <a href="intune-block3-enrollment.html" class="pl">← Block 3: Device Enrollment</a>
+    <a href="intune-block4-configprofiles.html" class="pl">← Block 4: Config Profiles</a>
+    <div class="ni" style="opacity:.4;cursor:default;font-size:11.5px;"><span class="nn">→</span>Block 6: App Management (Next)</div>
+  </div>
+  <div class="sf">
+    <div>Overall Progress</div>
+    <div style="color:var(--accent2);margin:2px 0;">Block 5 / 14 — 50 Topics Done</div>
+    <div class="pb"><div class="pf"></div></div>
+  </div>
+</nav>
+
+<div id="main">
+<div class="tb">
+  <div class="bc">Intune Mastery <span>›</span> Block 5 <span>›</span> Compliance Policies</div>
+  <div class="tc">8 Topics · ~2.5 Hours</div>
+</div>
+<div class="ct">
+
+  <div class="hero">
+    <div class="htag">✅ BLOCK 5 · COMPLIANCE POLICIES</div>
+    <h1 class="ht">Is Your Device<br/><span>Secure Enough?</span></h1>
+    <p class="hd">Compliance Policies are the evaluation layer of Intune — they check whether enrolled devices meet your security requirements and mark them compliant or non-compliant. Combined with Conditional Access, compliance becomes your access control gatekeeper: only healthy, policy-adherent devices can reach corporate resources. This block covers everything from building policies to troubleshooting why a device shows non-compliant.</p>
+    <div class="hm">
+      <div class="hmi"><div class="dot"></div>8 Topics</div>
+      <div class="hmi"><div class="dot b"></div>All 4 Platforms</div>
+      <div class="hmi"><div class="dot p"></div>CA Integration Deep Dive</div>
+    </div>
+  </div>
+
+  <!-- T43 -->
+  <section class="ts" id="t43">
+    <div class="th">
+      <div class="tn">TOPIC 43</div>
+      <div>
+        <div class="tt">What Is Compliance in Intune?</div>
+        <div class="tst">Purpose, workflow, and how compliance fits into the Zero Trust model</div>
+      </div>
+    </div>
+    <div class="sh2">The Core Purpose</div>
+    <p>A <strong>Compliance Policy</strong> in Intune is an evaluation engine — it checks whether an enrolled device meets a set of security requirements you define, then marks the device as <strong>Compliant</strong> or <strong>Non-Compliant</strong>. It doesn't configure anything. It evaluates and reports. The power comes from what happens based on that result.</p>
+    <p>Combined with Conditional Access, compliance becomes a gatekeeper: <em>only compliant devices can access Exchange Online, SharePoint, Teams, and other corporate resources</em>. Non-compliant devices are blocked at the door — regardless of whether the user has valid credentials.</p>
+
+    <div class="sh2">Compliance vs Configuration — The Critical Distinction</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Aspect</th><th>Configuration Profile</th><th>Compliance Policy</th></tr></thead>
+        <tbody>
+          <tr><td>What it does</td><td>PUSHES settings to the device — actively configures it</td><td>CHECKS if device meets requirements — evaluates and reports</td></tr>
+          <tr><td>Action on device</td><td>Changes device settings (Wi-Fi, camera block, BitLocker on)</td><td>Reads device state — does not change it</td></tr>
+          <tr><td>Result</td><td>Device setting is applied</td><td>Device marked Compliant or Non-Compliant</td></tr>
+          <tr><td>Consequence</td><td>Setting active on device</td><td>Non-compliant → blocked from resources via CA, notified, potentially wiped</td></tr>
+          <tr><td>Works without CA?</td><td>Yes — settings apply regardless</td><td>Reporting only — CA required to block access</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh2">The Compliance Workflow — End to End</div>
+    <div class="flow">
+      <div class="fn">Admin creates<br/>Compliance Policy<sub>Define requirements</sub></div>
+      <div class="fa">→</div>
+      <div class="fn">Assign to<br/>Azure AD Group<sub>Users or Devices</sub></div>
+      <div class="fa">→</div>
+      <div class="fn b">Device checks in<br/>with Intune<sub>Every 8 hrs / on-demand</sub></div>
+      <div class="fa">→</div>
+      <div class="fn y">Intune evaluates<br/>device state<sub>OS version, encryption etc.</sub></div>
+      <div class="fa">→</div>
+      <div class="fn">Marks device<br/>Compliant / Not<sub>Result in Azure AD</sub></div>
+      <div class="fa">→</div>
+      <div class="fn p">Conditional Access<br/>reads compliance<sub>Allow or Block</sub></div>
+    </div>
+
+    <div class="sh2">Compliance Statuses — What Each Means</div>
+    <div class="comp-visual">
+      <div class="cv-card cv-compliant">
+        <div class="cv-title">✅ Compliant</div>
+        <div class="cv-body">Device meets ALL requirements in the compliance policy. Conditional Access grants access. Device is healthy and policy-adherent.</div>
+      </div>
+      <div class="cv-card cv-noncompliant">
+        <div class="cv-title">❌ Non-Compliant</div>
+        <div class="cv-body">Device fails one or more requirements. CA can block access. Actions for non-compliance kick in (notifications, remote wipe after X days).</div>
+      </div>
+      <div class="cv-card cv-grace">
+        <div class="cv-title">⏳ In Grace Period</div>
+        <div class="cv-body">Device is non-compliant but within the admin-configured grace period. Access may still be allowed temporarily while user fixes the issue.</div>
+      </div>
+      <div class="cv-card cv-noteval">
+        <div class="cv-title">🔵 Not Evaluated</div>
+        <div class="cv-body">No compliance policy is assigned to this device. Intune treats it as non-compliant by default. Important for Conditional Access design.</div>
+      </div>
+    </div>
+
+    <div class="ib ir">
+      <div class="bt">🚨 Critical: Devices With No Compliance Policy Are Non-Compliant</div>
+      <p>If a device has no compliance policy assigned, Azure AD treats it as <strong>non-compliant by default</strong>. This means if your Conditional Access policy requires device compliance, devices without a compliance policy assigned will be BLOCKED. Always assign a baseline compliance policy to All Devices to avoid unintended lockouts when enabling Conditional Access.</p>
+    </div>
+
+    <div class="sh2">Compliance Within Zero Trust</div>
+    <p>Compliance is the <strong>device health signal</strong> in Microsoft's Zero Trust framework. Zero Trust says "never trust, always verify" — even if a user has valid credentials and MFA, access should still be conditional on the device being healthy. Compliance policies provide that device health signal to Conditional Access, completing the Zero Trust verification loop.</p>
+    <ul class="bl">
+      <li><strong>Identity verified:</strong> Azure AD + MFA confirms WHO is signing in.</li>
+      <li><strong>Device verified:</strong> Intune compliance confirms the device is HEALTHY.</li>
+      <li><strong>Access granted:</strong> Only when BOTH identity and device are verified.</li>
+    </ul>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 43</div>
+      <div class="qa">
+        <div class="qq">What is the difference between a Compliance Policy and a Configuration Profile?</div>
+        <div class="qa2">A Configuration Profile actively pushes and applies settings to a device — it configures the device. A Compliance Policy passively evaluates whether the device already meets security requirements — it checks and reports. Config profiles change device state; compliance policies read device state. Non-compliant devices can then be blocked from corporate resources via Conditional Access, which config profiles cannot do on their own.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">What happens to a device in Intune that has no compliance policy assigned?</div>
+        <div class="qa2">Azure AD marks it as non-compliant by default. If a Conditional Access policy requires device compliance, that device will be blocked from accessing Exchange, SharePoint, Teams, etc. — even if the device is actually secure. Best practice is to always assign a baseline compliance policy to All Devices to ensure every enrolled device has a compliance evaluation.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">How does Intune compliance fit into the Zero Trust security model?</div>
+        <div class="qa2">Zero Trust requires verifying both identity and device health for every access request. Intune compliance provides the device health signal — is the device encrypted? Is the OS patched? Is it jailbroken? Azure AD Conditional Access combines this device health signal with the identity verification (MFA, risk level) to make an access decision. Together they implement the "verify explicitly, use least privilege, assume breach" principles of Zero Trust.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T44 -->
+  <section class="ts" id="t44">
+    <div class="th">
+      <div class="tn">TOPIC 44</div>
+      <div>
+        <div class="tt">Compliance Policy Settings</div>
+        <div class="tst">Every requirement you can check — across platforms — with real-world recommendations</div>
+      </div>
+    </div>
+    <div class="sh2">Windows Compliance Settings</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Category</th><th>Setting</th><th>Recommended Value</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Device Health</td><td>Require BitLocker</td><td>Require</td><td>Protects data if laptop is stolen. Critical for any laptop compliance.</td></tr>
+          <tr><td>Device Health</td><td>Require Secure Boot</td><td>Require</td><td>Prevents bootkits and rootkits from loading before Windows.</td></tr>
+          <tr><td>Device Health</td><td>Require Code Integrity</td><td>Require</td><td>Ensures only trusted drivers and system files load. Needs TPM.</td></tr>
+          <tr><td>Device Health</td><td>Windows Health Attestation (Defender ATP)</td><td>Require (if MDE licensed)</td><td>Verifies device health at the hardware level via TPM attestation.</td></tr>
+          <tr><td>OS Version</td><td>Minimum OS version</td><td>Latest supported build</td><td>Block old, unpatched Windows versions from accessing resources.</td></tr>
+          <tr><td>OS Version</td><td>Maximum OS version</td><td>Usually not set</td><td>Rare — used when you need to block preview/Insider builds.</td></tr>
+          <tr><td>Password</td><td>Require password to unlock</td><td>Require</td><td>Screen lock is the most basic security requirement.</td></tr>
+          <tr><td>Password</td><td>Minimum password length</td><td>8 characters (or PIN 6+ digits)</td><td>Longer = harder to brute-force.</td></tr>
+          <tr><td>Password</td><td>Password complexity</td><td>Uppercase + lowercase + number + symbol</td><td>Enforce strong passwords to resist guessing attacks.</td></tr>
+          <tr><td>Password</td><td>Max minutes of inactivity before lock</td><td>5–15 minutes</td><td>Auto-lock unattended screens — prevents physical access.</td></tr>
+          <tr><td>Encryption</td><td>Require encryption of data storage</td><td>Require</td><td>Complements BitLocker requirement — ensures entire device is encrypted.</td></tr>
+          <tr><td>Defender</td><td>Require Microsoft Defender Antimalware</td><td>Require</td><td>Defender must be running and up to date.</td></tr>
+          <tr><td>Defender</td><td>Require real-time protection</td><td>Require</td><td>Real-time scanning must be enabled — not just AV installed.</td></tr>
+          <tr><td>Defender</td><td>Antivirus signature up to date</td><td>Require</td><td>Old signatures can't detect new malware.</td></tr>
+          <tr><td>MDE Integration</td><td>Require device risk score ≤ Medium</td><td>Medium or Low</td><td>Block devices with Active threats detected by Defender for Endpoint.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh2">iOS/iPadOS Compliance Settings</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Setting</th><th>Recommended</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Minimum OS version</td><td>Latest major iOS version (e.g., iOS 17.x)</td><td>Block old iOS versions with known vulnerabilities.</td></tr>
+          <tr><td>Jailbroken devices</td><td>Block</td><td>Jailbroken iOS has removed Apple's security sandbox — completely compromised device.</td></tr>
+          <tr><td>Require password</td><td>Require</td><td>Device lock is fundamental security.</td></tr>
+          <tr><td>Minimum password length</td><td>6 digits (or 8 alphanumeric)</td><td>6-digit PIN is default Apple Face/Touch ID requirement.</td></tr>
+          <tr><td>Maximum minutes of inactivity before lock</td><td>5 minutes</td><td>Auto-lock sensitive devices quickly.</td></tr>
+          <tr><td>Password expiration (days)</td><td>90–365 days</td><td>Regular rotation, but not so frequent it frustrates users.</td></tr>
+          <tr><td>Number of previous passwords to prevent reuse</td><td>5</td><td>Prevent cycling back to old passwords.</td></tr>
+          <tr><td>Maximum allowed threat level (MDE)</td><td>Medium</td><td>Block iOS devices with active threats if using Defender for Endpoint for mobile.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh2">Android Enterprise Compliance Settings</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Setting</th><th>Recommended</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Minimum Android OS version</td><td>Android 11 or later</td><td>Android 10 and below have significant unpatched vulnerabilities.</td></tr>
+          <tr><td>Rooted devices</td><td>Block</td><td>Rooted Android = security sandbox bypassed. Treat as compromised.</td></tr>
+          <tr><td>Require device to be at or under the device threat level</td><td>Medium</td><td>Uses Google Play Protect or Defender for Endpoint threat data.</td></tr>
+          <tr><td>Google Play Protect</td><td>Require</td><td>Blocks malicious sideloaded apps from being installed.</td></tr>
+          <tr><td>Require password</td><td>Require</td><td>PIN or biometric screen lock mandatory.</td></tr>
+          <tr><td>Encryption of data storage</td><td>Require</td><td>All Android 6.0+ devices are encrypted by default — checking ensures it hasn't been bypassed.</td></tr>
+          <tr><td>Samsung Knox Attestation</td><td>Require (Samsung devices)</td><td>Hardware-level security verification unique to Samsung Knox platform.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh2">macOS Compliance Settings</div>
+    <ul class="bl">
+      <li><strong>Minimum macOS version:</strong> Require latest supported macOS (e.g., 14.x Sonoma). Block older versions.</li>
+      <li><strong>FileVault encryption:</strong> Require — equivalent to BitLocker for Macs.</li>
+      <li><strong>Firewall enabled:</strong> Require macOS firewall to be active.</li>
+      <li><strong>Gatekeeper:</strong> Require — ensures only App Store or identified developer apps run.</li>
+      <li><strong>Password:</strong> Require screen lock password with minimum length and complexity.</li>
+      <li><strong>System Integrity Protection (SIP):</strong> Require — prevents unauthorized modification of core system files.</li>
+    </ul>
+
+    <div class="tip">
+      <div class="tpic">💡</div>
+      <div><strong>Start Loose, Tighten Over Time:</strong> When first enabling compliance in an organization, don't immediately require everything. Start with just OS version and device encryption — these are fundamental and most devices should pass. Monitor the compliance dashboard for 2 weeks to see how many devices fail each check. Then gradually add more requirements (Defender, BitLocker, password complexity) one at a time. This prevents mass user lockouts on day one.</div>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 44</div>
+      <div class="qa">
+        <div class="qq">What Windows compliance settings would you consider essential for a corporate environment?</div>
+        <div class="qa2">The non-negotiable baseline: Require BitLocker encryption, require Windows Defender Antimalware with real-time protection and up-to-date signatures, require Secure Boot, set a minimum OS version (current supported build), require a screen lock password, and set max inactivity lock time. For higher security environments, add Microsoft Defender for Endpoint risk score requirements — blocking devices with Medium or High threat levels from accessing corporate resources.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">Why should rooted/jailbroken devices be flagged as non-compliant?</div>
+        <div class="qa2">Jailbreaking iOS or rooting Android removes the operating system's security sandbox — the fundamental layer that isolates apps and protects data. A jailbroken/rooted device can run unsigned code, bypass app permissions, access any file on the device, and disable security features. Any malicious app can gain full device control. Such a device cannot be trusted to handle corporate data — it should be immediately flagged non-compliant and blocked from accessing company resources.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T45 -->
+  <section class="ts" id="t45">
+    <div class="th">
+      <div class="tn">TOPIC 45</div>
+      <div>
+        <div class="tt">Compliance Policy Assignment &amp; Evaluation</div>
+        <div class="tst">How compliance policies are assigned, when they evaluate, and what triggers re-evaluation</div>
+      </div>
+    </div>
+    <div class="sh2">How Assignment Works for Compliance</div>
+    <p>Compliance policies are assigned to <strong>Azure AD groups</strong> — the same mechanism as Configuration Profiles. You can assign to user groups (policy evaluates on devices the user signs into) or device groups (policy evaluates on specific devices regardless of user). The same include/exclude and filter mechanics apply.</p>
+    <div class="ib ib2">
+      <div class="bt">💡 Key Difference: User vs Device for Compliance</div>
+      <p>If you assign a compliance policy to a <strong>user group</strong> and the user signs into multiple devices, the policy evaluates on ALL those devices. Each device gets individually evaluated and marked compliant or non-compliant independently. The user's access via Conditional Access depends on whether the SPECIFIC DEVICE they're currently using is compliant — not a combined status of all their devices.</p>
+    </div>
+
+    <div class="sh2">When Does Compliance Evaluate?</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Trigger</th><th>What Happens</th></tr></thead>
+        <tbody>
+          <tr><td>Initial enrollment</td><td>Compliance evaluation begins immediately after enrollment. Device gets 3 days by default to become compliant (configurable grace period).</td></tr>
+          <tr><td>Periodic check-in (every 8 hours)</td><td>Device reports current state to Intune. Compliance re-evaluated against current policy settings.</td></tr>
+          <tr><td>Manual sync triggered</td><td>Immediate re-evaluation — useful after fixing a compliance issue to quickly restore access.</td></tr>
+          <tr><td>Policy change</td><td>When a compliance policy is modified or a new one assigned, Intune pushes a sync request — devices re-evaluate within minutes.</td></tr>
+          <tr><td>OS update installed</td><td>Windows reports new OS version to Intune → compliance re-evaluated (minimum OS version check updates).</td></tr>
+          <tr><td>User manually syncs</td><td>Triggers immediate re-evaluation. Useful after user installs an OS update or enables encryption.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh2">Multiple Compliance Policies — Precedence Rules</div>
+    <p>A device can receive multiple compliance policies (e.g., one from a user group assignment and another from a device group assignment). The rules for multiple policies are different from Configuration Profile conflicts:</p>
+    <ul class="bl">
+      <li><strong>Most restrictive wins:</strong> If Policy A requires password length 6 and Policy B requires 8, the device must have length 8 to be compliant. The stricter requirement takes precedence.</li>
+      <li><strong>All policies must pass:</strong> The device is only marked Compliant if it meets ALL requirements across ALL assigned compliance policies. Failing any single policy from any assigned compliance policy = Non-Compliant.</li>
+      <li><strong>No "conflict" status:</strong> Unlike Configuration Profiles, compliance policies don't create conflicts. They stack — more policies = more requirements to meet.</li>
+    </ul>
+
+    <div class="sh2">Compliance Evaluation Scope</div>
+    <ol class="steps">
+      <li><div class="sn2">1</div><div><strong>Device checks in</strong> → reports hardware specs, OS version, encryption state, Defender status, etc.</div></li>
+      <li><div class="sn2">2</div><div><strong>Intune evaluates</strong> each compliance policy assigned to the device/user against the reported device state.</div></li>
+      <li><div class="sn2">3</div><div><strong>Per-setting result:</strong> Each individual setting is marked Compliant or Non-Compliant (visible in Intune device compliance details).</div></li>
+      <li><div class="sn2">4</div><div><strong>Overall status</strong> = Compliant only if EVERY setting in EVERY assigned policy passes. One failure = Non-Compliant overall.</div></li>
+      <li><div class="sn2">5</div><div><strong>Status written to Azure AD</strong> → Conditional Access reads it → Access decisions made in real-time.</div></li>
+    </ol>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🏦</div><div class="rwl">Real-World Multiple Policy Scenario</div></div>
+      <p><strong>Setup:</strong> Finance department has two compliance policies assigned:<br/>
+      Policy 1 (All Devices group): Require BitLocker, Minimum OS Windows 11 22H2, Require Defender AV.<br/>
+      Policy 2 (Finance Devices group): Require MDE risk score ≤ Low (stricter than the default Medium), Require Secure Boot, Password length ≥ 12.<br/>
+      A Finance laptop must meet ALL six requirements across both policies to be marked Compliant. If it's missing Secure Boot (even though Policy 1 doesn't require it), it's Non-Compliant because Policy 2 requires it. This layered approach lets the security team add Finance-specific hardening on top of the baseline — without modifying the baseline policy.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 45</div>
+      <div class="qa">
+        <div class="qq">If a device has two compliance policies assigned and fails a requirement in only one of them, what is the overall compliance status?</div>
+        <div class="qa2">Non-Compliant. A device must meet ALL requirements across ALL assigned compliance policies to be marked Compliant. Failing any single requirement in any single assigned policy results in an overall Non-Compliant status. Unlike Configuration Profile conflicts, compliance policies don't create conflict states — they stack, and the most restrictive requirement wins.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">How quickly does a device's compliance status update after a user fixes a non-compliance issue?</div>
+        <div class="qa2">The device won't automatically reflect the fix until the next check-in (up to 8 hours). To get immediate re-evaluation: the user can manually sync from Company Portal or from Settings → Access work or school → Sync. The admin can also trigger a sync from Intune portal → Device → Sync. After sync, Intune re-evaluates and updates Azure AD compliance status within minutes — restoring Conditional Access if now compliant.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T46 -->
+  <section class="ts" id="t46">
+    <div class="th">
+      <div class="tn">TOPIC 46</div>
+      <div>
+        <div class="tt">Grace Period &amp; Actions for Non-Compliance</div>
+        <div class="tst">What happens when a device fails compliance — automated escalating responses</div>
+      </div>
+    </div>
+    <div class="sh2">The Grace Period</div>
+    <p>When a device first becomes non-compliant (either at enrollment or after a policy change), Intune provides a configurable <strong>grace period</strong> before consequences kick in. During this window, the device is marked non-compliant in reports but Conditional Access may still allow access.</p>
+    <ul class="bl">
+      <li><strong>Default grace period:</strong> 3 days after enrollment. Configurable from 0 to 365 days.</li>
+      <li><strong>Purpose:</strong> Give users time to fix compliance issues (install OS update, enable BitLocker) without being immediately locked out.</li>
+      <li><strong>Zero grace period:</strong> Device is immediately blocked on enrollment if non-compliant. Harsh — use only for high-security scenarios where new devices must be 100% compliant before any access is granted.</li>
+      <li><strong>Long grace period (30+ days):</strong> Gives generous time to fix issues. Risk: non-compliant devices with security issues still access resources for weeks.</li>
+    </ul>
+
+    <div class="sh2">Actions for Non-Compliance — Escalating Responses</div>
+    <p>Intune allows you to configure <strong>automated actions</strong> that trigger at specific intervals after a device becomes non-compliant. These actions escalate over time — start with a gentle notification, escalate to blocking, and ultimately to remote wipe if the device stays non-compliant.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Action</th><th>What It Does</th><th>When to Use</th><th>Timing Example</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Send email to end user</strong></td><td>Email sent to the non-compliant device's primary user explaining what's wrong and how to fix it</td><td>Always — first step in every compliance action plan</td><td>Immediately (Day 0)</td></tr>
+          <tr><td><strong>Send push notification</strong></td><td>Push notification to the Company Portal app on the device</td><td>Mobile-first environments where email might be missed</td><td>Day 0</td></tr>
+          <tr><td><strong>Remotely lock the device</strong></td><td>Locks the device screen — user must enter PIN to unlock. For mobile devices.</td><td>Devices with sensitive data that need immediate protection</td><td>Day 3–7</td></tr>
+          <tr><td><strong>Mark device non-compliant</strong></td><td>Updates compliance status in Intune (triggers Conditional Access blocking)</td><td>Standard — most policies use immediate or 1-day mark</td><td>Day 0–1</td></tr>
+          <tr><td><strong>Retire the device</strong></td><td>Removes all corporate data and unenrolls from Intune (selective wipe equivalent)</td><td>BYOD devices that remain non-compliant for weeks</td><td>Day 30+</td></tr>
+          <tr><td><strong>Wipe the device</strong></td><td>Full factory reset — removes EVERYTHING including personal data</td><td>High-security scenarios, company-owned devices only</td><td>Day 30+ (company device only)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh2">Designing a Non-Compliance Action Schedule</div>
+    <div class="rw">
+      <div class="rwh"><div class="rwi">📅</div><div class="rwl">Example Non-Compliance Escalation Schedule</div></div>
+      <p><strong>Day 0 (immediately):</strong> Email notification to user — "Your device doesn't meet company security requirements. Here's what to fix: [link to help article]." Push notification to Company Portal app.<br/>
+      <strong>Day 1:</strong> Mark device as Non-Compliant in Intune (Conditional Access blocking activates — user loses access to Exchange, SharePoint, Teams).<br/>
+      <strong>Day 7:</strong> Second reminder email. CC to the user's manager.<br/>
+      <strong>Day 14:</strong> Remote lock on mobile devices — device locked until compliance is restored.<br/>
+      <strong>Day 30:</strong> Retire device (selective wipe of corporate data, unenroll from Intune).<br/>
+      This schedule gives 24 hours before blocking (Day 1) — generous enough not to cause immediate panic, strict enough to enforce compliance quickly.</p>
+    </div>
+
+    <div class="sh2">Customizing Non-Compliance Notifications</div>
+    <p>You can customize the email template sent to non-compliant users:</p>
+    <ol class="steps">
+      <li><div class="sn2">1</div><div>Intune → Devices → Compliance → Notifications → Create notification</div></li>
+      <li><div class="sn2">2</div><div>Add your company logo, company name, email header/footer</div></li>
+      <li><div class="sn2">3</div><div>Write the message body — use plain language explaining what's non-compliant and how to fix it. Include a link to your IT helpdesk or a self-service fix guide.</div></li>
+      <li><div class="sn2">4</div><div>Assign the notification template to the "Send email to end user" action in each compliance policy's Actions tab.</div></li>
+    </ol>
+    <div class="tip">
+      <div class="tpic">💡</div>
+      <div><strong>User-Friendly Non-Compliance Emails:</strong> The default Intune non-compliance email is technical and confusing to end users. Always customize it with: the company's IT support phone number and link, a clear explanation of what the user needs to do in plain English (not IT jargon), a link to a self-service help article, and a deadline. A well-written email dramatically reduces helpdesk calls about "why can't I access email?"</div>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 46</div>
+      <div class="qa">
+        <div class="qq">What is a grace period in Intune compliance and when would you set it to zero?</div>
+        <div class="qa2">A grace period is the time after a device becomes non-compliant before consequences like Conditional Access blocking take effect. The default is 3 days. You'd set it to zero for high-security environments — like classified government systems or financial trading platforms — where any non-compliant device must be immediately blocked, even if it means the user is instantly locked out. For most enterprise environments, a 1-3 day grace period is appropriate to allow users time to self-remediate.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">Walk me through the non-compliance actions you would configure for BYOD mobile devices.</div>
+        <div class="qa2">For BYOD mobiles: Day 0 — send email and push notification explaining what's non-compliant and how to fix it. Day 1 — mark as non-compliant in Intune (triggers Conditional Access blocking of corporate apps). Day 7 — second reminder email CC'd to manager. Day 14 — remote lock the device. Day 30 — Retire the device (selective wipe of corporate data, leave personal data intact, unenroll from Intune). For BYOD, never use full device wipe — you don't own the device and wiping personal data creates legal liability.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T47 -->
+  <section class="ts" id="t47">
+    <div class="th">
+      <div class="tn">TOPIC 47</div>
+      <div>
+        <div class="tt">Device Compliance Reports — How to Read Them</div>
+        <div class="tst">Finding non-compliant devices, understanding the data, and acting on it</div>
+      </div>
+    </div>
+    <div class="sh2">Where to Find Compliance Reports</div>
+    <p>Compliance reporting is spread across two main areas in Intune: <strong>Devices → Monitor</strong> for device-centric views, and <strong>Reports → Device compliance</strong> for aggregate and exportable reports. Understanding where to find the right data quickly is an L1/L2 skill.</p>
+
+    <div class="sh2">Key Compliance Reports</div>
+    <div class="cg">
+      <div class="card">
+        <div class="ci">📊</div>
+        <div class="ctit">Device Compliance Status</div>
+        <div class="cb">Aggregate view — how many devices are Compliant, Non-Compliant, Not Evaluated, In Grace Period, Error. Good for daily health check. Exportable to CSV for management reporting.</div>
+      </div>
+      <div class="card">
+        <div class="ci">❌</div>
+        <div class="ctit">Non-Compliant Devices</div>
+        <div class="cb">List of every non-compliant device with the specific setting(s) that failed. Click into any device to see exactly which requirement it missed. Your go-to for troubleshooting.</div>
+      </div>
+      <div class="card">
+        <div class="ci">⚙️</div>
+        <div class="ctit">Setting Compliance</div>
+        <div class="cb">Aggregate by setting — "How many devices are failing the BitLocker check?" Shows which specific settings are failing most across the fleet. Helps prioritize remediation effort.</div>
+      </div>
+      <div class="card">
+        <div class="ci">📋</div>
+        <div class="ctit">Policy Compliance</div>
+        <div class="cb">Per-policy view — compliance rate for each individual compliance policy. Shows pass/fail counts. Helps identify if a specific policy is too strict or has a configuration error.</div>
+      </div>
+      <div class="card">
+        <div class="ci">🔍</div>
+        <div class="ctit">Devices Without Compliance Policy</div>
+        <div class="cb">Critical report — lists enrolled devices that have NO compliance policy assigned. These devices are treated as non-compliant by default. Review and assign a policy to all devices listed here.</div>
+      </div>
+      <div class="card">
+        <div class="ci">📈</div>
+        <div class="ctit">Compliance Trend (Endpoint Analytics)</div>
+        <div class="cb">Historical compliance rate over time. Shows if compliance is improving or degrading. Useful for management presentations and demonstrating security posture improvement.</div>
+      </div>
+    </div>
+
+    <div class="sh2">Reading a Device's Compliance Detail</div>
+    <ol class="steps">
+      <li><div class="sn2">1</div><div>Go to <strong>Devices → All Devices</strong> → click on the device name</div></li>
+      <li><div class="sn2">2</div><div>Click <strong>Device compliance</strong> in the left menu of the device pane</div></li>
+      <li><div class="sn2">3</div><div>See each compliance policy assigned to this device and its overall pass/fail</div></li>
+      <li><div class="sn2">4</div><div>Click into a non-compliant policy → See the exact settings that failed, the current device value vs the required value</div></li>
+      <li><div class="sn2">5</div><div>Example: "BitLocker: Required | Current Value: Not Enabled → Device does not have BitLocker active."</div></li>
+    </ol>
+
+    <div class="sh2">Exporting Compliance Data for Reporting</div>
+    <p>Management often asks for compliance reports in Excel or PowerPoint. Intune makes this easy:</p>
+    <ul class="bl">
+      <li><strong>CSV Export:</strong> In any report view → Export → CSV. Includes device name, user, OS version, compliance status, last check-in, per-setting results.</li>
+      <li><strong>Azure Monitor / Log Analytics Integration:</strong> For custom dashboards and alerts — send Intune compliance data to Azure Monitor. Query with KQL. Build Power BI dashboards showing real-time compliance rates.</li>
+      <li><strong>Microsoft Graph API:</strong> Query compliance data programmatically for custom tooling. Useful for automated compliance reporting pipelines.</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">📊</div><div class="rwl">Real-World Weekly Compliance Review</div></div>
+      <p><strong>Good admin habit:</strong> Every Monday morning, open Intune → Reports → Device compliance. Check:<br/>
+      1. What % of devices are compliant? (Target: 95%+)<br/>
+      2. Which settings have the most failures? (Prioritize remediation)<br/>
+      3. How many devices have no compliance policy? (Should be zero)<br/>
+      4. Any devices in error state? (MDM agent issues)<br/>
+      Export the non-compliant device list to CSV → Send to helpdesk for user follow-up. This weekly review takes 15 minutes but catches security drift before it becomes a major audit finding.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 47</div>
+      <div class="qa">
+        <div class="qq">Where would you look to find which specific setting is causing a device to be non-compliant?</div>
+        <div class="qa2">Devices → All Devices → click the device → Device compliance tab → click the non-compliant policy → view per-setting results. Each setting shows its compliance state, the required value, and the current device value. For example: "BitLocker: Required | Current: Not Enabled." This tells you exactly what to fix. You can also use the Troubleshoot and Support blade — search the user, click their device, and see compliance status alongside policy and app assignment in one view.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">What is the "Devices Without Compliance Policy" report and why is it important?</div>
+        <div class="qa2">This report lists enrolled devices that have no compliance policy assigned. These devices are automatically treated as Non-Compliant by Azure AD — meaning if Conditional Access requires device compliance, these devices will be blocked from corporate resources despite being enrolled. It's critical to review this report regularly, especially after new device enrollment waves, to ensure every enrolled device has at least one compliance policy applied.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T48 -->
+  <section class="ts" id="t48">
+    <div class="th">
+      <div class="tn">TOPIC 48</div>
+      <div>
+        <div class="tt">Compliance + Conditional Access Integration</div>
+        <div class="tst">How device compliance becomes access control — the most powerful Intune integration</div>
+      </div>
+    </div>
+    <div class="sh2">The Integration Architecture</div>
+    <p>Compliance + Conditional Access is the most important integration in the Microsoft security stack for endpoint admins. Here's how they connect:</p>
+    <ol class="steps">
+      <li><div class="sn2">1</div><div>Intune evaluates device against compliance policy → marks Compliant or Non-Compliant → writes status to Azure AD.</div></li>
+      <li><div class="sn2">2</div><div>User tries to access Exchange Online, SharePoint, Teams, or any CA-protected app.</div></li>
+      <li><div class="sn2">3</div><div>Azure AD Conditional Access intercepts the request → evaluates the CA policy conditions.</div></li>
+      <li><div class="sn2">4</div><div>CA policy condition: "Require device to be marked compliant" → checks Azure AD for the device's compliance status.</div></li>
+      <li><div class="sn2">5</div><div>If Compliant: <strong>Access Granted.</strong> If Non-Compliant or Not Evaluated: <strong>Access Blocked</strong> (or redirect to a remediation page).</div></li>
+    </ol>
+
+    <div class="sh2">Building the Compliance + CA Policy Combination</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Component</th><th>Where Configured</th><th>What It Does</th></tr></thead>
+        <tbody>
+          <tr><td>Compliance Policy</td><td>Intune → Devices → Compliance</td><td>Defines what "secure device" means. Evaluates devices. Writes status to Azure AD.</td></tr>
+          <tr><td>Conditional Access Policy</td><td>Azure AD → Protection → Conditional Access</td><td>Reads compliance status from Azure AD. Blocks or allows access based on compliance.</td></tr>
+          <tr><td>Combined effect</td><td>Both must be configured</td><td>Non-compliant devices are automatically blocked from corporate resources.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh2">The Three Access Scenarios</div>
+    <div class="cg">
+      <div class="card" style="border-color:rgba(16,185,129,.3);">
+        <div class="ci">✅</div>
+        <div class="ctit" style="color:var(--accent2);">Scenario 1: Full Access</div>
+        <div class="cb">User signs in with MFA ✅ + Device is compliant ✅ → Conditional Access grants full access to Exchange, SharePoint, Teams. No friction for the user — they don't even notice CA is running.</div>
+      </div>
+      <div class="card" style="border-color:rgba(248,113,113,.3);">
+        <div class="ci">❌</div>
+        <div class="ctit" style="color:var(--red);">Scenario 2: Blocked</div>
+        <div class="cb">User signs in ✅ + Device is Non-Compliant ❌ → Access blocked. User sees an error page: "You can't get there from here. Your device doesn't meet security requirements." Link to fix the issue.</div>
+      </div>
+      <div class="card" style="border-color:rgba(251,191,36,.3);">
+        <div class="ci">⚠️</div>
+        <div class="ctit" style="color:var(--yellow);">Scenario 3: Personal Device (MAM-WE)</div>
+        <div class="cb">User on personal BYOD device (not enrolled) → CA checks "Require app protection policy" instead of device compliance → grants access only via managed apps (Outlook, Teams) with MAM DLP applied.</div>
+      </div>
+    </div>
+
+    <div class="sh2">The "Require compliant device OR app protection" Pattern</div>
+    <p>A sophisticated CA design allows two paths to access — useful when you support both fully enrolled devices AND BYOD MAM-WE:</p>
+    <ul class="bl">
+      <li><strong>Path 1:</strong> Device is enrolled and compliant → full access via any app (Outlook, browser, etc.)</li>
+      <li><strong>Path 2:</strong> Device is NOT enrolled (personal) → requires App Protection Policy (MAM) → access only via managed apps with DLP enforced</li>
+    </ul>
+    <p>In the CA policy Grant controls: select <strong>"Require device to be marked compliant" OR "Require app protection policy"</strong> (select "Require one of the selected controls"). This is the most common enterprise configuration for supporting both corporate and BYOD devices.</p>
+
+    <div class="sh2">What Users See When Blocked</div>
+    <p>When CA blocks a non-compliant device, the user is redirected to a <strong>remediation page</strong> — not just an error. The page explains:</p>
+    <ul class="bl">
+      <li>What requirement their device is failing</li>
+      <li>Steps to fix it (install OS update, enable encryption, etc.)</li>
+      <li>A link to the Company Portal app to check compliance status after fixing</li>
+      <li>IT helpdesk contact information</li>
+    </ul>
+    <p>You can customize this page via the Azure AD Conditional Access portal → Customize continuous access evaluation message.</p>
+
+    <div class="ib ir">
+      <div class="bt">🚨 Common Mistake — Enable CA Before Compliance Policies Exist</div>
+      <p>A new admin turns on a CA policy requiring device compliance — BEFORE assigning compliance policies to devices. Result: ALL enrolled devices are treated as Non-Compliant (no policy assigned = non-compliant). ALL users are immediately blocked from Exchange, SharePoint, Teams. The organization grinds to a halt. <strong>Always:</strong> Create and assign compliance policies first → verify devices are showing Compliant → THEN enable CA policy in Report-Only mode → review impact → THEN enforce.</p>
+    </div>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔐</div><div class="rwl">Enterprise CA + Compliance Rollout Plan</div></div>
+      <p><strong>Week 1:</strong> Create compliance policies. Assign to All Devices. Monitor — see what % of devices pass without taking action. Identify the most common failures (usually BitLocker or OS version).<br/>
+      <strong>Week 2–3:</strong> Fix the top failure causes. Push OS updates via Update Rings. Enable BitLocker via Endpoint Security policy. Aim for 95%+ compliance before enabling CA.<br/>
+      <strong>Week 4:</strong> Create CA policy requiring device compliance. Set to Report-Only mode. Review Sign-in logs to see who WOULD be blocked.<br/>
+      <strong>Week 5:</strong> Communicate to all employees: "Starting [date], your device must meet security requirements to access company resources." Provide self-service fix guide.<br/>
+      <strong>Week 6:</strong> Switch CA policy from Report-Only to Enforce. Monitor helpdesk tickets. Support stragglers. Target 99%+ compliance within 2 weeks of enforcement.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 48</div>
+      <div class="qa">
+        <div class="qq">How does Intune compliance integrate with Conditional Access?</div>
+        <div class="qa2">Intune evaluates devices against compliance policies and writes the result (Compliant or Non-Compliant) to Azure AD as a device attribute. When a user accesses a CA-protected resource like Exchange Online, Azure AD evaluates the CA policy conditions — including "Require device to be marked compliant." If the device's compliance status in Azure AD is Non-Compliant, CA blocks the access request. If Compliant, access is granted. Intune provides the signal; CA acts on it.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">What is the "Require compliant device OR app protection policy" CA grant control pattern and why is it used?</div>
+        <div class="qa2">This CA grant pattern allows two paths to corporate resources: fully enrolled compliant devices get unrestricted app access, while unenrolled personal (BYOD) devices can still access corporate resources but only via apps protected by MAM App Protection Policies (like Outlook with DLP controls). It prevents the situation where personal device users are completely locked out — instead they get controlled access via managed apps. This is the standard pattern for organizations supporting both corporate-enrolled and BYOD scenarios.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">Why should you never enable a CA policy requiring compliance before assigning compliance policies to devices?</div>
+        <div class="qa2">Because devices with no compliance policy assigned are treated as Non-Compliant by Azure AD by default. Enabling CA requiring compliance before assigning policies means every enrolled device immediately appears Non-Compliant — Conditional Access blocks all users from Exchange, SharePoint, and Teams simultaneously. The correct order is: create and assign compliance policies → verify devices are marking Compliant → enable CA in Report-Only mode → review impact → then enforce.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T49 -->
+  <section class="ts" id="t49">
+    <div class="th">
+      <div class="tn">TOPIC 49</div>
+      <div>
+        <div class="tt">Per-Platform Compliance — Windows, iOS, Android, macOS</div>
+        <div class="tst">Platform-specific compliance considerations and configuration differences</div>
+      </div>
+    </div>
+    <div class="sh2">Why Platform Compliance Differs</div>
+    <p>Each platform has different capabilities, different security models, and different threat vectors. A compliance policy must be tailored to each platform — you can't apply Windows compliance settings to iOS. Intune enforces this: compliance policies are created per-platform.</p>
+
+    <div class="sh2">Windows Compliance — Deep Notes</div>
+    <ul class="bl">
+      <li><strong>Windows Health Attestation:</strong> Uses the device's TPM chip to verify the boot chain integrity at a hardware level. Requires Defender for Endpoint P1/P2. Very high assurance — can't be spoofed by a compromised OS.</li>
+      <li><strong>MDE Integration for Windows:</strong> Compliance can require a maximum Defender for Endpoint risk score (None/Low/Medium/High). Devices with active threats automatically become non-compliant → blocked by CA → forces remediation before access is restored.</li>
+      <li><strong>BitLocker compliance vs BitLocker config profile:</strong> Compliance CHECKS if BitLocker is on. Config Profile ENABLES BitLocker. Both are needed — config profile to turn it on, compliance to verify it stayed on.</li>
+      <li><strong>OS version compliance on Windows:</strong> Intune can check for specific KB (Knowledge Base) patch levels, not just feature versions. Example: require KB5031356 or later, ensuring a specific security patch is installed.</li>
+    </ul>
+
+    <div class="sh2">iOS Compliance — Deep Notes</div>
+    <ul class="bl">
+      <li><strong>Jailbreak detection:</strong> Intune checks for jailbreak indicators on iOS devices. If detected, marks as Non-Compliant immediately. Note: sophisticated jailbreaks can evade detection — defense in depth is needed.</li>
+      <li><strong>iOS compliance only evaluates at check-in:</strong> Unlike Windows (which can report health attestation in near real-time), iOS compliance is evaluated at each check-in. A device jailbroken between check-ins stays Compliant until the next evaluation.</li>
+      <li><strong>Jamf integration:</strong> If using JAMF Pro for Mac management, you can configure Jamf → Intune integration where Jamf sends compliance signals to Intune, and Intune passes them to Azure AD for CA evaluation. Best of both worlds.</li>
+      <li><strong>Managed device vs MAM-WE:</strong> An MDM-enrolled iPhone can have full compliance evaluation. A MAM-WE (non-enrolled) personal iPhone has limited compliance checking — mostly via App Protection Policy conditions in CA instead.</li>
+    </ul>
+
+    <div class="sh2">Android Compliance — Deep Notes</div>
+    <ul class="bl">
+      <li><strong>Android SafetyNet Attestation (now Play Integrity):</strong> Google's hardware-backed device integrity check. Compliance can require passing Google's Play Integrity API — which validates that the device hasn't been tampered with and is running genuine Android. Much stronger than software-only root detection.</li>
+      <li><strong>Android threat level via Defender:</strong> If Defender for Endpoint for Android is deployed, compliance can check the mobile threat defense risk score — blocking devices with banking trojans, network attacks, or phishing apps detected.</li>
+      <li><strong>Work Profile vs Fully Managed compliance:</strong> Compliance policies work the same way for both enrollment modes — but available settings may differ slightly. Fully Managed has more device-level settings (like factory reset protection verification) than Work Profile.</li>
+      <li><strong>Samsung Knox compliance:</strong> Knox Platform for Enterprise provides additional hardware attestation for Samsung devices — compliance can specifically require Knox attestation, providing a Samsung-level hardware security guarantee beyond standard Android compliance.</li>
+    </ul>
+
+    <div class="sh2">macOS Compliance — Deep Notes</div>
+    <ul class="bl">
+      <li><strong>FileVault + Intune escrow:</strong> Compliance can require FileVault to be enabled. The Configuration Profile can enable it silently. Intune stores the personal recovery key — admin can view it if the user is locked out. Compliance checks that it's still enabled and the key is escrowed.</li>
+      <li><strong>Gatekeeper enforcement:</strong> Compliance can require Gatekeeper (macOS's app trust system) to be set to "App Store and identified developers" minimum, blocking unsigned and untrusted apps.</li>
+      <li><strong>Jamf + Intune co-management:</strong> Many enterprises use Jamf Pro for Mac management + Intune for compliance signal and CA. Jamf sends device health data to Intune → Intune evaluates compliance → Azure AD CA enforces access. The admin manages Macs primarily in Jamf but leverages Intune/CA for access control.</li>
+    </ul>
+
+    <div class="sh2">Platform Compliance Comparison</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Feature</th><th>Windows</th><th>iOS</th><th>Android</th><th>macOS</th></tr></thead>
+        <tbody>
+          <tr><td>Hardware attestation</td><td>✅ TPM via MDE</td><td>✅ Secure Enclave</td><td>✅ Play Integrity API</td><td>✅ Secure Boot</td></tr>
+          <tr><td>Encryption compliance check</td><td>BitLocker</td><td>Always encrypted by default</td><td>Storage encryption</td><td>FileVault</td></tr>
+          <tr><td>Rooted/jailbreak detection</td><td>N/A</td><td>✅ Jailbreak detection</td><td>✅ Root detection + Play Integrity</td><td>N/A</td></tr>
+          <tr><td>MDE risk score check</td><td>✅ Full support</td><td>✅ With MDE for iOS</td><td>✅ With MDE for Android</td><td>✅ With MDE for macOS</td></tr>
+          <tr><td>OS version check</td><td>✅ Down to KB level</td><td>✅ Major.minor.patch</td><td>✅ API level</td><td>✅ Major.minor.patch</td></tr>
+          <tr><td>Password requirements</td><td>✅ Full</td><td>✅ Full</td><td>✅ Full</td><td>✅ Full</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 49</div>
+      <div class="qa">
+        <div class="qq">How does Intune detect jailbroken iOS devices and what are the limitations?</div>
+        <div class="qa2">Intune checks for jailbreak indicators at each device check-in — looking for files, processes, and behaviors characteristic of jailbroken devices. The limitation is timing: evaluation only happens at check-in (every 6-8 hours), so a device jailbroken between check-ins remains Compliant until the next evaluation. Also, sophisticated jailbreaks can evade detection. Defense in depth is essential: App Protection Policies should also be configured to prevent corporate data from being accessed on jailbroken devices, as MAM can detect jailbreak via the SDK independently of Intune MDM evaluation.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">What is Google Play Integrity and how does it enhance Android compliance?</div>
+        <div class="qa2">Play Integrity (formerly SafetyNet Attestation) is Google's hardware-backed API that verifies whether an Android device is genuine, unmodified, and running certified Android. Compliance can require devices to pass Play Integrity checks — which validates the device hasn't been rooted, the OS isn't modified, and the device is a legitimate Android device. This is significantly stronger than software-only root detection because it uses hardware-level attestation that sophisticated root kits can't easily bypass.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- T50 -->
+  <section class="ts" id="t50">
+    <div class="th">
+      <div class="tn">TOPIC 50</div>
+      <div>
+        <div class="tt">Troubleshooting Compliance Issues</div>
+        <div class="tst">Diagnosing why a device shows non-compliant — and how to fix it systematically</div>
+      </div>
+    </div>
+    <div class="sh2">The Compliance Troubleshooting Approach</div>
+    <ol class="steps">
+      <li><div class="sn2">1</div><div><strong>Find exactly which setting is failing:</strong> Devices → All Devices → Device → Device compliance tab → Click non-compliant policy → read per-setting results. Note the exact failed setting and the current vs required value.</div></li>
+      <li><div class="sn2">2</div><div><strong>Verify the device actually has the issue:</strong> Is BitLocker really off? Check on the device itself (Control Panel → BitLocker). Is the OS really below the required version? Check winver.exe. Don't assume Intune is wrong — verify the device state directly.</div></li>
+      <li><div class="sn2">3</div><div><strong>Fix the underlying issue:</strong> Enable BitLocker. Install the OS update. Set a screen lock PIN. The compliance check will re-evaluate on next sync.</div></li>
+      <li><div class="sn2">4</div><div><strong>Force a sync to re-evaluate immediately:</strong> On device: Settings → Accounts → Access work or school → Info → Sync. Or in Intune: Devices → Device → Sync. Don't wait 8 hours.</div></li>
+      <li><div class="sn2">5</div><div><strong>Verify compliance status updated:</strong> Check the device compliance tab again — should now show Compliant. CA access should restore within a few minutes of status update.</div></li>
+    </ol>
+
+    <div class="sh2">Common Compliance Failures and Fixes</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Failed Setting</th><th>Platform</th><th>Common Cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td>BitLocker not enabled</td><td>Windows</td><td>Device doesn't have TPM, or BitLocker was manually disabled, or Config Profile hasn't pushed BitLocker yet</td><td>Check TPM status (tpm.msc). Deploy Endpoint Security BitLocker policy to enable silently. Verify profile reached device.</td></tr>
+          <tr><td>OS below minimum version</td><td>Windows/iOS/Android</td><td>Device hasn't updated. Update ring deferred. User dismissed update prompts.</td><td>Push Windows Update via Intune Update Rings. On mobile: Company Portal shows update as required. Force update via Intune remote action.</td></tr>
+          <tr><td>Antivirus not running</td><td>Windows</td><td>Third-party AV disabled Defender. Defender service crashed. AV signatures outdated.</td><td>Check Defender status (Windows Security app). Restart Windows Defender service. Force signature update. Remove conflicting AV.</td></tr>
+          <tr><td>Device shows Non-Compliant despite settings being correct</td><td>All</td><td>Compliance status is stale — device reported old data. MDM agent not syncing properly.</td><td>Force sync from Intune portal and from device. If persists, run MDMDiagReport (Windows) or re-enroll.</td></tr>
+          <tr><td>Jailbreak detected (iOS)</td><td>iOS</td><td>Device is actually jailbroken, or a jailbreak detection false positive</td><td>If device is jailbroken: retire/wipe. If false positive: factory reset device → re-enroll → monitor. Report the false positive to Microsoft.</td></tr>
+          <tr><td>MDE risk score too high</td><td>Windows/Mobile</td><td>Defender for Endpoint detected active malware, suspicious activity, or vulnerability</td><td>Open Defender Security Center → investigate and remediate the threat. Score automatically decreases as threats are resolved. Device becomes compliant after next MDE risk score update.</td></tr>
+          <tr><td>No compliance policy assigned</td><td>All</td><td>Device enrolled but IT forgot to assign a compliance policy to the device's group</td><td>Assign a compliance policy to the device's Azure AD group. Verify group membership. Device shows Not Evaluated until policy assigned and evaluated.</td></tr>
+          <tr><td>Device stuck in Grace Period indefinitely</td><td>All</td><td>Device non-compliant, but grace period configured too long (or infinite). CA policy not blocking.</td><td>Review compliance policy's Actions for Non-Compliance. Ensure "Mark device non-compliant" action is set (Day 0 or 1). Check CA policy is actually enforced (not in Report-Only).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh2">Compliance Troubleshooting Tools</div>
+    <div class="tw">
+      <table>
+        <thead><tr><th>Tool</th><th>Where</th><th>What It Shows</th></tr></thead>
+        <tbody>
+          <tr><td>Intune Troubleshoot &amp; Support blade</td><td>Intune → Troubleshoot + Support → search user</td><td>Device compliance status, policy assignments, enrollment state, app status — all in one view. Best starting point for L1 tickets.</td></tr>
+          <tr><td>Device Compliance tab</td><td>Devices → All Devices → Device → Device compliance</td><td>Per-policy, per-setting compliance results with current vs required values. Best for specific device deep-dive.</td></tr>
+          <tr><td>Azure AD Sign-in Logs</td><td>Azure AD → Monitoring → Sign-in logs</td><td>See exactly why CA blocked or allowed an access attempt. Shows which CA policy applied and which condition failed (compliance, MFA, location).</td></tr>
+          <tr><td>MDMDiagReport (Windows)</td><td>Run MDMDiagnosticsTool.exe -out C:\Temp\MDM</td><td>Full MDM state on the device — enrolled policies, compliance state as seen by the device. Share with Microsoft Support.</td></tr>
+          <tr><td>Event Viewer</td><td>DeviceManagement-Enterprise-Diagnostics-Provider</td><td>Low-level MDM events. Error events show compliance policy delivery failures with error codes.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sh2">Why Is User Blocked Despite Device Showing Compliant?</div>
+    <p>This is one of the most confusing compliance scenarios — Intune says Compliant, but the user is still blocked by CA. Here's the systematic check:</p>
+    <ul class="bl">
+      <li><strong>Check Azure AD Sign-in logs:</strong> Go to Azure AD → Sign-in logs → filter by the user → find the blocked attempt → see the failure reason. Is it compliance? Or is it MFA? Or location? CA block reason is always logged here.</li>
+      <li><strong>Compliance status propagation delay:</strong> Intune updates the device compliance status in Azure AD — but there can be a few minutes of delay. Have the user wait 5 minutes then try again.</li>
+      <li><strong>Is it the right device?</strong> The user might be signing in from a different device (personal laptop) that is NOT compliant. CA checks the device the user is CURRENTLY on, not all their devices.</li>
+      <li><strong>CA policy target:</strong> Verify the CA policy applies to this user's group and this app. The user might be blocked by a different CA policy than the compliance one.</li>
+      <li><strong>Token caching:</strong> Azure AD access tokens can be cached — the user's session might still have an old (pre-compliance) token. Have them sign out completely and sign back in to force fresh token evaluation.</li>
+    </ul>
+
+    <div class="rw">
+      <div class="rwh"><div class="rwi">🔧</div><div class="rwl">Real Troubleshooting Case</div></div>
+      <p><strong>Ticket:</strong> "I enabled BitLocker on my laptop as IT asked. Company Portal says I'm compliant. But I still can't access Outlook on the web — it says my device doesn't meet requirements."<br/>
+      <strong>Investigation:</strong><br/>
+      Step 1: Intune → Device → Device compliance: Shows Compliant. BitLocker check: Passed. ✅<br/>
+      Step 2: Azure AD → Sign-in logs → filter user → find blocked attempt → Failure reason: "Device not compliant."<br/>
+      Step 3: Timestamp of sign-in attempt (2:47 PM) vs compliance update timestamp (2:51 PM). The user tried to access Outlook 4 minutes BEFORE Intune finished propagating the new compliance status to Azure AD.<br/>
+      Step 4: Ask user to sign out of all browser sessions (clear cached tokens), then sign back in.<br/>
+      <strong>Result:</strong> Access restored immediately after fresh sign-in. Root cause: compliance status propagation delay + old cached token. Not a real compliance failure — just a timing issue.</p>
+    </div>
+
+    <div class="iq">
+      <div class="iqh">🎤 Interview Questions — Topic 50</div>
+      <div class="qa">
+        <div class="qq">A user is blocked by Conditional Access but Intune shows their device as compliant. What do you check?</div>
+        <div class="qa2">First, check Azure AD Sign-in logs for the blocked attempt — the failure reason tells you exactly which CA condition failed. Compliance? MFA? Location? Then verify the device the user is signing in FROM — they might be on a different device than the one showing compliant in Intune. Check for compliance status propagation delay (Intune → Azure AD can take minutes). If delay, have user sign out completely and sign back in to get a fresh token. Also verify the CA policy actually applies to this user's group and app combination.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">A Windows device shows non-compliant for BitLocker but BitLocker appears to be enabled on the device. What could cause this?</div>
+        <div class="qa2">Several possibilities: (1) BitLocker is enabled but not protecting the OS drive (maybe only a data drive), (2) BitLocker is suspended — a suspended state is not the same as fully enabled (check Manage-bde -status in Command Prompt), (3) Compliance data is stale — the device's last reported state to Intune was before BitLocker was enabled — force a manual sync, (4) The specific BitLocker check in the compliance policy requires additional settings (like startup PIN or TPM-only protection) that aren't met even though encryption is on. Run Manage-bde -status C: to see the full BitLocker state on the OS drive.</div>
+      </div>
+      <div class="qa">
+        <div class="qq">Where is the best first place to look when a user is blocked by Conditional Access and you need to know why?</div>
+        <div class="qa2">Azure AD Sign-in Logs — always the first stop. Filter by the user's UPN, find the failed sign-in attempt, and look at the Conditional Access tab of that event. It shows every CA policy that evaluated, whether it passed or failed, and the specific condition that failed (compliance, MFA, location, risk level). This tells you in 30 seconds exactly what's blocking the user — saving the time of checking multiple Intune reports, compliance tabs, and guessing.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Block Complete -->
+  <div style="background:linear-gradient(135deg,rgba(16,185,129,.07),rgba(56,189,248,.05));border:1px solid rgba(16,185,129,.22);border-radius:16px;padding:30px;margin-top:48px;text-align:center;">
+    <div style="font-size:30px;margin-bottom:11px;">🎉</div>
+    <div style="font-family:'Syne',sans-serif;font-size:21px;font-weight:800;color:var(--heading);margin-bottom:9px;">Block 5 Complete!</div>
+    <div style="color:var(--text2);font-size:13.5px;max-width:600px;margin:0 auto 18px;line-height:1.7;">You've mastered Compliance Policies — from building policies per platform, configuring grace periods and non-compliance actions, reading compliance reports, wiring compliance to Conditional Access, and troubleshooting every type of compliance failure.</div>
+    <div style="display:flex;gap:11px;justify-content:center;flex-wrap:wrap;">
+      <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--accent2);font-family:'IBM Plex Mono',monospace;">✅ Blocks 1–5 Done — 50 Topics</div>
+      <div style="background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--blue);font-family:'IBM Plex Mono',monospace;">⬡ Block 6 Next: Application Management</div>
+      <div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:7px;padding:7px 14px;font-size:12px;color:var(--purple);font-family:'IBM Plex Mono',monospace;">📋 79 Topics Remaining</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<a href="#" class="stup">↑</a>
+
+<script>
+const secs=document.querySelectorAll('.ts');
+const navs=document.querySelectorAll('.ni[href^="#"]');
+const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting){const id=x.target.id;navs.forEach(n=>{n.classList.remove('active');if(n.getAttribute('href')==='#'+id)n.classList.add('active');});}});},{rootMargin:'-20% 0px -60% 0px'});
+secs.forEach(s=>obs.observe(s));
+navs.forEach(n=>n.addEventListener('click',e=>{e.preventDefault();const t=document.querySelector(n.getAttribute('href'));if(t)t.scrollIntoView({behavior:'smooth'});}));
+</script>
+</body>
+</html>
